@@ -108,8 +108,8 @@ namespace Utils {
             return false;
         }
 
-        public int Remove(T item) {
-            int ret = IndexOf(item);
+        public int Remove(T item, IComparer<T> onCompare = null) {
+            int ret = IndexOf(item, onCompare);
             if (ret >= 0)
                 Delete(ret);
             return ret;
