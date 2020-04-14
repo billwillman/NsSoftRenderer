@@ -60,7 +60,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\NsSoftRenderer\NewBehaviourScript.cs" />
+    <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\Buffer.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\NativeList.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\SoftDevice.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
