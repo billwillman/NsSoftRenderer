@@ -200,10 +200,28 @@ namespace Utils {
             }
         }
 
+        public static readonly int MaxCount = int.MaxValue / UnsafeUtility.SizeOf<T>();
 
-        public int Count {
+        public unsafe int Count {
             get {
                 return m_Count;
+            }
+
+            set {
+                if (value < 0 || value > MaxCount)
+                    return;
+                if (value > this.Capacity)
+                    this.Capacity = value;
+                if (value > m_Count) {
+                    int elemSize = UnsafeUtility.SizeOf<T>();
+                    void* dst = (void*)IntPtr.Add((IntPtr)m_Arr.GetUnsafePtr<T>(), m_Count * elemSize);
+                    UnsafeUtility.MemClear(dst, (value - m_Count) * elemSize);
+                } else {
+                    for (int i = m_Count - 1; i >= 0; --i) {
+                        Delete(i);
+                    }
+                }
+                m_Count = value;
             }
         }
 
@@ -223,6 +241,9 @@ namespace Utils {
             }
 
             set {
+                if (value < 0 || value > MaxCount)
+                    return;
+
                 if (value < Count)
                     m_Count = value;
 
