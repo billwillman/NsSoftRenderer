@@ -13,6 +13,12 @@ namespace Utils {
         private int m_Count = 0;
         private Allocator m_Allocator = Allocator.Persistent;
 
+        public int ElemSize {
+            get {
+                return UnsafeUtility.SizeOf<T>();
+            }
+        }
+
         public NativeList(int cap = 0, Allocator alloc = Allocator.Persistent) {
             m_Allocator = alloc;
             if (cap > 0) {
