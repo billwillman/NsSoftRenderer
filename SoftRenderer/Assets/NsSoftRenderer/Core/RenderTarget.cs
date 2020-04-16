@@ -13,12 +13,18 @@ namespace NsSoftRenderer {
         Depth = 2
     };
 
+
+    public interface IRenderTargetNotify {
+        void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect);
+    }
+
     public class RenderTarget: DisposeObject {
         private ColorBuffer m_FrontColorBuffer = null;
         private Depth32Buffer m_FrontDepthBuffer = null;
         private RenderTargetUseFlags m_ClearFlags = 0;
         private Color m_CleanColor = Color.black;
         // 脏矩形
+        private RectInt m_ClearColorDirtRect = new RectInt(0, 0, 0, 0);
         private RectInt m_ColorDirthRect = new RectInt(0, 0, 0, 0);
         private RectInt m_DepthDirthRect = new RectInt(0, 0, 0, 0);
         private bool m_IsCleanedColor = true;
@@ -28,6 +34,7 @@ namespace NsSoftRenderer {
 
         // 无限远定义
         private static readonly int _cFarFarZ = -9999999;
+        private static readonly RectInt _cZeroRect = new RectInt(0, 0, 0, 0);
 
         public RenderTarget(int deviceWidth, int deviceHeight) {
             m_FrontColorBuffer = new ColorBuffer(deviceWidth, deviceHeight);
@@ -67,11 +74,13 @@ namespace NsSoftRenderer {
             if (m_FrontColorBuffer != null && (!m_IsCleanedColor) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Color))) {
                 m_IsCleanedColor = true;
                 if (m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) {
-                    for (int r = m_ColorDirthRect.yMin; r <= m_ColorDirthRect.yMax; ++r) {
-                        for (int c = m_ColorDirthRect.xMin; c <= m_ColorDirthRect.xMax; ++c) {
+                    for (int r = m_ColorDirthRect.yMin; r < m_ColorDirthRect.yMax; ++r) {
+                        for (int c = m_ColorDirthRect.xMin; c < m_ColorDirthRect.xMax; ++c) {
                             m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
                         }
                     }
+
+                    m_ClearColorDirtRect = m_ColorDirthRect;
 
                     m_ColorDirthRect.x = 0;
                     m_ColorDirthRect.y = 0;
@@ -83,8 +92,8 @@ namespace NsSoftRenderer {
             if (m_FrontDepthBuffer != null && (!m_IsCleanedDepth) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth))) {
                 m_IsCleanedDepth = true;
                 if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
-                    for (int r = m_DepthDirthRect.yMin; r <= m_DepthDirthRect.yMax; ++r) {
-                        for (int c = m_DepthDirthRect.xMin; c <= m_DepthDirthRect.xMax; ++c) {
+                    for (int r = m_DepthDirthRect.yMin; r < m_DepthDirthRect.yMax; ++r) {
+                        for (int c = m_DepthDirthRect.xMin; c < m_DepthDirthRect.xMax; ++c) {
                             m_FrontDepthBuffer.SetItem(c, r, _cFarFarZ);
                         }
                     }
@@ -92,10 +101,41 @@ namespace NsSoftRenderer {
             }
         }
 
+        // 填充到屏幕
+        public void FlipToScreen(IRenderTargetNotify notify) {
+            if (notify != null) {
+                if (m_IsFillAllColor) {
+                    RectInt fillRect = new RectInt(0, 0, this.Width, this.Height);
+                    notify.OnFillColor(m_FrontColorBuffer, fillRect, _cZeroRect);
+                } else {
+                    if (m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) {
+                        notify.OnFillColor(m_FrontColorBuffer, m_ColorDirthRect, m_ClearColorDirtRect);
+                    }
+                }
+            }
+        }
+
+        private bool m_IsFillAllColor = false;
         public void Prepare() {
-            InitClearAllColor();
+            m_IsFillAllColor = InitClearAllColor();
             InitClearAllDepth();
             Clear();
+        }
+
+        public int Width {
+            get {
+                if (m_FrontColorBuffer != null)
+                    return m_FrontColorBuffer.Width;
+                return 0;
+            }
+        }
+
+        public int Height {
+            get {
+                if (m_FrontColorBuffer != null)
+                    return m_FrontColorBuffer.Height;
+                return 0;
+            }
         }
 
         public Color CleanColor {
@@ -183,6 +223,20 @@ namespace NsSoftRenderer {
                 else if (y > m_DepthDirthRect.yMax)
                     m_DepthDirthRect.yMax = y;
             }
+        }
+
+        private void CheckClipPt(ref Vector2 pt) {
+        }
+
+        // 画2D线
+        public bool Draw2DLine(Vector2 start, Vector2 end, RenderTargetUseFlags flags, Color color, int depth = 0) {
+
+           if ((end - start).sqrMagnitude <= (float.Epsilon * float.Epsilon)) {
+                // 画点
+                return DrawPixel((int)start.x, (int)start.y, flags, color, depth);
+            }
+
+            return true;
         }
 
         public bool DrawPixel(int x, int y, RenderTargetUseFlags flags, Color color, int depth = 0) {

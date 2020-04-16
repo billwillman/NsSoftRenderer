@@ -13,6 +13,12 @@ namespace Utils {
         private int m_Count = 0;
         private Allocator m_Allocator = Allocator.Persistent;
 
+        public NativeArray<T> OriginArray {
+            get {
+                return m_Arr;
+            }
+        }
+
         public void* GetPtr(int index) {
             if (IsVaild && index >= 0 && index < m_Count) {
                 IntPtr bb = (IntPtr)m_Arr.GetUnsafePtr<T>();
@@ -46,7 +52,7 @@ namespace Utils {
             m_Count = 0;
         }
 
-        protected bool IsVaild {
+        public bool IsVaild {
             get {
                 return m_Arr.IsCreated;
             }

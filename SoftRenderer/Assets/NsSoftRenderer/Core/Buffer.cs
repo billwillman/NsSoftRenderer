@@ -42,7 +42,7 @@ namespace NsSoftRenderer {
     }
 
     // 颜色Buffer
-    public class ColorBuffer: Buffer<Color> {
+    public class ColorBuffer: Buffer<Color32> {
         public ColorBuffer(int width, int height): base(width, height) { }
     }
 
