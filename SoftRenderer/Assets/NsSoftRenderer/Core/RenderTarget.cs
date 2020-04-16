@@ -17,15 +17,96 @@ namespace NsSoftRenderer {
         private ColorBuffer m_FrontColorBuffer = null;
         private Depth32Buffer m_FrontDepthBuffer = null;
         private RenderTargetClearFlags m_ClearFlags = 0;
+        private Color m_CleanColor = Color.black;
         // 脏矩形
         private RectInt m_ColorDirthRect = new RectInt(0, 0, 0, 0);
         private RectInt m_DepthDirthRect = new RectInt(0, 0, 0, 0);
         private bool m_IsCleanedColor = true;
         private bool m_IsCleanedDepth = true;
+        private bool m_IsAllCleanedColor = false;
+        private bool m_IsAllCleanedDepth = false;
+
+        // 无限远定义
+        private static readonly int _cFarFarZ = -9999999;
 
         public RenderTarget(int deviceWidth, int deviceHeight) {
             m_FrontColorBuffer = new ColorBuffer(deviceWidth, deviceHeight);
             m_FrontDepthBuffer = new Depth32Buffer(deviceWidth, deviceHeight);
+        }
+
+
+        private bool InitClearAllColor() {
+            if (m_FrontColorBuffer != null && (!m_IsAllCleanedColor)) {
+                m_IsAllCleanedColor = true;
+                for (int r = 0; r < m_FrontColorBuffer.Height; ++r) {
+                    for (int c = 0; c < m_FrontColorBuffer.Width; ++c) {
+                        m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
+                    }
+                }
+                m_IsCleanedColor = true;
+                return true;
+            }
+            return false;
+        }
+
+        private bool InitClearAllDepth() {
+            if (m_FrontDepthBuffer != null && (!m_IsAllCleanedDepth)) {
+                m_IsAllCleanedDepth = true;
+                for (int r = 0; r < m_FrontDepthBuffer.Height; ++r) {
+                    for (int c = 0; c < m_FrontDepthBuffer.Width; ++c) {
+                        m_FrontDepthBuffer.SetItem(c, r, _cFarFarZ);
+                    }
+                }
+                m_IsCleanedDepth = true;
+                return true;
+            }
+            return false;
+        }
+
+        private void Clear() {
+            if (m_FrontColorBuffer != null && (!m_IsCleanedColor) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Color))) {
+                m_IsCleanedColor = true;
+                if (m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) {
+                    for (int r = m_ColorDirthRect.yMin; r <= m_ColorDirthRect.yMax; ++r) {
+                        for (int c = m_ColorDirthRect.xMin; c <= m_ColorDirthRect.xMax; ++c) {
+                            m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
+                        }
+                    }
+
+                    m_ColorDirthRect.x = 0;
+                    m_ColorDirthRect.y = 0;
+                    m_ColorDirthRect.width = 0;
+                    m_ColorDirthRect.height = 0;
+                }
+            }
+
+            if (m_FrontDepthBuffer != null && (!m_IsCleanedDepth) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth))) {
+                m_IsCleanedDepth = true;
+                if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
+                    for (int r = m_DepthDirthRect.yMin; r <= m_DepthDirthRect.yMax; ++r) {
+                        for (int c = m_DepthDirthRect.xMin; c <= m_DepthDirthRect.xMax; ++c) {
+                            m_FrontDepthBuffer.SetItem(c, r, _cFarFarZ);
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Prepare() {
+            InitClearAllColor();
+            InitClearAllDepth();
+            Clear();
+        }
+
+        public Color CleanColor {
+            get {
+                return m_CleanColor;
+            }
+
+            set {
+                m_CleanColor = value;
+                m_IsAllCleanedColor = false;
+            }
         }
 
         // 清理参数
