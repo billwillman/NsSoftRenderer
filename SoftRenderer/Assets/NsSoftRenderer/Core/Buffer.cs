@@ -34,6 +34,11 @@ namespace NsSoftRenderer {
             T ret = this[idx];
             return ret;
         }
+
+        public void SetItem(int col, int row, T item) {
+            int idx = col + row * m_Width;
+            this[idx] = item;
+        }
     }
 
     // 颜色Buffer

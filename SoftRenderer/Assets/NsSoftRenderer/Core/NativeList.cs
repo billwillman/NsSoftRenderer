@@ -8,10 +8,25 @@ namespace Utils {
 
     // 原生List
     //[BurstCompile]
-    public class NativeList<T> : DisposeObject where T : struct {
+    public unsafe class NativeList<T> : DisposeObject where T : struct {
         private NativeArray<T> m_Arr;
         private int m_Count = 0;
         private Allocator m_Allocator = Allocator.Persistent;
+
+        public void* GetPtr(int index) {
+            if (IsVaild && index >= 0 && index < m_Count) {
+                IntPtr bb = (IntPtr)m_Arr.GetUnsafePtr<T>();
+                int elemSize = this.ElemSize;
+                void* ret = (void*)IntPtr.Add(bb, elemSize * index);
+                return ret;
+            }
+            return null;
+        }
+
+        public IntPtr GetIntPtr(int index) {
+            void* ret = GetPtr(index);
+            return (IntPtr)ret;
+        }
 
         public int ElemSize {
             get {
@@ -94,7 +109,7 @@ namespace Utils {
             return -1;
         }
 
-        public unsafe bool Delete(int index) {
+        public bool Delete(int index) {
             if (IsVaild && index >= 0 && index < m_Count) {
                 // 减少数量
                 --m_Count;
@@ -121,7 +136,7 @@ namespace Utils {
             return ret;
         }
 
-        public unsafe bool Insert(int index, T item) {
+        public bool Insert(int index, T item) {
             if (!IsVaild || index < 0 || index > m_Count)
                 return false;
             if (m_Count == this.Capacity)
@@ -208,7 +223,7 @@ namespace Utils {
 
         public static readonly int MaxCount = int.MaxValue / UnsafeUtility.SizeOf<T>();
 
-        public unsafe int Count {
+        public int Count {
             get {
                 return m_Count;
             }
@@ -238,10 +253,16 @@ namespace Utils {
                 }
                 return default(T);
             }
+
+            set {
+                if (IsVaild && m_Count > 0) {
+                    m_Arr[idx] = value;
+                }
+            }
         }
           
 
-        public unsafe int Capacity {
+        public int Capacity {
             get {
                 return m_Arr.Length;
             }
@@ -281,7 +302,7 @@ namespace Utils {
 
 
         // 紧缩
-        public unsafe void Pack() {
+        public void Pack() {
             if (!IsVaild || m_Count == 0)
                 return;
             int packCount = 0;
