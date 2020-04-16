@@ -28,6 +28,7 @@ namespace NsSoftRenderer {
             m_FrontDepthBuffer = new Depth32Buffer(deviceWidth, deviceHeight);
         }
 
+        // 清理参数
         public RenderTargetClearFlags ClearFlags {
             get {
                 return m_ClearFlags;
@@ -36,8 +37,6 @@ namespace NsSoftRenderer {
                 m_ClearFlags = value;
             }
         }
-
-        // 清理参数
 
         /// <summary>
         /// 裁剪像素
