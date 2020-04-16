@@ -16,7 +16,7 @@ namespace NsSoftRenderer {
     public class RenderTarget: DisposeObject {
         private ColorBuffer m_FrontColorBuffer = null;
         private Depth32Buffer m_FrontDepthBuffer = null;
-        private RenderTargetClearFlags m_ClearFlags = 0;
+        private RenderTargetUseFlags m_ClearFlags = 0;
         private Color m_CleanColor = Color.black;
         // 脏矩形
         private RectInt m_ColorDirthRect = new RectInt(0, 0, 0, 0);
