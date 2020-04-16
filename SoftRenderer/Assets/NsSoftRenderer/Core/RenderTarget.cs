@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
-using RenderTargetClearFlags = System.Int32;
+using RenderTargetUseFlags = System.Int32;
 
 namespace NsSoftRenderer {
 
@@ -110,7 +110,7 @@ namespace NsSoftRenderer {
         }
 
         // 清理参数
-        public RenderTargetClearFlags ClearFlags {
+        public RenderTargetUseFlags ClearFlags {
             get {
                 return m_ClearFlags;
             }
@@ -134,13 +134,13 @@ namespace NsSoftRenderer {
             return true;
         }
 
-        public static RenderTargetClearFlags CombineUseFlag(RenderTargetClearFlags old, RenderTargetClearFlag flag) {
-            RenderTargetClearFlags ret = old | (1 << ((int)flag - 1));
+        public static RenderTargetUseFlags CombineUseFlag(RenderTargetUseFlags old, RenderTargetClearFlag flag) {
+            RenderTargetUseFlags ret = old | (1 << ((int)flag - 1));
             return ret;
         }
 
 
-        public static bool IncludeUseFlag(RenderTargetClearFlags flags, RenderTargetClearFlag flag) {
+        public static bool IncludeUseFlag(RenderTargetUseFlags flags, RenderTargetClearFlag flag) {
             bool ret = (flags & (1 << ((int)flag - 1))) != 0;
             return ret;
         }
@@ -185,7 +185,7 @@ namespace NsSoftRenderer {
             }
         }
 
-        public bool DrawPixel(int x, int y, RenderTargetClearFlags flags, Color color, int depth = 0) {
+        public bool DrawPixel(int x, int y, RenderTargetUseFlags flags, Color color, int depth = 0) {
             if (flags == 0 || ClipPixel(x, y))
                 return false;
 
