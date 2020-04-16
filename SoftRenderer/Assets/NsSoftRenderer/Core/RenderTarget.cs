@@ -102,7 +102,7 @@ namespace NsSoftRenderer {
         }
 
         // 填充到屏幕
-        public void FlipToScreen(IRenderTargetNotify notify) {
+        public void FlipToNotify(IRenderTargetNotify notify) {
             if (notify != null) {
                 if (m_IsFillAllColor) {
                     RectInt fillRect = new RectInt(0, 0, this.Width, this.Height);

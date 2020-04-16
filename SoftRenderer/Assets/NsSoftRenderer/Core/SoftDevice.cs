@@ -54,7 +54,7 @@ namespace NsSoftRenderer {
             // 1.先清理Target
             if (m_RenerTarget != null) {
                 m_RenerTarget.Prepare();
-                m_RenerTarget.FlipToScreen(notify);
+                m_RenerTarget.FlipToNotify(notify);
             }
         }
 
