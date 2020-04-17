@@ -25,6 +25,8 @@ namespace NsSoftRenderer {
         private bool m_IsMustChgMatrix = true;
         // 观测和投影矩阵
         private Matrix4x4 m_ViewProjMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_ViewMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
 
         // 更新轴
         private void UpdateAxis() {
