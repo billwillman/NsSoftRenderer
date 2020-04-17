@@ -18,6 +18,20 @@ namespace NsSoftRenderer {
         void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect);
     }
 
+    // ZTest操作
+    public enum ZTestOp {
+        // <=
+        LessEqual = 0,
+        // <
+        Less,
+        // ==
+        Equal,
+        // >
+        Greate,
+        // >=
+        GreateEqual
+    }
+
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
     internal struct TriangleVertexColor {
         // 顶点位置(屏幕坐标系)
@@ -29,7 +43,7 @@ namespace NsSoftRenderer {
     // 填充策略
     internal interface IRenderTargetFillProxy {
         // 颜色填充三角形
-        void FillTriangle(TriangleVertexColor triangleVertexs, ColorBuffer colorBuffer, Depth32Buffer depthBuffer);
+        void FillTriangleColor(TriangleVertexColor triangleVertexs, ColorBuffer colorBuffer);
     }
 
     public class RenderTarget: DisposeObject {
@@ -55,6 +69,10 @@ namespace NsSoftRenderer {
             m_FrontDepthBuffer = new Depth32Buffer(deviceWidth, deviceHeight);
         }
 
+        // ZTest检测，暂时占位，后面完善
+        public bool ZTest(ZTestOp op, float z) {
+            return true;
+        }
 
         private bool InitClearAllColor() {
             if (m_FrontColorBuffer != null && (!m_IsAllCleanedColor)) {
