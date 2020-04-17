@@ -21,7 +21,7 @@ namespace NsSoftRenderer {
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
     internal struct TriangleVertexColor {
         // 顶点位置
-        Vector2 vP1, vP2, vP3;
+        Vector3 vP1, vP2, vP3;
         // 顶点颜色
         Color cP1, cP2, cP3;
     }
@@ -29,7 +29,7 @@ namespace NsSoftRenderer {
     // 填充策略
     internal interface IRenderTargetFillProxy {
         // 颜色填充三角形
-        void FillTriangleColor(TriangleVertexColor triangleVertexs, ColorBuffer buffer);
+        void FillTriangle(TriangleVertexColor triangleVertexs, ColorBuffer colorBuffer, Depth32Buffer depthBuffer);
     }
 
     public class RenderTarget: DisposeObject {
