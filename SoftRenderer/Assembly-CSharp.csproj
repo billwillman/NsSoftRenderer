@@ -64,11 +64,12 @@
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftDeviceBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\Buffer.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\IRenderPipline.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\NativeLinkedList.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\NativeList.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\RenderTarget.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftDevice.cs" />
-    <Compile Include="Assets\NsSoftRenderer\SoftCamera.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\SoftCamera.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
