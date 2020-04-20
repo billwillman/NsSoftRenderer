@@ -19,10 +19,14 @@ namespace NsSoftRenderer {
         void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect);
     }
 
+    public struct Triangle {
+       public Vector3 p1, p2, p3;
+    }
+
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
     internal struct TriangleVertexColor {
         // 顶点位置(屏幕坐标系)
-        Vector3 vP1, vP2, vP3;
+        Triangle triangle;
         // 顶点颜色
         Color cP1, cP2, cP3;
     }

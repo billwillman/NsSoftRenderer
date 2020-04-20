@@ -17,7 +17,7 @@ namespace NsSoftRenderer {
     }
 
     // 软渲染设备
-    public class SoftDevice: DisposeObject, ISoftCameraNotify {
+    public class SoftDevice: DisposeObject, ISoftCameraLinker {
 
         private RenderTarget m_RenerTarget = null;
         // 软渲染摄像机列表（按照深度排序）
@@ -55,6 +55,7 @@ namespace NsSoftRenderer {
             cam.Up = up;
             cam.LookAt = lookAt;
             cam.Depth = depth;
+            cam.SetOCamera(info);
             AddCamera(cam);
         }
 

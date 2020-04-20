@@ -16,12 +16,43 @@ namespace NsSoftRenderer {
 
     // 正交摄影机数据
     public struct OCameraInfo {
+        public float Size;
 
+        public void ResetDefault() {
+            Size = 5.0f;
+        }
+
+        public static OCameraInfo Create() {
+            OCameraInfo ret = new OCameraInfo();
+            ret.ResetDefault();
+            return ret;
+        }
+
+        public float CameraHeight {
+            get {
+                return Size * 2.0f;
+            }
+        }
+
+        public float GetCameraWidth(int deviceWidth, int deviceHeight) {
+            float w = (float)deviceWidth;
+            float h = (float)deviceHeight;
+            float ret = w / h * CameraHeight;
+            return ret;
+        }
     }
 
     // 相机通知
-    public interface ISoftCameraNotify {
+    public interface ISoftCameraLinker {
         void OnCameraDepthChanged();
+
+        int DeviceWidth {
+            get;
+        }
+
+        int DeviceHeight {
+            get;
+        }
     }
 
     // 软渲染摄影机
@@ -43,7 +74,7 @@ namespace NsSoftRenderer {
         // 正交摄影机
         private OCameraInfo m_OCameraInfo;
 
-        private ISoftCameraNotify m_Notify = null;
+        private ISoftCameraLinker m_Linker = null;
 
         private int m_Depth = 0;
         // 观测和投影矩阵
@@ -51,8 +82,13 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ViewMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
 
-        public SoftCamera(ISoftCameraNotify notify): base() {
-            m_Notify = notify;
+        public void SetOCamera(OCameraInfo info) {
+            m_OCameraInfo = info;
+            m_CamType = SoftCameraType.O;
+        }
+
+        public SoftCamera(ISoftCameraLinker linker): base() {
+            m_Linker = linker;
         }
 
         public int Depth {
@@ -68,8 +104,8 @@ namespace NsSoftRenderer {
         }
 
         private void OnDepthChanged() {
-            if (m_Notify != null)
-                m_Notify.OnCameraDepthChanged();
+            if (m_Linker != null)
+                m_Linker.OnCameraDepthChanged();
         }
 
         public Matrix4x4 ViewMatrix {
@@ -117,14 +153,36 @@ namespace NsSoftRenderer {
             m_ViewMatrix = axis * invTranslate;
         }
 
+        private void UpdateOProjMatrix() {
+
+        }
+
+        private void UpdatePProjMatrix() {
+            if (m_Linker != null) {
+                int deviceWidth = m_Linker.DeviceWidth;
+                int deviceHeight = m_Linker.DeviceHeight;
+                float w = m_OCameraInfo.GetCameraWidth(deviceWidth, deviceHeight);
+                float h = m_OCameraInfo.CameraHeight;
+
+                // Vector3 offset = new Vector3(-w / 2.0f, -h / 2.0f, 0f);
+                //  Matrix4x4 translate = Matrix4x4.Translate(offset);
+
+                // 投影矩阵
+                Vector3 scale = new Vector3(2.0f/w, 2.0f/h, 1.0f);
+                m_ProjMatrix = Matrix4x4.Scale(scale);
+            }
+        }
+
         // 投影矩阵
         private void UpdateProjMatrix() {
             switch (m_CamType) {
                 // 正交
                 case SoftCameraType.O:
+                    UpdateOProjMatrix();
                     break;
                 // 透视
                 case SoftCameraType.P:
+                    UpdatePProjMatrix();
                     break;
             }
         }

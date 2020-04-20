@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace NsSoftRenderer {
 
@@ -60,6 +61,6 @@ namespace NsSoftRenderer {
 
     // 渲染管线
     public class IRenderPipline {
-
+        private List<IRenderPass> m_PassList = null;
     }
 }
