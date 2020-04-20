@@ -9,10 +9,66 @@ using RenderTargetClearFlags = System.Int32;
 
 namespace NsSoftRenderer {
 
+    class CameraSort: IComparer<SoftCamera> {
+        public int Compare(SoftCamera x, SoftCamera y) {
+            int ret = x.Depth - y.Depth;
+            return ret;
+        }
+    }
+
     // 软渲染设备
-    public class SoftDevice: DisposeObject {
+    public class SoftDevice: DisposeObject, ISoftCameraNotify {
 
         private RenderTarget m_RenerTarget = null;
+        // 软渲染摄像机列表（按照深度排序）
+        private List<SoftCamera> m_CamList = null;
+        private Dictionary<int, SoftRenderObject> m_RenderObjMap = null;
+        private bool m_CamListChanged = true;
+        private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
+
+        private void OnCamListChanged() {
+            m_CamListChanged = true;
+        }
+
+        protected int RegisterRenderObject(SoftRenderObject obj) {
+            if (obj == null)
+                return -1;
+            if (m_RenderObjMap.ContainsKey(obj.InstanceId))
+                return 0;
+            m_RenderObjMap.Add(obj.InstanceId, obj);
+            return 1;
+        }
+
+        protected void AddCamera(SoftCamera cam) {
+            if (cam == null)
+                return;
+            if (m_CamList == null)
+                m_CamList = new List<SoftCamera>();
+            if (RegisterRenderObject(cam) > 0)
+                m_CamList.Add(cam);
+        }
+
+        // 添加
+        public void AddOCamera(OCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth) {
+            SoftCamera cam = new SoftCamera(this);
+            cam.Position = pos;
+            cam.Up = up;
+            cam.LookAt = lookAt;
+            cam.Depth = depth;
+            AddCamera(cam);
+        }
+
+        public void OnCameraDepthChanged() {
+            OnCamListChanged();
+        }
+
+        private void SortCamList() {
+            if (m_CamListChanged && m_CamList != null) {
+                // 排序
+                m_CamListChanged = false;
+                m_CamList.Sort(m_CamSortFunc);
+            }
+        }
 
         public SoftDevice(int deviceWidth, int deviceHeight) {
             m_RenerTarget = new RenderTarget(deviceWidth, deviceHeight);
@@ -51,6 +107,10 @@ namespace NsSoftRenderer {
         }
 
         public void Update(float delta, IRenderTargetNotify notify) {
+
+            // 排序CameraList列表
+            SortCamList();
+
             // 1.先清理Target
             if (m_RenerTarget != null) {
                 m_RenerTarget.Prepare();

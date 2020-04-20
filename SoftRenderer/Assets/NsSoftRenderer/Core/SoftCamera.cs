@@ -10,22 +10,22 @@ namespace NsSoftRenderer {
     }
 
     // 透视摄影机数据
-    struct PCameraInfo {
+    public struct PCameraInfo {
         float nearPlane, farPlane;
     }
 
     // 正交摄影机数据
-    struct OCameraInfo {
+    public struct OCameraInfo {
 
     }
 
     // 相机通知
     public interface ISoftCameraNotify {
-        void OnDepthChanged();
+        void OnCameraDepthChanged();
     }
 
     // 软渲染摄影机
-    public class SoftCamera {
+    public class SoftCamera: SoftRenderObject {
         private SoftCameraType m_CamType = SoftCameraType.O;
 
         // 观测方向
@@ -40,6 +40,8 @@ namespace NsSoftRenderer {
         private bool m_IsMustChgMatrix = true;
         // 透视摄影机
         private PCameraInfo m_PCameraInfo;
+        // 正交摄影机
+        private OCameraInfo m_OCameraInfo;
 
         private ISoftCameraNotify m_Notify = null;
 
@@ -49,7 +51,7 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ViewMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
 
-        public SoftCamera(ISoftCameraNotify notify) {
+        public SoftCamera(ISoftCameraNotify notify): base() {
             m_Notify = notify;
         }
 
@@ -67,7 +69,7 @@ namespace NsSoftRenderer {
 
         private void OnDepthChanged() {
             if (m_Notify != null)
-                m_Notify.OnDepthChanged();
+                m_Notify.OnCameraDepthChanged();
         }
 
         public Matrix4x4 ViewMatrix {
@@ -115,8 +117,16 @@ namespace NsSoftRenderer {
             m_ViewMatrix = axis * invTranslate;
         }
 
+        // 投影矩阵
         private void UpdateProjMatrix() {
-
+            switch (m_CamType) {
+                // 正交
+                case SoftCameraType.O:
+                    break;
+                // 透视
+                case SoftCameraType.P:
+                    break;
+            }
         }
 
         private void UpdateViewProjMatrix() {

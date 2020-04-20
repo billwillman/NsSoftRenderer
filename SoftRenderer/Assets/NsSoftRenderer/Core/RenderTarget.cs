@@ -15,21 +15,8 @@ namespace NsSoftRenderer {
 
 
     public interface IRenderTargetNotify {
+        // IAntiAliasing 抗锯齿接口
         void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect);
-    }
-
-    // ZTest操作
-    public enum ZTestOp {
-        // <=
-        LessEqual = 0,
-        // <
-        Less,
-        // ==
-        Equal,
-        // >
-        Greate,
-        // >=
-        GreateEqual
     }
 
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
@@ -40,7 +27,7 @@ namespace NsSoftRenderer {
         Color cP1, cP2, cP3;
     }
 
-    // 填充策略
+    // 填充策略(包围盒扫描策略或三角形扫描线策略)
     internal interface IRenderTargetFillProxy {
         // 颜色填充三角形
         void FillTriangleColor(TriangleVertexColor triangleVertexs, ColorBuffer colorBuffer);
