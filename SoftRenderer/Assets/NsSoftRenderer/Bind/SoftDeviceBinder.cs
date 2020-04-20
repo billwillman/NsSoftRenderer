@@ -11,6 +11,7 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
     private Texture2D m_TargetTexture = null;
 
     public Color m_ClearColor = Color.clear;
+    public Camera[] m_StartCameras = null;
 
     public virtual void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect) {
         if (buffer != null && m_TargetTexture != null && buffer.IsVaild) {
@@ -53,6 +54,27 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
         m_Device = new SoftDevice(DeviceWidth, DeviceHeight);
 
         m_ClearColor = m_Device.ClearColor;
+    }
+
+    void Start()
+    {
+        if (m_StartCameras != null)
+        {
+            for (int i = 0; i < m_StartCameras.Length; ++i)
+            {
+                Camera cam = m_StartCameras[i];
+                if (cam != null)
+                {
+                    if (cam.orthographic)
+                    {
+                        OCameraInfo info = OCameraInfo.Create();
+                        info.Size = cam.orthographicSize;
+                        var trans = cam.transform;
+                        m_Device.AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth);
+                    }
+                }
+            }
+        }
     }
 
     private void Update() {
