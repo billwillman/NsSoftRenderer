@@ -33,7 +33,7 @@ namespace NsSoftRenderer {
     }
 
     // 渲染PASS模式
-    public struct RenderPassMode {
+    public class RenderPassMode {
         // 是否写深度
         public bool ZWrite;
         // 剔除模式

@@ -51,6 +51,21 @@ namespace NsSoftRenderer {
             return true;
         }
 
+        public SoftCamera AddPCamera(PCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth, bool isMainCamera = false) {
+            SoftCamera cam = new SoftCamera(this);
+            cam.Position = pos;
+            cam.Up = up;
+            cam.LookAt = lookAt;
+            cam.Depth = depth;
+            cam.SetPCamera(info);
+            if (AddCamera(cam)) {
+                cam.IsMainCamera = isMainCamera;
+                return cam;
+            }
+
+            return null;
+        }
+
         // 添加
         public SoftCamera AddOCamera(OCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth, bool isMainCamera = false) {
             SoftCamera cam = new SoftCamera(this);

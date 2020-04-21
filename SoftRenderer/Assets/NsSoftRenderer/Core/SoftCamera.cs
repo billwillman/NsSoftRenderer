@@ -13,7 +13,20 @@ namespace NsSoftRenderer {
 
     // 透视摄影机数据
     public struct PCameraInfo {
-        float nearPlane, farPlane;
+        public float nearPlane, farPlane;
+        public float fieldOfView;  // 角度制
+
+        public void ResetDefault() {
+            nearPlane = 0.3f;
+            farPlane = 1000f;
+            fieldOfView = 60.0f;
+        }
+
+        public static PCameraInfo Create() {
+            PCameraInfo ret = new PCameraInfo();
+            ret.ResetDefault();
+            return ret;
+        }
     }
 
     // 正交摄影机数据
@@ -110,6 +123,11 @@ namespace NsSoftRenderer {
             }
         }
 
+        // 渲染到RenderTarget
+        internal void FlipToRenderTarget(TriangleVertexColor trangleInfo, RenderTarget renderTarget) {
+
+        }
+
         public Matrix4x4 LinkerScreenMatrix {
             get {
                 return m_LinkerScreenMatrix;
@@ -143,9 +161,14 @@ namespace NsSoftRenderer {
             }
         }
 
+        public void SetPCamera(PCameraInfo info) {
+            m_PCameraInfo = info;
+            this.CameraType = SoftCameraType.P;
+        }
+
         public void SetOCamera(OCameraInfo info) {
             m_OCameraInfo = info;
-            m_CamType = SoftCameraType.O;
+            this.CameraType = SoftCameraType.O;
         }
 
         public SoftCamera(ISoftCameraLinker linker): base() {

@@ -47,7 +47,7 @@ namespace NsSoftRenderer {
     }
 
     // 32位深度
-    public class Depth32Buffer : Buffer<int> {
+    public class Depth32Buffer : Buffer<float> {
         public Depth32Buffer(int width, int height) : base(width, height) { }
     }
 
