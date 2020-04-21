@@ -25,10 +25,14 @@ public class SoftCameraTest : MonoBehaviour
 
 
             var uPt = m_UnityCam.WorldToViewportPoint(pt);
-
             var mat = m_SoftCam.ViewProjMatrix;
             var sPt = mat * pt;
-            Debug.LogFormat("【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
+            Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
+
+            uPt = m_UnityCam.WorldToScreenPoint(pt);
+            mat = m_SoftCam.ViewProjLinkerScreenMatrix;
+            sPt = mat * pt;
+            Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
         }
     }
 }

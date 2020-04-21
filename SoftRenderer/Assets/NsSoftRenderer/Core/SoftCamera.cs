@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 
 
+using RenderTargetClearFlags = System.Int32;
+
 namespace NsSoftRenderer {
 
     // 摄影机类型
@@ -85,6 +87,34 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ViewProjMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ViewMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_LinkerScreenMatrix = Matrix4x4.identity;
+        // 世界坐标系转屏幕坐标系
+        private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
+        // 渲染目标
+        // private RenderTarget m_RenderTarget = null;
+
+        private void UpdateLinkerScreenMatrix() {
+            if (m_Linker != null) {
+                float w = (float)m_Linker.DeviceWidth;
+                float h = (float)m_Linker.DeviceHeight;
+                Vector3 scale = new Vector3(w / 2.0f, h / 2.0f, 1.0f);
+                m_LinkerScreenMatrix = Matrix4x4.Scale(scale);
+            } else {
+                m_LinkerScreenMatrix = Matrix4x4.identity;
+            }
+        }
+
+        public Matrix4x4 ViewProjLinkerScreenMatrix {
+            get {
+                return m_ViewProjLinkerScreenMatrix;
+            }
+        }
+
+        public Matrix4x4 LinkerScreenMatrix {
+            get {
+                return m_LinkerScreenMatrix;
+            }
+        } 
 
         public static SoftCamera MainCamera {
             get {
@@ -120,6 +150,7 @@ namespace NsSoftRenderer {
 
         public SoftCamera(ISoftCameraLinker linker): base() {
             m_Linker = linker;
+            UpdateLinkerScreenMatrix();
         }
 
         public int Depth {
@@ -225,6 +256,10 @@ namespace NsSoftRenderer {
             m_ViewProjMatrix = m_ProjMatrix * m_ViewMatrix;
         }
 
+        private void UpdateViewProjLinerScreenMatrix() {
+            m_ViewProjLinkerScreenMatrix = m_LinkerScreenMatrix * m_ViewProjMatrix;
+        }
+
         private void UpdateMatrix() {
             if (m_IsMustChgMatrix) {
                 m_IsMustChgMatrix = false;
@@ -236,6 +271,7 @@ namespace NsSoftRenderer {
                 UpdateProjMatrix();
                 // 更新观察投影矩阵
                 UpdateViewProjMatrix();
+                UpdateViewProjLinerScreenMatrix();
             }
         }
 

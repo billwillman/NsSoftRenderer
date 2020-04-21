@@ -51,6 +51,8 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
     public bool m_IsShowRenderer = true;
 
     private void Awake() {
+        DeviceWidth = Screen.width;
+        DeviceHeight = Screen.height;
         m_Device = new SoftDevice(DeviceWidth, DeviceHeight);
 
         m_ClearColor = m_Device.ClearColor;
