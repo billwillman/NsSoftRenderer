@@ -58,6 +58,9 @@ namespace NsSoftRenderer {
         public RenderTarget(int deviceWidth, int deviceHeight) {
             m_FrontColorBuffer = new ColorBuffer(deviceWidth, deviceHeight);
             m_FrontDepthBuffer = new Depth32Buffer(deviceWidth, deviceHeight);
+            unchecked {
+                m_ClearFlags = (RenderTargetUseFlags)0xFFFFFFFF;
+            }
         }
 
         // ZTest检测，暂时占位，后面完善

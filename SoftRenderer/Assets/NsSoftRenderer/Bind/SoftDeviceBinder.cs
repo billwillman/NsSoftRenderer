@@ -54,23 +54,22 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
         m_Device = new SoftDevice(DeviceWidth, DeviceHeight);
 
         m_ClearColor = m_Device.ClearColor;
+
+        InitStartCameras();
     }
 
-    void Start()
-    {
-        if (m_StartCameras != null)
-        {
-            for (int i = 0; i < m_StartCameras.Length; ++i)
-            {
+    private void InitStartCameras() {
+        if (m_StartCameras != null) {
+            Camera mainCam = Camera.main;
+            for (int i = 0; i < m_StartCameras.Length; ++i) {
                 Camera cam = m_StartCameras[i];
-                if (cam != null)
-                {
-                    if (cam.orthographic)
-                    {
+                if (cam != null) {
+                    if (cam.orthographic) {
                         OCameraInfo info = OCameraInfo.Create();
                         info.Size = cam.orthographicSize;
                         var trans = cam.transform;
-                        m_Device.AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth);
+                        bool isMainCamera = cam == mainCam;
+                        m_Device.AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
                     }
                 }
             }

@@ -72,6 +72,7 @@
     <Compile Include="Assets\NsSoftRenderer\Core\SoftDevice.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMath.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftRenderObject.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

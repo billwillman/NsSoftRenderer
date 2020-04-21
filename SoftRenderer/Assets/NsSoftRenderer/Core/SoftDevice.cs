@@ -33,30 +33,37 @@ namespace NsSoftRenderer {
         protected int RegisterRenderObject(SoftRenderObject obj) {
             if (obj == null)
                 return -1;
+            if (m_RenderObjMap == null)
+                m_RenderObjMap = new Dictionary<RenderTargetClearFlags, SoftRenderObject>();
             if (m_RenderObjMap.ContainsKey(obj.InstanceId))
                 return 0;
             m_RenderObjMap.Add(obj.InstanceId, obj);
             return 1;
         }
 
-        protected void AddCamera(SoftCamera cam) {
+        protected bool AddCamera(SoftCamera cam) {
             if (cam == null)
-                return;
+                return false;
             if (m_CamList == null)
                 m_CamList = new List<SoftCamera>();
             if (RegisterRenderObject(cam) > 0)
                 m_CamList.Add(cam);
+            return true;
         }
 
         // 添加
-        public void AddOCamera(OCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth) {
+        public SoftCamera AddOCamera(OCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth, bool isMainCamera = false) {
             SoftCamera cam = new SoftCamera(this);
             cam.Position = pos;
             cam.Up = up;
             cam.LookAt = lookAt;
             cam.Depth = depth;
             cam.SetOCamera(info);
-            AddCamera(cam);
+            if (AddCamera(cam)) {
+                cam.IsMainCamera = isMainCamera;
+                return cam;
+            }
+            return null;
         }
 
         public void OnCameraDepthChanged() {

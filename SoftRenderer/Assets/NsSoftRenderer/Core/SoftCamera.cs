@@ -57,7 +57,11 @@ namespace NsSoftRenderer {
 
     // 软渲染摄影机
     public class SoftCamera: SoftRenderObject {
+        private static SoftCamera m_MainCamera = null;
+
         private SoftCameraType m_CamType = SoftCameraType.O;
+        // 是否是主摄像机
+        private bool m_IsMainCamera = false;
 
         // 观测方向
         private Vector3 m_LookAt = new Vector3(0, 0, -1f);
@@ -81,6 +85,33 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ViewProjMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ViewMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
+
+        public static SoftCamera MainCamera {
+            get {
+                return m_MainCamera;
+            }
+        }
+
+        public bool IsMainCamera {
+            get {
+                return m_IsMainCamera;
+            }
+
+            set {
+                if (m_IsMainCamera != value) {
+                    m_IsMainCamera = value;
+                   
+                   if (value) {
+                        if (m_MainCamera != null)
+                            m_MainCamera.IsMainCamera = false;
+                        m_MainCamera = this;
+                    } else {
+                        if (m_MainCamera == this)
+                            m_MainCamera = null;
+                    }
+                }
+            }
+        }
 
         public void SetOCamera(OCameraInfo info) {
             m_OCameraInfo = info;
@@ -157,23 +188,23 @@ namespace NsSoftRenderer {
         }
 
         private void UpdateOProjMatrix() {
-
-        }
-
-        private void UpdatePProjMatrix() {
             if (m_Linker != null) {
                 int deviceWidth = m_Linker.DeviceWidth;
                 int deviceHeight = m_Linker.DeviceHeight;
                 float w = m_OCameraInfo.GetCameraWidth(deviceWidth, deviceHeight);
                 float h = m_OCameraInfo.CameraHeight;
 
-                // Vector3 offset = new Vector3(-w / 2.0f, -h / 2.0f, 0f);
-                //  Matrix4x4 translate = Matrix4x4.Translate(offset);
+                 Vector3 offset = new Vector3(-w / 2.0f, -h / 2.0f, 0f);
+                 Matrix4x4 translate = Matrix4x4.Translate(offset);
 
-                // 投影矩阵
-                Vector3 scale = new Vector3(2.0f/w, 2.0f/h, 1.0f);
-                m_ProjMatrix = Matrix4x4.Scale(scale);
+                // 投影矩阵: 范围:X 0-2, Y 0-2, Z 0-W 
+                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 1.0f);
+                m_ProjMatrix = translate * Matrix4x4.Scale(scale);
             }
+        }
+
+        private void UpdatePProjMatrix() {
+            
         }
 
         // 投影矩阵
