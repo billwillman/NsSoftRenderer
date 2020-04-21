@@ -110,18 +110,21 @@ namespace NsSoftRenderer {
 
         public Matrix4x4 ViewMatrix {
             get {
+                UpdateMatrix();
                 return m_ViewMatrix;
             }
         }
 
         public Matrix4x4 ViewProjMatrix {
             get {
+                UpdateMatrix();
                 return m_ViewProjMatrix;
             }
         }
 
         public Matrix4x4 ProjMatrix {
             get {
+                UpdateMatrix();
                 return m_ProjMatrix;
             }
         }
