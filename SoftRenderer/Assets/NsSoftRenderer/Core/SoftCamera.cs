@@ -64,7 +64,18 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        
+        // 只有透视的矩阵，没有做0-2的范围的，那是缩放
+        public Matrix4x4 PMatrix {
+            get {
+                Matrix4x4 mat = Matrix4x4.zero;
+                mat.m00 = nearPlane;
+                mat.m11 = nearPlane;
+                mat.m22 = farPlane + nearPlane;
+                mat.m23 = -nearPlane * farPlane;
+                mat.m32 = 1.0f;
+                return mat;
+            }
+        }
     }
 
     // 正交摄影机数据
