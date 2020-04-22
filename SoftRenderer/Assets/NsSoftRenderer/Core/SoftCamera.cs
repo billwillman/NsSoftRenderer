@@ -27,6 +27,44 @@ namespace NsSoftRenderer {
             ret.ResetDefault();
             return ret;
         }
+
+        // 近平面高度
+        public float nearHeight {
+            get {
+                float halfAngle = fieldOfView / 2.0f * Mathf.PI/180.0f; // 弧度制
+                float ret = 2.0f * Mathf.Tan(halfAngle) * nearPlane;
+                return ret;
+            }
+        }
+
+        // 远平面高度
+        public float farHeight {
+            get {
+                float halfAngle = fieldOfView / 2.0f * Mathf.PI / 180.0f; // 弧度制
+                float ret = 2.0f * Mathf.Tan(halfAngle) * farPlane;
+                return ret;
+            }
+        }
+
+        // 获得近平面宽度
+        public float GetNearWidth(int deviceWidth, int deviceHeight) {
+            float w = (float)deviceWidth;
+            float h = (float)deviceHeight;
+            float aspect = w / h;
+            float ret = aspect * nearHeight;
+            return ret;
+        }
+
+        // 获得远平面宽度
+        public float GetFarWidth(int deviceWidth, int deviceHeight) {
+            float w = (float)deviceWidth;
+            float h = (float)deviceHeight;
+            float aspect = w / h;
+            float ret = aspect * farHeight;
+            return ret;
+        }
+
+        
     }
 
     // 正交摄影机数据
