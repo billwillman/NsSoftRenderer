@@ -211,7 +211,7 @@ namespace NsSoftRenderer {
         }
 
         // 渲染到RenderTarget
-        internal void FlipToRenderTarget(TriangleVertexColor trangleInfo, RenderTarget renderTarget) {
+        internal void FlipToRenderTarget(TriangleVertex trangleInfo, RenderTarget renderTarget) {
 
         }
 

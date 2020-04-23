@@ -76,6 +76,7 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
                         PCameraInfo info = PCameraInfo.Create();
                         info.nearPlane = cam.nearClipPlane;
                         info.farPlane = cam.farClipPlane;
+                        info.fieldOfView = cam.fieldOfView;
                         var trans = cam.transform;
                         bool isMainCamera = cam == mainCam;
                         m_Device.AddPCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);

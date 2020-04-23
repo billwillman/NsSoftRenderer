@@ -55,4 +55,8 @@ namespace NsSoftRenderer {
     public class Depth16Buffer : Buffer<short> {
         public Depth16Buffer(int width, int height) : base(width, height) { }
     }
+
+    // 三角形Buffer
+    public class TriangleList: NativeList<TriangleVertex> {
+    }
 }
