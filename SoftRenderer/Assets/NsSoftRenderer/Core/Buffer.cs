@@ -63,7 +63,7 @@ namespace NsSoftRenderer {
     }
 
     // 索引缓冲
-    public class IndexBuffer: NativeList<ushort> {
+    public class IndexBuffer: NativeList<int> {
 
     }
 

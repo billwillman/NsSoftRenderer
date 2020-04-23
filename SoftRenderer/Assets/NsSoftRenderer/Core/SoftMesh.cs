@@ -7,8 +7,14 @@ namespace NsSoftRenderer {
     public class SoftSubMesh: DisposeObject {
         private IndexBuffer m_IndexBuffer = null;
 
-        public SoftSubMesh(Mesh mesh, int subMesh) {
-
+        public SoftSubMesh(Mesh mesh, int[] indexes) {
+            if (indexes != null && indexes.Length > 0) {
+                m_IndexBuffer = new IndexBuffer();
+                m_IndexBuffer.Capacity = indexes.Length;
+                for (int i = 0; i < indexes.Length; ++i) {
+                    m_IndexBuffer.Add(indexes[i]);
+                }
+            }
         }
 
         protected override void OnFree(bool isManual) {
@@ -54,9 +60,12 @@ namespace NsSoftRenderer {
                 }
 
                 for (int i = 0; i < mesh.subMeshCount; ++i) {
+                    if (m_SubList == null)
+                        m_SubList = new List<SoftSubMesh>();  
                     var triangles = mesh.GetTriangles(i);
                     if (triangles != null && triangles.Length > 0) {
-
+                        SoftSubMesh subMesh = new SoftSubMesh(mesh, triangles);
+                        m_SubList.Add(subMesh);
                     }
                 }
             }
