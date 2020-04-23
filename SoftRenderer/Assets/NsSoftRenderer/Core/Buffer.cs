@@ -46,6 +46,8 @@ namespace NsSoftRenderer {
         public ColorBuffer(int width, int height): base(width, height) { }
     }
 
+    public class VertexColorBuffer: NativeList<Color> { }
+
     // 32位深度
     public class Depth32Buffer : Buffer<float> {
         public Depth32Buffer(int width, int height) : base(width, height) { }
@@ -58,5 +60,20 @@ namespace NsSoftRenderer {
 
     // 三角形Buffer
     public class TriangleList: NativeList<TriangleVertex> {
+    }
+
+    // 索引缓冲
+    public class IndexBuffer: NativeList<ushort> {
+
+    }
+
+    // 顶点缓冲
+    public class VertexBuffer: NativeList<Vector3> {
+
+    }
+
+    // 法线缓冲
+    public class VertexNormalBuffer: NativeList<Vector3> {
+
     }
 }
