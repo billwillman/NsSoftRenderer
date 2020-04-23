@@ -403,6 +403,7 @@ namespace NsSoftRenderer {
                 UpdateProjMatrix();
                 // 更新观察投影矩阵
                 UpdateViewProjMatrix();
+                // 更新世界坐标到屏幕
                 UpdateViewProjLinerScreenMatrix();
             }
         }
