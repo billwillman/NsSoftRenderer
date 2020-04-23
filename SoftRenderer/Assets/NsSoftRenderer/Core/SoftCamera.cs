@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 
-using RenderTargetClearFlags = System.Int32;
+//using RenderTargetClearFlags = System.Int32;
 
 namespace NsSoftRenderer {
 
@@ -26,6 +26,14 @@ namespace NsSoftRenderer {
             PCameraInfo ret = new PCameraInfo();
             ret.ResetDefault();
             return ret;
+        }
+
+        public void GetNearWidthAndHeight(int deviceWidth, int deviceHeight, out float width, out float height) {
+            height = this.nearHeight;
+            float w = (float)deviceWidth;
+            float h = (float)deviceHeight;
+            float aspect = w / h;
+            width = aspect * height;
         }
 
         // 近平面高度
@@ -64,9 +72,39 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 只有透视的矩阵，没有做0-2的范围的，那是缩放
+        // 只有透视的矩阵，没有做0-2的范围的，那是缩放和平移
         public Matrix4x4 PMatrix {
             get {
+                /*
+                 * n, 0, 0, 0
+                 * 0, n, 0, 0
+                 * 0, 0, f + n, -nf
+                 * 0, 0, 1, 0
+                 * 
+                 * 推到过程：
+                 * 1）普通点：视锥体【任意点】(x0, y0, z0) 到最终变换到近平面点(x1, y1, z1(Unknown))，根据相似三角形推出
+                 *    y1 = near/z0 * y0;    x1 = near/z0 * x0;   z1 = z0;
+                 *    最终变换坐标为：(near/z0 * x0, near/z0 * y0, z0), 根据齐次坐标定义，都乘以Z得到齐次坐标：(near * x0, near * y0, z1(unknow(?)), z0),这样仍然描述同一个点。
+                 *    这样构造出一个矩阵结论：
+                 *    near, 0, 0, 0
+                 *    0, near, 0, 0
+                 *    A(?), B(?), C(?), D(?)
+                 *    0，0，1, 0
+                 *   【关键，现在就是求第三行了】
+                 * 2）【近平面任意点】转换后仍然是相同的点。
+                 *    即：M * (x0, y0, near, 1) = (x0 * near, y0 * near, near^2, near)
+                 *    来推到出矩阵第三行条件：
+                 *    A * x0 + B * y0 + C * near + D = near^2
+                 *    任意点不受X,Y影响，所以得到，A = 0, B = 0
+                 *    【最终得到】 
+                 *          C * near + D  = near^2 ------------- 式1
+                 * 3）对于【远平面中心原点】坐标为：(0, 0, 0, far, 1)最终变换到的齐次坐标为：(0, 0, far^2, f)
+                 *    【推算出】
+                 *          C * far + D = far^2    ---------------- 式2
+                 * 最后，根据 式1 和 式2，求出C和D,得到：
+                 *      C = far + near; D = -near * far
+                 *  最终求出视锥体变换矩阵的第一步
+                 */
                 Matrix4x4 mat = Matrix4x4.zero;
                 mat.m00 = nearPlane;
                 mat.m11 = nearPlane;
@@ -303,11 +341,33 @@ namespace NsSoftRenderer {
                 // 投影矩阵: 范围:X 0-2, Y 0-2, Z 0-W 
                 Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 1.0f);
                 m_ProjMatrix = translate * Matrix4x4.Scale(scale);
+            } else {
+                m_ProjMatrix = Matrix4x4.identity;
             }
         }
 
         private void UpdatePProjMatrix() {
-            
+            if (m_Linker != null) {
+                int deviceWidth = m_Linker.DeviceWidth;
+                int deviceHeight = m_Linker.DeviceHeight;
+
+                float nearW, nearH;
+                m_PCameraInfo.GetNearWidthAndHeight(deviceWidth, deviceHeight, out nearW, out nearH);
+
+                // 1.从视锥体转到正方体
+                Matrix4x4 pMatrix = m_PCameraInfo.PMatrix;
+                // 2.平移矩阵
+                Vector3 offset = new Vector3(-nearW / 2.0f, -nearH / 2.0f, 0);
+                Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
+                // 3.缩放矩阵，缩放到0~2
+                Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, 1.0f);
+                Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
+
+                // 根据步骤求出ProjMatrix
+                m_ProjMatrix = scaleMat * offsetMat * pMatrix;
+            } else {
+                m_ProjMatrix = Matrix4x4.identity;
+            }
         }
 
         // 投影矩阵
