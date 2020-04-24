@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftDeviceBinder.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Bind\SoftMeshBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\AntiAliasing.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\Buffer.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\IRenderPipline.cs" />
