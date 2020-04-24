@@ -74,6 +74,14 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        // 點到平面的距離
+        public static float PtToPlaneDistance(ref Vector3 pt, SoftPlane panel) {
+            float d = panel.normal.magnitude;
+            float a = Mathf.Abs(pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d);
+            float ret = a / d;
+            return ret;
+        }
+
         public static bool PtInCamera(ref Vector3 pt, SoftCamera camera) {
             SoftPlane[] planes = camera.WorldPlanes;
             if (planes != null && planes.Length >= 6) {
@@ -99,7 +107,14 @@ namespace NsSoftRenderer {
             if (camera == null)
                 return false;
 
-            
+            float r = spere.radius;
+            SoftPlane[] panels = camera.WorldPlanes;
+            for (int i = 0; i < panels.Length; ++i) {
+                var panel = panels[i];
+                float distance = PtToPlaneDistance(ref spere.position, panel);
+                if (distance < r)
+                    return true;
+            }
 
             return false;
         }
