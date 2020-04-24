@@ -11,6 +11,15 @@ namespace NsSoftRenderer {
         P  // 透视摄影机
     }
 
+    public static class SoftCameraPlanes {
+        public static readonly byte NearPlane = 0; // 近平面
+        public static readonly byte FarPlane = 1; // 远平面
+        public static readonly byte LeftPlane = 2;
+        public static readonly byte RightPlane = 3;
+        public static readonly byte UpPlane =  4;
+        public static readonly byte DownPlane = 5;
+    }
+
     // 透视摄影机数据
     public struct PCameraInfo {
         public float nearPlane, farPlane;
@@ -26,6 +35,14 @@ namespace NsSoftRenderer {
             PCameraInfo ret = new PCameraInfo();
             ret.ResetDefault();
             return ret;
+        }
+
+        public void GetFarWidthAndHeight(int deviceWidth, int deviceHeight, out float width, out float height) {
+            height = this.farHeight;
+            float w = (float)deviceWidth;
+            float h = (float)deviceHeight;
+            float aspect = w / h;
+            width = aspect * height;
         }
 
         public void GetNearWidthAndHeight(int deviceWidth, int deviceHeight, out float width, out float height) {
@@ -114,14 +131,94 @@ namespace NsSoftRenderer {
                 return mat;
             }
         }
+
+        public void GetPlanePoints(int deviceWidth, int deviceHeight, SoftCamera camera, 
+            out Vector3 a, out Vector3 b, out Vector3 c, out Vector3 d, out Vector3 e, out Vector3 f, out Vector3 g, out Vector3 h) {
+            // 8个顶点
+            float halfNearHeight;
+            float halfNearWidth;
+            GetNearWidthAndHeight(deviceWidth, deviceHeight, out halfNearWidth, out halfNearHeight);
+            halfNearWidth = halfNearWidth / 2.0f;
+            halfNearHeight = halfNearHeight / 2.0f;
+
+            Vector3 forward = camera.LookAt;
+            Vector3 nearCenter = camera.Position + forward * nearPlane;
+            /* e  h
+             * f  g
+             * |  |
+             * a d
+             * b c
+             */
+            // 近平面4个点
+            // a, b, c, d;
+            // 远平面4个点
+            // e, f, g, h;
+            a = nearCenter + new Vector3(-halfNearWidth, halfNearHeight, 0f);
+            b = nearCenter + new Vector3(-halfNearWidth, -halfNearHeight, 0f);
+            c = nearCenter + new Vector3(halfNearWidth, -halfNearHeight, 0f);
+            d = nearCenter + new Vector3(halfNearWidth, halfNearHeight, 0f);
+
+            float halfFarWidth, halfFarHeight;
+            GetFarWidthAndHeight(deviceWidth, deviceHeight, out halfFarWidth, out halfFarHeight);
+            halfFarWidth = halfFarWidth / 2.0f;
+            halfFarHeight = halfFarHeight / 2.0f;
+            Vector3 farCenter = camera.Position + forward * farPlane;
+            e = farCenter + new Vector3(-halfFarWidth, halfFarHeight, 0f);
+            f = farCenter + new Vector3(-halfFarWidth, -halfFarHeight, 0f);
+            g = farCenter + new Vector3(halfFarWidth, -halfFarHeight, 0f);
+            h = farCenter + new Vector3(halfFarWidth, halfFarHeight, 0f);
+        }
+
+        // 六大平面
+        public void InitPlanes(SoftPlane[] planes, int deviceWidth, int deviceHeight, SoftCamera camera) {
+            Vector3 a, b, c, d;
+            Vector3 e, f, g, h;
+            GetPlanePoints(deviceWidth, deviceHeight, camera, out a, out b, out c, out d, out e, out f, out g, out h);
+
+            Vector3 camPos = camera.Position;
+
+            // near plane
+            Vector3 n = camera.LookAt;
+            float dd = -n.x * a.x - n.y * a.y - n.z * a.z;
+            planes[SoftCameraPlanes.NearPlane] = new SoftPlane(n, dd);
+            // far plane
+            n = -camera.LookAt;
+            dd = -n.x * e.x - n.y * e.y - n.z * e.z;
+            planes[SoftCameraPlanes.FarPlane] = new SoftPlane(n, dd);
+            // left plane
+            Vector3 v1 = a - camPos;
+            Vector3 v2 = b - camPos;
+            n = Vector3.Cross(v2, v1).normalized;
+            dd = -n.x * a.x - n.y * a.y - n.z * a.z;
+            planes[SoftCameraPlanes.LeftPlane] = new SoftPlane(n, dd);
+            // right plane
+            v1 = d - camPos;
+            v2 = c - camPos;
+            n = Vector3.Cross(v1, v2).normalized;
+            planes[SoftCameraPlanes.RightPlane] = new SoftPlane(n, dd);
+            // up plane
+            v1 = e - a;
+            v2 = d - a;
+            n = Vector3.Cross(v1, v2).normalized;
+            planes[SoftCameraPlanes.UpPlane] = new SoftPlane(n, dd);
+            // down plane
+            v1 = g - c;
+            v2 = d - c;
+            n = Vector3.Cross(v2, v1).normalized;
+            planes[SoftCameraPlanes.DownPlane] = new SoftPlane(n, dd);
+        }
     }
 
     // 正交摄影机数据
     public struct OCameraInfo {
         public float Size;
+        public float nearPlane;
+        public float farPlane;
 
         public void ResetDefault() {
             Size = 5.0f;
+            nearPlane = 0.3f;
+            farPlane = 1000f;
         }
 
         public static OCameraInfo Create() {
@@ -141,6 +238,47 @@ namespace NsSoftRenderer {
             float h = (float)deviceHeight;
             float ret = w / h * CameraHeight;
             return ret;
+        }
+
+        public void InitPlanes(SoftPlane[] planes, int deviceWidth, int deviceHeight, SoftCamera camera) {
+            if (camera == null || planes == null || planes.Length < 6)
+                return;
+            Vector3 forward = camera.LookAt;
+            Vector3 right = camera.Right;
+            Vector3 up = camera.Up;
+            float cameraHeight = this.CameraHeight;
+            float cameraWidth = GetCameraWidth(deviceWidth, deviceHeight);
+            Vector3 nearCenter = camera.Position + forward * nearPlane;
+
+            // near plane
+            Vector3 n = forward;
+            float d = -n.x * nearCenter.x - n.y * nearCenter.y - n.z * nearCenter.z;
+            planes[SoftCameraPlanes.NearPlane] = new SoftPlane(n, d);
+            // far plane
+            Vector3 pos = camera.Position + forward * farPlane;
+            n = -forward;
+            d = -n.x * pos.x - n.y * pos.y - n.z * pos.z;
+            planes[SoftCameraPlanes.FarPlane] = new SoftPlane(n, d);
+            // Left plane
+            n = right;
+            pos = nearCenter + (-right * cameraWidth / 2.0f);
+            d = -n.x * pos.x - n.y * pos.y - n.z * pos.z;
+            planes[SoftCameraPlanes.LeftPlane] = new SoftPlane(n, d);
+            // right plane
+            n = -right;
+            pos = nearCenter + (right * cameraWidth / 2.0f);
+            d = -n.x * pos.x - n.y * pos.y - n.z * pos.z;
+            planes[SoftCameraPlanes.RightPlane] = new SoftPlane(n, d);
+            // up plane
+            n = -up;
+            pos = nearCenter + (up * cameraHeight / 2.0f);
+            d = -n.x * pos.x - n.y * pos.y - n.z * pos.z;
+            planes[SoftCameraPlanes.UpPlane] = new SoftPlane(n, d);
+            // down plane
+            n = up;
+            pos = nearCenter - (up * cameraHeight / 2.0f);
+            d = -n.x * pos.x - n.y * pos.y - n.z * pos.z;
+            planes[SoftCameraPlanes.DownPlane] = new SoftPlane(n, d);
         }
     }
 
@@ -192,6 +330,35 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
         // 渲染目标
         // private RenderTarget m_RenderTarget = null;
+        private bool m_IsMustUpdatePlanes = true;
+        private SoftPlane[] m_Planes = new SoftPlane[6];
+
+        public SoftPlane[] WorldPlanes {
+            get {
+                UpdatePlanes();
+                return m_Planes;
+            }
+        }
+
+        // 更新Plane
+        private void UpdatePlanes() {
+            if (m_IsMustUpdatePlanes) {
+                m_IsMustUpdatePlanes = false;
+                // 生成Plane
+                switch (m_CamType) {
+                    case SoftCameraType.O:
+                        m_OCameraInfo.InitPlanes(m_Planes, m_Linker.DeviceWidth, m_Linker.DeviceHeight, this);
+                        break;
+                    case SoftCameraType.P:
+                        m_PCameraInfo.InitPlanes(m_Planes, m_Linker.DeviceWidth, m_Linker.DeviceHeight, this);
+                        break;
+                }
+            }
+        }
+
+        private void DoMustUpdatePlanes() {
+            m_IsMustUpdatePlanes = true;
+        }
 
         private void UpdateLinkerScreenMatrix() {
             if (m_Linker != null) {
@@ -303,6 +470,7 @@ namespace NsSoftRenderer {
 
         private void DoMatrixChange() {
             m_IsMustChgMatrix = true;
+            DoMustUpdatePlanes();
         }
 
         private void DoLookAtUpChange() {

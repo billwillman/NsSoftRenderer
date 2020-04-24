@@ -69,6 +69,8 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
                     if (cam.orthographic) {
                         OCameraInfo info = OCameraInfo.Create();
                         info.Size = cam.orthographicSize;
+                        info.nearPlane = cam.nearClipPlane;
+                        info.farPlane = cam.farClipPlane;
                         var trans = cam.transform;
                         bool isMainCamera = cam == mainCam;
                         m_Device.AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
