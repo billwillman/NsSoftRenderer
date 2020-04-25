@@ -309,8 +309,6 @@ namespace NsSoftRenderer {
         private Vector3 m_Up = new Vector3(0, 1f, 0);
         // Right方向
         private Vector3 m_Right = Vector3.zero;
-        // 位置
-        private Vector3 m_Position = Vector3.zero;
         private bool m_IsLookAtAndUpChged = true;
         private bool m_IsMustChgMatrix = true;
         // 透视摄影机
@@ -612,17 +610,9 @@ namespace NsSoftRenderer {
             }
         }
 
-        public Vector3 Position {
-            get {
-                return m_Position;
-            }
-
-            set {
-                if (m_Position != value) {
-                    m_Position = value;
-                    DoMatrixChange();
-                }
-            }
+        protected override void PositionChanged()
+        {
+            DoMatrixChange();
         }
 
         public void Update(float delta) {
