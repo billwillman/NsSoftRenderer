@@ -130,7 +130,9 @@ namespace NsSoftRenderer {
          *   在三角形里面。
          *   
          * 【推到如何求出 a, b, c】   
-         *
+         *      A
+         *   B  P  C
+         *   
         */
     }
 }
