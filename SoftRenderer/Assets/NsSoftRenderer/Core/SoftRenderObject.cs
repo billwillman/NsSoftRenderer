@@ -2,7 +2,7 @@
 
 namespace NsSoftRenderer {
 
-    // 所有类基
+    // 所有3D物件类基
     public class SoftRenderObject {
         private static int m_GlobalInstanceId = 0;
         private int m_InstanceId = 0;
