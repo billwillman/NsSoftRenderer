@@ -32,6 +32,14 @@ namespace NsSoftRenderer {
 
         private static readonly float EPS = 1e-6f;
 
+        /*
+         * 判断一个点是否在三角形内，有两种常用方法：
+         *    1. 一种是P点1和三角形任意一点的向量，和三角形三个边向量都在同一侧，同时左侧还是有右侧（即采用向量叉乘，三条边的点乘符号+或者-都是一致的 ）
+         *       1）点乘和叉乘的位置意义是，点乘是表示前后关系。
+         *       2）叉乘是表示左右侧关系。
+         *    2. 另一种是采用重心坐标系
+         */
+
         // 判断点是否在三角形上（三维坐标）
         public static bool PtInTriangle(ref Vector3 pt, ref Triangle trangle, out float h) {
             // 采用重心法

@@ -25,6 +25,7 @@ namespace NsSoftRenderer {
         private Dictionary<int, SoftRenderObject> m_RenderObjMap = null;
         private bool m_CamListChanged = true;
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
+        private RenderTrianglesMgr m_TrianglesMgr = null;
 
         private void OnCamListChanged() {
             m_CamListChanged = true;
