@@ -72,6 +72,7 @@
     <Compile Include="Assets\NsSoftRenderer\Core\RenderTarget.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftCamera.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftDevice.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\SoftLight.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMath.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMesh.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftRenderObject.cs" />

@@ -132,7 +132,23 @@ namespace NsSoftRenderer {
          * 【推到如何求出 a, b, c】   
          *      A
          *   B  P  C
-         *   
+         *   可知：
+         *   AP = u * AB + v * AC
+         *   => P - A = u (B - A) + v * (C - A)
+         *   => P = u * B - u * A + v * C - v * A + A
+         *   => P = (1 - u - v) * A + u * B  + v * C
+         *   令：r = 1 - u - v, 則 P = r * A + u * B  + v * C
+         *   【结论】说明存在一个 P = r * A + u * B  + v * C 即重心坐标系
+         *
+         *   因为，AP = u * AB + v * AC
+         *   =》u * AB + v * AC - AP = 0
+         *   更改为向量乘法为：
+         *   [u, v, 1] * [AB, AC, -AP]
+         *   => [u, v, 1] * [AB, AC, PA]
+         *   拆分得到：
+         *   => [u, v, 1] * [ABx, ACx, PAx] = 0
+         *      [u, v, 1] * [ABy, ACy, PAy] = 0
+         *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy]的向量，也就是这两个向量的叉乘。
         */
     }
 }
