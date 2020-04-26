@@ -148,6 +148,8 @@ namespace NsSoftRenderer {
          *   拆分得到：
          *   => [u, v, 1] * [ABx, ACx, PAx] = 0
          *      [u, v, 1] * [ABy, ACy, PAy] = 0
+         *      [u, v, 1] * [ABz, ACz, PAz] = 0
+         *    两个式子足够了，所以只取前两个用于计算。
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy]的向量，也就是这两个向量的叉乘。
          *   【注意】矩阵变换后的三角形的重心和原来三角形的重心可能会不一致。。。
         */
