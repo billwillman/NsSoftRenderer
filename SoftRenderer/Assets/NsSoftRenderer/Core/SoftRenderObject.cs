@@ -14,6 +14,12 @@ namespace NsSoftRenderer {
         // Right方向
         protected Vector3 m_Right = Vector3.zero;
         protected bool m_IsLookAtAndUpChged = true;
+        protected Matrix4x4 m_GlobalToLocalMatrix = Matrix4x4.identity;
+        protected bool m_MustGlobalToLocalMatrixChg = true;
+
+        protected virtual void DoMustGlobalToLocalMatrixChg() {
+            m_MustGlobalToLocalMatrixChg = true;
+        }
 
         private static int GenInstanceId() {
             return ++m_GlobalInstanceId;
@@ -45,6 +51,7 @@ namespace NsSoftRenderer {
                 {
                     m_Position = value;
                     PositionChanged();
+                    DoMustGlobalToLocalMatrixChg();
                 }
             }
         }
@@ -55,6 +62,24 @@ namespace NsSoftRenderer {
                 m_LookAt = m_LookAt.normalized;
                 m_Right = Vector3.Cross(m_LookAt, m_Up).normalized;
                 m_Up = Vector3.Cross(m_Right, m_LookAt);
+            }
+        }
+
+        protected void UpdateGlobalToLocalMatrix() {
+            if (m_MustGlobalToLocalMatrixChg) {
+                m_MustGlobalToLocalMatrixChg = false;
+                Matrix4x4 invTransMat = Matrix4x4.Translate(-this.m_Position);
+                Matrix4x4 axisMat = Matrix4x4.zero;
+
+                Vector3 xAxis = this.Right;
+                Vector3 yAxis = this.Up;
+                Vector3 zAxis = this.LookAt;
+
+                axisMat.SetRow(0, xAxis);
+                axisMat.SetRow(1, yAxis);
+                axisMat.SetRow(2, zAxis);
+
+                m_GlobalToLocalMatrix = axisMat * invTransMat;
             }
         }
 
@@ -71,6 +96,7 @@ namespace NsSoftRenderer {
                 if (m_LookAt != value) {
                     m_LookAt = value;
                     DoLookAtUpChange();
+                    DoMustGlobalToLocalMatrixChg();
                 }
             }
         }
@@ -85,6 +111,7 @@ namespace NsSoftRenderer {
                 if (m_Up != value) {
                     m_Up = value;
                     DoLookAtUpChange();
+                    DoMustGlobalToLocalMatrixChg();
                 }
             }
         }
@@ -93,6 +120,14 @@ namespace NsSoftRenderer {
             get {
                 UpdateAxis();
                 return m_Right;
+            }
+        }
+
+        // 全局坐标转局部坐标
+        public Matrix4x4 GlobalToLocalMatrix {
+            get {
+                UpdateGlobalToLocalMatrix();
+                return m_GlobalToLocalMatrix;
             }
         }
     }
