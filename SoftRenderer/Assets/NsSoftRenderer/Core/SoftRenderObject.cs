@@ -15,6 +15,7 @@ namespace NsSoftRenderer {
         protected Vector3 m_Right = Vector3.zero;
         protected bool m_IsLookAtAndUpChged = true;
         protected Matrix4x4 m_GlobalToLocalMatrix = Matrix4x4.identity;
+        protected Matrix4x4 m_LocalToGlobalMatrix = Matrix4x4.identity;
         protected bool m_MustGlobalToLocalMatrixChg = true;
 
         protected virtual void DoMustGlobalToLocalMatrixChg() {
@@ -74,6 +75,9 @@ namespace NsSoftRenderer {
                 axis.m10 = m_Up.x; axis.m11 = m_Up.y; axis.m12 = m_Up.z;
                 axis.m20 = m_LookAt.x; axis.m21 = m_LookAt.y; axis.m22 = m_LookAt.z;
                 m_GlobalToLocalMatrix = axis * invTranslate;
+
+                // 简单转置一下作为正交矩阵
+                m_LocalToGlobalMatrix = m_GlobalToLocalMatrix.transpose;
             }
         }
 
