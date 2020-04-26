@@ -68,18 +68,12 @@ namespace NsSoftRenderer {
         protected void UpdateGlobalToLocalMatrix() {
             if (m_MustGlobalToLocalMatrixChg) {
                 m_MustGlobalToLocalMatrixChg = false;
-                Matrix4x4 invTransMat = Matrix4x4.Translate(-this.m_Position);
-                Matrix4x4 axisMat = Matrix4x4.zero;
-
-                Vector3 xAxis = this.Right;
-                Vector3 yAxis = this.Up;
-                Vector3 zAxis = this.LookAt;
-
-                axisMat.SetRow(0, xAxis);
-                axisMat.SetRow(1, yAxis);
-                axisMat.SetRow(2, zAxis);
-
-                m_GlobalToLocalMatrix = axisMat * invTransMat;
+                Matrix4x4 invTranslate = Matrix4x4.Translate(-m_Position);
+                Matrix4x4 axis = Matrix4x4.identity;
+                axis.m00 = m_Right.x; axis.m01 = m_Right.y; axis.m02 = m_Right.z;
+                axis.m10 = m_Up.x; axis.m11 = m_Up.y; axis.m12 = m_Up.z;
+                axis.m20 = m_LookAt.x; axis.m21 = m_LookAt.y; axis.m22 = m_LookAt.z;
+                m_GlobalToLocalMatrix = axis * invTranslate;
             }
         }
 
