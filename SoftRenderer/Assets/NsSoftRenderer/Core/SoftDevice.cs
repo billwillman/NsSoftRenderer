@@ -18,14 +18,37 @@ namespace NsSoftRenderer {
 
     // 软渲染设备
     public class SoftDevice: DisposeObject, ISoftCameraLinker {
-
+        private static SoftDevice m_StaticDevice = null;
         private RenderTarget m_RenerTarget = null;
         // 软渲染摄像机列表（按照深度排序）
         private List<SoftCamera> m_CamList = null;
         private Dictionary<int, SoftRenderObject> m_RenderObjMap = null;
         private bool m_CamListChanged = true;
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
+        // 提交的三角形
         private RenderTrianglesMgr m_TrianglesMgr = null;
+        // 用于渲染各种排序管理
+        private RenderObjMgr m_RenderObjMgr = null;
+
+        public static SoftDevice StaticDevice {
+            get {
+                return m_StaticDevice;
+            }
+        }
+
+        public void RemoveRenderObject(SoftRenderObject obj) {
+            if (obj != null && m_RenderObjMap != null) {
+                int instanceId = obj.InstanceId;
+                m_RenderObjMap.Remove(instanceId);
+
+                SoftCamera cam = obj as SoftCamera;
+                if (cam != null) {
+                    m_CamList.Remove(cam);
+                }
+
+                obj.Dispose();
+            }
+        }
 
         private void OnCamListChanged() {
             m_CamListChanged = true;
@@ -67,6 +90,35 @@ namespace NsSoftRenderer {
             return null;
         }
 
+        // 添加UNITY摄影机
+        public SoftCamera AddCamera(UnityEngine.Camera cam, bool isMainCamera) {
+            if (cam != null) {
+                if (cam.orthographic) {
+                    OCameraInfo info = OCameraInfo.Create();
+                    info.Size = cam.orthographicSize;
+                    info.nearPlane = cam.nearClipPlane;
+                    info.farPlane = cam.farClipPlane;
+                    var trans = cam.transform;
+                    return AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
+                } else {
+                    PCameraInfo info = PCameraInfo.Create();
+                    info.nearPlane = cam.nearClipPlane;
+                    info.farPlane = cam.farClipPlane;
+                    info.fieldOfView = cam.fieldOfView;
+                    var trans = cam.transform;
+                    return AddPCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
+                }
+            }
+            return null;
+        }
+
+        public SoftMeshRenderer AddMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh) {
+            SoftMeshRenderer ret = new SoftMeshRenderer(pos, up, lookAt, mesh);
+            if (RegisterRenderObject(ret) > 0)
+                return ret;
+            return null;
+        }
+
         // 添加
         public SoftCamera AddOCamera(OCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth, bool isMainCamera = false) {
             SoftCamera cam = new SoftCamera(this);
@@ -96,6 +148,7 @@ namespace NsSoftRenderer {
 
         public SoftDevice(int deviceWidth, int deviceHeight) {
             m_RenerTarget = new RenderTarget(deviceWidth, deviceHeight);
+            m_StaticDevice = this;
         }
 
         public Color ClearColor {
@@ -154,11 +207,27 @@ namespace NsSoftRenderer {
             }
         }
 
+        /*
+        private void DestroyRenderObjects() {
+            if (m_RenderObjMap != null) {
+                var iter = m_RenderObjMap.GetEnumerator();
+                while (iter.MoveNext()) {
+                    if (iter.Current.Value != null)
+                        iter.Current.Value.Dispose();
+                }
+                iter.Dispose();
+                m_RenderObjMap.Clear();
+            }
+        }*/
+
         protected override void OnFree(bool isManual) {
+           // DestroyRenderObjects();
+
             if (m_RenerTarget != null) {
                 m_RenerTarget.Dispose();
                 m_RenerTarget = null;
             }
+            m_StaticDevice = null;
         }
     }
 }

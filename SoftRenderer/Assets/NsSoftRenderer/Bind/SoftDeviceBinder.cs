@@ -7,11 +7,9 @@ using NsSoftRenderer;
 public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
     public int DeviceWidth = 800;
     public int DeviceHeight = 600;
-    private SoftDevice m_Device = null;
     private Texture2D m_TargetTexture = null;
-
+    private SoftDevice m_Device;
     public Color m_ClearColor = Color.clear;
-    public Camera[] m_StartCameras = null;
 
     public virtual void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect) {
         if (buffer != null && m_TargetTexture != null && buffer.IsVaild) {
@@ -56,36 +54,6 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
         m_Device = new SoftDevice(DeviceWidth, DeviceHeight);
 
         m_ClearColor = m_Device.ClearColor;
-
-        InitStartCameras();
-    }
-
-    private void InitStartCameras() {
-        if (m_StartCameras != null) {
-            Camera mainCam = Camera.main;
-            for (int i = 0; i < m_StartCameras.Length; ++i) {
-                Camera cam = m_StartCameras[i];
-                if (cam != null) {
-                    if (cam.orthographic) {
-                        OCameraInfo info = OCameraInfo.Create();
-                        info.Size = cam.orthographicSize;
-                        info.nearPlane = cam.nearClipPlane;
-                        info.farPlane = cam.farClipPlane;
-                        var trans = cam.transform;
-                        bool isMainCamera = cam == mainCam;
-                        m_Device.AddOCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
-                    } else {
-                        PCameraInfo info = PCameraInfo.Create();
-                        info.nearPlane = cam.nearClipPlane;
-                        info.farPlane = cam.farClipPlane;
-                        info.fieldOfView = cam.fieldOfView;
-                        var trans = cam.transform;
-                        bool isMainCamera = cam == mainCam;
-                        m_Device.AddPCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
-                    }
-                }
-            }
-        }
     }
 
     private void Update() {

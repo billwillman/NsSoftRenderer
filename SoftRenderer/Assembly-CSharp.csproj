@@ -8,8 +8,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <ProjectGuid>{18CA33B3-E5DC-5742-7FAD-23F7B166E606}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -62,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Bind\SoftCameraBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftDeviceBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftMeshBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\AntiAliasing.cs" />
