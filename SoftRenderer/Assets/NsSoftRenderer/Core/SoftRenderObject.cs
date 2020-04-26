@@ -7,6 +7,13 @@ namespace NsSoftRenderer {
         private static int m_GlobalInstanceId = 0;
         private int m_InstanceId = 0;
         protected Vector3 m_Position;
+        // 观测方向
+        protected Vector3 m_LookAt = new Vector3(0, 0, -1f);
+        // UP方向
+        protected Vector3 m_Up = new Vector3(0, 1f, 0);
+        // Right方向
+        protected Vector3 m_Right = Vector3.zero;
+        protected bool m_IsLookAtAndUpChged = true;
 
         private static int GenInstanceId() {
             return ++m_GlobalInstanceId;
@@ -39,6 +46,53 @@ namespace NsSoftRenderer {
                     m_Position = value;
                     PositionChanged();
                 }
+            }
+        }
+
+        protected void UpdateAxis() {
+            if (m_IsLookAtAndUpChged) {
+                m_IsLookAtAndUpChged = false;
+                m_LookAt = m_LookAt.normalized;
+                m_Right = Vector3.Cross(m_LookAt, m_Up).normalized;
+                m_Up = Vector3.Cross(m_Right, m_LookAt);
+            }
+        }
+
+        protected virtual void DoLookAtUpChange() {
+            m_IsLookAtAndUpChged = true;
+        }
+
+        public Vector3 LookAt {
+            get {
+                UpdateAxis();
+                return m_LookAt;
+            }
+            set {
+                if (m_LookAt != value) {
+                    m_LookAt = value;
+                    DoLookAtUpChange();
+                }
+            }
+        }
+
+        public Vector3 Up {
+            get {
+                UpdateAxis();
+                return m_Up;
+            }
+
+            set {
+                if (m_Up != value) {
+                    m_Up = value;
+                    DoLookAtUpChange();
+                }
+            }
+        }
+
+        public Vector3 Right {
+            get {
+                UpdateAxis();
+                return m_Right;
             }
         }
     }

@@ -302,14 +302,7 @@ namespace NsSoftRenderer {
         private SoftCameraType m_CamType = SoftCameraType.O;
         // 是否是主摄像机
         private bool m_IsMainCamera = false;
-
-        // 观测方向
-        private Vector3 m_LookAt = new Vector3(0, 0, -1f);
-        // UP方向
-        private Vector3 m_Up = new Vector3(0, 1f, 0);
-        // Right方向
-        private Vector3 m_Right = Vector3.zero;
-        private bool m_IsLookAtAndUpChged = true;
+        
         private bool m_IsMustChgMatrix = true;
         // 透视摄影机
         private PCameraInfo m_PCameraInfo;
@@ -471,18 +464,9 @@ namespace NsSoftRenderer {
             DoMustUpdatePlanes();
         }
 
-        private void DoLookAtUpChange() {
-            m_IsLookAtAndUpChged = true;
-        }
-
-        // 更新轴
-        private void UpdateAxis() {
-            if (m_IsLookAtAndUpChged) {
-                m_IsLookAtAndUpChged = false;
-                m_LookAt = m_LookAt.normalized;
-                m_Right = Vector3.Cross(m_LookAt, m_Up).normalized;
-                m_Up = Vector3.Cross(m_Right, m_LookAt);
-            }
+        protected override void DoLookAtUpChange() {
+            base.DoLookAtUpChange();
+            DoMatrixChange();
         }
 
         private void UpdateViewMatrix() {
@@ -574,42 +558,6 @@ namespace NsSoftRenderer {
             }
         }
 
-        public Vector3 Right {
-            get {
-                UpdateAxis();
-                return m_Right;
-            }
-        }
-
-        public Vector3 Up {
-            get {
-                UpdateAxis();
-                return m_Up;
-            }
-
-            set {
-                if (m_Up != value) {
-                    m_Up = value;
-                    DoLookAtUpChange();
-                    DoMatrixChange();
-                }
-            }
-        }
-
-        public Vector3 LookAt {
-            get {
-                UpdateAxis();
-                return m_LookAt;
-            }
-            set {
-                if (m_LookAt != value) {
-                    m_LookAt = value;
-                    DoLookAtUpChange();
-                    DoMatrixChange();
-                }
-            }
-        }
-
         protected override void PositionChanged()
         {
             DoMatrixChange();
@@ -631,5 +579,7 @@ namespace NsSoftRenderer {
                 }
             }
         }
+
+
     }
 }
