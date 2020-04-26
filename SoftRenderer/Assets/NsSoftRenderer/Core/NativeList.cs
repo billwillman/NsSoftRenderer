@@ -47,8 +47,9 @@ namespace Utils {
             }
         }
 
-        public void Clear() {
-            FreeArray();
+        public void Clear(bool isClearArray = true) {
+            if (isClearArray)
+                FreeArray();
             m_Count = 0;
         }
 
