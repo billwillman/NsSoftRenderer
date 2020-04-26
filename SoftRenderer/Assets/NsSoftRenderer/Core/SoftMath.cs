@@ -150,5 +150,19 @@ namespace NsSoftRenderer {
          *      [u, v, 1] * [ABy, ACy, PAy] = 0
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy]的向量，也就是这两个向量的叉乘。
         */
+        public static void GetBarycentricCoordinate(ref Vector3 A, ref Vector3 B, ref Vector3 C, ref Vector3 P, out float u, out float v, out float r) {
+            Vector3 AB = B - A;
+            Vector3 AC = C - A;
+            Vector3 PA = A - P;
+
+            Vector3 v1 = new Vector3(AB.x, AC.x, PA.x);
+            Vector3 v2 = new Vector3(AB.y, AC.y, PA.y);
+            Vector3 vv = Vector3.Cross(v1, v2);
+            if (vv.x < 0)
+                vv = -vv;
+            u = vv.x;
+            v = vv.y;
+            r = 1 - u - v;
+        }
     }
 }
