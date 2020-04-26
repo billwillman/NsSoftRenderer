@@ -149,8 +149,9 @@ namespace NsSoftRenderer {
          *   => [u, v, 1] * [ABx, ACx, PAx] = 0
          *      [u, v, 1] * [ABy, ACy, PAy] = 0
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy]的向量，也就是这两个向量的叉乘。
+         *   【注意】矩阵变换后的三角形的重心和原来三角形的重心可能会不一致。。。
         */
-        public static void GetBarycentricCoordinate(ref Vector3 A, ref Vector3 B, ref Vector3 C, ref Vector3 P, out float u, out float v, out float r) {
+        public static void GetBarycentricCoordinate(ref Vector3 A, ref Vector3 B, ref Vector3 C, ref Vector3 P, out float a, out float b, out float c) {
             Vector3 AB = B - A;
             Vector3 AC = C - A;
             Vector3 PA = A - P;
@@ -160,9 +161,9 @@ namespace NsSoftRenderer {
             Vector3 vv = Vector3.Cross(v1, v2);
             if (vv.x < 0)
                 vv = -vv;
-            u = vv.x;
-            v = vv.y;
-            r = 1 - u - v;
+            b = vv.x; //-->> b即是u
+            c = vv.y; //-->> c即是v
+            a = 1f - b - c; //-->>a即是 1- u - v = r
         }
     }
 }
