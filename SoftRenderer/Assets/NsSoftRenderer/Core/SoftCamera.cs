@@ -333,6 +333,15 @@ namespace NsSoftRenderer {
             m_RenderObjMgr.CameraCull(this, objMap, out visibleList);
         }
 
+        // 渲染提前调用
+        internal virtual void DoCameraPreRender() {
+            m_TrianglesMgr.Clear();
+        }
+
+        internal virtual void DoCameraPostRender() {
+
+        }
+
         private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
             if (subMesh == null || passMode == null)
                 return;
@@ -365,6 +374,8 @@ namespace NsSoftRenderer {
                     //----
 
                     TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
+
+                    // 进入VertexShader了， 做顶点变换等
                 }
             }
         }

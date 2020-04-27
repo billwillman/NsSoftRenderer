@@ -20,6 +20,7 @@ namespace NsSoftRenderer {
             if (camera == null || objMap == null)
                 return;
             NativeList<int> visibleList;
+            camera.DoCameraPreRender();
             camera.Cull(objMap, out visibleList);
             if (visibleList != null && visibleList.Count > 0) {
                 for (int i = 0; i < visibleList.Count; ++i) {
@@ -30,6 +31,7 @@ namespace NsSoftRenderer {
                     }
                 }
             }
+            camera.DoCameraPostRender();
         }
     }
 }
