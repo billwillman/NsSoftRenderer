@@ -146,14 +146,6 @@ namespace NsSoftRenderer {
                 return m_Right;
             }
         }
-
-        // 全局坐标转局部坐标
-        public Matrix4x4 GlobalToLocalMatrix {
-            get {
-                UpdateGlobalToLocalMatrix();
-                return m_GlobalToLocalMatrix;
-            }
-        }
     }
 
 }

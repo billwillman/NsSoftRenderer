@@ -59,8 +59,23 @@ namespace NsSoftRenderer {
         protected abstract void DoPixelShader();
     }
 
+    public static class RenderQueue {
+        public static readonly int Geometry = 2000;
+    }
+
+    // 渲染队列
+    public class IRenderQueue {
+
+    }
+
     // 渲染管线
     public class IRenderPipline {
-        private List<IRenderPass> m_PassList = null;
+        private Dictionary<int, IRenderQueue> m_RenderQueue = null;
+
+        internal virtual void DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) { }
+
+        internal void RegisterRenderQueue(int renderQueue, IRenderQueue pass) {
+
+        }
     }
 }
