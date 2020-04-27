@@ -339,7 +339,9 @@ namespace NsSoftRenderer {
             var indexes = subMesh.Indexes;
             var vertexs = mesh.Vertexs;
             var colors = mesh.Colors;
-            if (vertexs != null && colors != null && (vertexs.Count == colors.Count) && indexes != null && indexes.Count > 0) {
+            if (vertexs != null && colors != null && (vertexs.Count == colors.Count)
+                && indexes != null && indexes.Count > 0) {
+
                 int triangleCnt = ((int)indexes.Count / 3);
                 for (int i = 0; i < triangleCnt; ++i) {
                     int idx = i * 3;
@@ -354,7 +356,12 @@ namespace NsSoftRenderer {
                     Color c3 = colors[index];
                     Triangle tri = new Triangle(p1, p2, p3);
 
+                    // 三角形转到世界坐标系
+                    tri.MulMatrix(ref objToWorld);
                     // 过CullMode
+                    if (SoftMath.IsCulled(this, passMode.Cull, ref tri)) {
+                        continue;
+                    }
                     //----
 
                     TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);

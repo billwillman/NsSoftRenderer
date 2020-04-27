@@ -26,6 +26,12 @@ namespace NsSoftRenderer {
             this.p2 = p2;
             this.p3 = p3;
         }
+
+        public void MulMatrix(ref Matrix4x4 mat) {
+            p1 = mat * p1;
+            p2 = mat * p2;
+            p3 = mat * p3;
+        }
     }
 
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点

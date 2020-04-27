@@ -82,6 +82,30 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        // 判断是否需要Cull
+        public static bool IsCulled(SoftCamera camera, CullMode mode, ref Triangle tri) {
+            if (mode == CullMode.none)
+                return false;
+            if (camera == null)
+                return true;
+
+            Vector3 v1 = tri.p3 - tri.p1;
+            Vector3 v2 = tri.p2 - tri.p3;
+            Vector3 n = Vector3.Cross(v1, v2);
+            Vector3 lookAt = camera.LookAt;
+            bool isFront = Vector3.Dot(lookAt, n) < 0;
+
+            switch (mode) {
+                case CullMode.front: {          
+                        return !isFront;
+                    }
+                case CullMode.back: {              
+                        return isFront;
+                    }
+            }
+            return false;
+        }
+
         // 點到平面的距離
         public static float PtToPlaneDistance(ref Vector3 pt, SoftPlane panel) {
             float d = panel.normal.magnitude;
