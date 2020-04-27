@@ -195,6 +195,9 @@ namespace NsSoftRenderer {
             // 1.先清理Target
             if (m_RenerTarget != null) {
                 m_RenerTarget.Prepare();
+
+                // 渲染
+
                 m_RenerTarget.FlipToNotify(notify);
             }
         }
