@@ -10,6 +10,7 @@ namespace NsSoftRenderer {
             this.Position = pos;
             this.Up = up;
             this.LookAt = lookAt;
+            this.m_Type = SoftRenderObjType.MeshRender;
             if (mesh != null) {
                 m_Mesh = new SoftMesh(mesh);
             }

@@ -3,6 +3,13 @@ using Utils;
 
 namespace NsSoftRenderer {
 
+    public enum SoftRenderObjType {
+        None,
+        Camera,
+        MeshRender,
+        SkinedMeshRender
+    }
+
     // 所有3D物件类基
     public class SoftRenderObject: DisposeObject {
         private static int m_GlobalInstanceId = 0;
@@ -18,6 +25,21 @@ namespace NsSoftRenderer {
         protected Matrix4x4 m_GlobalToLocalMatrix = Matrix4x4.identity;
         protected Matrix4x4 m_LocalToGlobalMatrix = Matrix4x4.identity;
         protected bool m_MustGlobalToLocalMatrixChg = true;
+        protected SoftRenderObjType m_Type = SoftRenderObjType.None;
+
+        // 是否能渲染
+        public bool CanRenderer {
+            get {
+                bool ret = (m_Type == SoftRenderObjType.MeshRender) && (m_Type == SoftRenderObjType.SkinedMeshRender);
+                return ret;
+            }
+        }
+
+        public SoftRenderObjType ObjType {
+            get {
+                return m_Type;
+            }
+        }
 
         public Matrix4x4 LocalToGlobalMatrix {
             get {

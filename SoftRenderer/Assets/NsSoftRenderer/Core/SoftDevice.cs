@@ -34,6 +34,16 @@ namespace NsSoftRenderer {
             }
         }
 
+        public SoftRenderObject GetRenderObject(int instanceId) {
+            if (m_RenderObjMap != null) {
+                SoftRenderObject ret;
+                if (!m_RenderObjMap.TryGetValue(instanceId, out ret))
+                    ret = null;
+                return ret;
+            }
+            return null;
+        }
+
         public static SoftDevice StaticDevice {
             get {
                 return m_StaticDevice;
@@ -187,6 +197,18 @@ namespace NsSoftRenderer {
             }
         }
 
+        private void CameraRender(SoftCamera cam) {
+            if (cam == null)
+                return;
+            var target = cam.Target;
+            if (target != null) {
+                target.Prepare();
+                if (m_RenderPipline != null) {
+                    m_RenderPipline.DoCameraRender(cam, m_RenderObjMap);
+                }
+            }
+        }
+
         public void Update(float delta, IRenderTargetNotify notify) {
 
             // 排序CameraList列表
@@ -194,9 +216,15 @@ namespace NsSoftRenderer {
 
             // 1.先清理Target
             if (m_RenerTarget != null) {
-                m_RenerTarget.Prepare();
+                // 通过Camera接口处理了, 这里注释
+            //    m_RenerTarget.Prepare();
 
-                // 渲染
+                // 多摄像机渲染，根据摄影机深度排序后顺序渲染
+                for (int i = 0; i < m_CamList.Count; ++i) {
+                    var cam = m_CamList[i];
+                    CameraRender(cam);
+                }
+
 
                 m_RenerTarget.FlipToNotify(notify);
             }

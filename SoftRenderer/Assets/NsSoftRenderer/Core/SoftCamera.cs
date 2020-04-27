@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-
+﻿using System.Collections.Generic;
+using UnityEngine;
+using Utils;
 
 //using RenderTargetClearFlags = System.Int32;
 
@@ -328,6 +329,17 @@ namespace NsSoftRenderer {
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
         private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
 
+       public void Cull(Dictionary<int, SoftRenderObject> objMap, out NativeList<int> visibleList) {
+            m_RenderObjMgr.CameraCull(this, objMap, out visibleList);
+        }
+
+        public SoftRenderObject GetRenderObject(int instanceId) {
+            SoftDevice device = SoftDevice.StaticDevice;
+            if (device != null)
+                return device.GetRenderObject(instanceId);
+            return null;
+        }
+
         public RenderTarget Target {
             get {
                 if (m_RenderTarget != null)
@@ -350,6 +362,16 @@ namespace NsSoftRenderer {
                 UpdatePlanes();
                 return m_Planes;
             }
+        }
+
+        protected override void OnFree(bool isManual) {
+
+            if (m_RenderObjMgr != null) {
+                m_RenderObjMgr.Dispose();
+                m_RenderObjMgr = null;
+            }
+
+            base.OnFree(isManual);
         }
 
         // 更新Plane
@@ -439,6 +461,7 @@ namespace NsSoftRenderer {
 
         public SoftCamera(ISoftCameraLinker linker): base() {
             m_Linker = linker;
+            m_Type = SoftRenderObjType.Camera;
             UpdateLinkerScreenMatrix();
         }
 
