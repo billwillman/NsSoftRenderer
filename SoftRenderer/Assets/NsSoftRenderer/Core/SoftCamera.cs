@@ -333,6 +333,47 @@ namespace NsSoftRenderer {
             m_RenderObjMgr.CameraCull(this, objMap, out visibleList);
         }
 
+        private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
+            if (subMesh == null || passMode == null)
+                return;
+            var indexes = subMesh.Indexes;
+            var vertexs = mesh.Vertexs;
+            var colors = mesh.Colors;
+            if (vertexs != null && colors != null && (vertexs.Count == colors.Count) && indexes != null && indexes.Count > 0) {
+                int triangleCnt = ((int)indexes.Count / 3);
+                for (int i = 0; i < triangleCnt; ++i) {
+                    int idx = i * 3;
+                    int index = indexes[idx];
+                    Vector3 p1 = vertexs[index];
+                    Color c1 = colors[index];
+                    index = indexes[idx + 1];
+                    Vector3 p2 = vertexs[index];
+                    Color c2 = colors[index];
+                    index = indexes[idx + 2];
+                    Vector3 p3 = vertexs[index];
+                    Color c3 = colors[index];
+                    Triangle tri = new Triangle(p1, p2, p3);
+
+                    // 过CullMode
+                    //----
+
+                    TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
+                }
+            }
+        }
+
+        public void RenderMesh(SoftMesh mesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
+            if (mesh == null || passMode == null)
+                return;
+            var subMeshes = mesh.SubMeshes;
+            if (subMeshes != null) {
+                for (int i = 0; i < subMeshes.Count; ++i) {
+                    var subMesh = subMeshes[i];
+                    RenderSubMesh(mesh, subMesh, ref objToWorld, passMode);
+                }
+            }
+        }
+
         public SoftRenderObject GetRenderObject(int instanceId) {
             SoftDevice device = SoftDevice.StaticDevice;
             if (device != null)

@@ -21,14 +21,26 @@ namespace NsSoftRenderer {
 
     public struct Triangle {
        public Vector3 p1, p2, p3;
+       public Triangle(Vector3 p1, Vector3 p2, Vector3 p3) {
+            this.p1 = p1;
+            this.p2 = p2;
+            this.p3 = p3;
+        }
     }
 
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
     public struct TriangleVertex {
         // 顶点位置
-        Triangle triangle;
+        public Triangle triangle;
         // 顶点颜色
-        Color cP1, cP2, cP3;
+        public Color cP1, cP2, cP3;
+
+        public TriangleVertex(Triangle tri, Color p1, Color p2, Color p3) {
+            triangle = tri;
+            cP1 = p1;
+            cP2 = p2;
+            cP3 = p3;
+        }
     }
 
     // 填充策略(包围盒扫描策略或三角形扫描线策略)

@@ -82,7 +82,7 @@ namespace NsSoftRenderer {
 
         public virtual void Update(float delta) { }
 
-        public virtual void Render(SoftCamera camera) { }
+        public virtual void Render(SoftCamera camera, RenderPassMode passMode) { }
 
         protected virtual void PositionChanged()
         { }

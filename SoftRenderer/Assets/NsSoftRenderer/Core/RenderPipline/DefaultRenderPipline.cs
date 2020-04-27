@@ -9,6 +9,7 @@ namespace NsSoftRenderer {
 
     // 默认的RenderPipline
     public class DefaultRenderPipline: IRenderPipline {
+        private RenderPassMode m_DefaultPassMode = new RenderPassMode();
 
         public DefaultRenderPipline() {
             RegisterRenderQueue(RenderQueue.Geometry, new GeometryQueue());
@@ -24,7 +25,8 @@ namespace NsSoftRenderer {
                 for (int i = 0; i < visibleList.Count; ++i) {
                     SoftRenderObject obj = camera.GetRenderObject(visibleList[i]);
                     if (obj != null) {
-
+                        // 后面考虑排序和后面模拟可编程。。。
+                        obj.Render(camera, m_DefaultPassMode);
                     }
                 }
             }

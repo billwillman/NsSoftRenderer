@@ -17,6 +17,12 @@ namespace NsSoftRenderer {
             }
         }
 
+        internal IndexBuffer Indexes {
+            get {
+                return m_IndexBuffer;
+            }
+        }
+
         protected override void OnFree(bool isManual) {
             if (m_IndexBuffer != null) {
                 m_IndexBuffer.Dispose();
@@ -36,6 +42,30 @@ namespace NsSoftRenderer {
 
         public SoftMesh(Mesh mesh) {
             BuildFromMesh(mesh);
+        }
+
+        internal List<SoftSubMesh> SubMeshes {
+            get {
+                return m_SubList;
+            }
+        }
+
+        internal VertexBuffer Vertexs {
+            get {
+                return m_VertexBuffer;
+            }
+        }
+
+        internal VertexColorBuffer Colors {
+            get {
+                return m_ColorBuffer;
+            }
+        }
+
+        internal VertexNormalBuffer Normals {
+            get {
+                return m_NormalBuffer;
+            }
         }
 
         // 局部坐标系的

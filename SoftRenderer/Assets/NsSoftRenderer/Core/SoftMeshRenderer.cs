@@ -49,11 +49,11 @@ namespace NsSoftRenderer {
         }
 
         // 提交到渲染队列中
-        public override void Render(SoftCamera camera) {
-            SoftDevice device = SoftDevice.StaticDevice;
-            if (device != null) {
-                
-            }
+        public override void Render(SoftCamera camera, RenderPassMode passMode) {
+            if (camera == null || passMode == null || m_Mesh == null)
+                return;
+            UpdateGlobalToLocalMatrix();
+            camera.RenderMesh(m_Mesh, ref m_LocalToGlobalMatrix, passMode);
         }
     }
 

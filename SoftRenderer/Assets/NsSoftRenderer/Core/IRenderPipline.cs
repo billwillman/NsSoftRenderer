@@ -35,11 +35,11 @@ namespace NsSoftRenderer {
     // 渲染PASS模式
     public class RenderPassMode {
         // 是否写深度
-        public bool ZWrite;
+        public bool ZWrite = true;
         // 剔除模式
-        public CullMode Cull;
+        public CullMode Cull = CullMode.back;
         // ZTest模式
-        public ZTestOp ZTest;
+        public ZTestOp ZTest = ZTestOp.Less;
     }
 
     // 渲染Pass
