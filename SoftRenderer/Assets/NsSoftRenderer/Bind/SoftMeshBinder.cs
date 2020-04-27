@@ -18,7 +18,7 @@ namespace NsSoftRenderer {
                 m_SoftMeshRenderer.Position = trans.position;
                 m_SoftMeshRenderer.LookAt = trans.forward;
                 m_SoftMeshRenderer.Up = trans.up;
-                m_SoftMeshRenderer.sharedMesh = m_MeshFilter.sharedMesh;
+                //m_SoftMeshRenderer.sharedMesh = m_MeshFilter.sharedMesh;
             }
         }
 
