@@ -376,6 +376,7 @@ namespace NsSoftRenderer {
                     TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
 
                     // 进入VertexShader了， 做顶点变换等
+                    m_TrianglesMgr.AddTriangle(triV);
                 }
             }
         }
