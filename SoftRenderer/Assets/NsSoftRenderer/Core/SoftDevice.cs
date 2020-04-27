@@ -25,7 +25,9 @@ namespace NsSoftRenderer {
         private Dictionary<int, SoftRenderObject> m_RenderObjMap = null;
         private bool m_CamListChanged = true;
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
-        
+        // 默认渲染管线
+        private IRenderPipline m_RenderPipline = new DefaultRenderPipline();
+
         public RenderTarget Target {
             get {
                 return m_RenerTarget;
