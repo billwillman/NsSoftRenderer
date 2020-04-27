@@ -326,7 +326,7 @@ namespace NsSoftRenderer {
         // 提交的三角形
         private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
-        private RenderObjMgr m_RenderObjMgr = null;
+        private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
 
         public RenderTrianglesMgr TrianglesMgr {
             get {
