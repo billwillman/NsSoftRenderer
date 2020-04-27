@@ -319,7 +319,7 @@ namespace NsSoftRenderer {
         // 世界坐标系转屏幕坐标系
         private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
         // 渲染目标
-        // private RenderTarget m_RenderTarget = null;
+        private RenderTarget m_RenderTarget = null;
         private bool m_IsMustUpdatePlanes = true;
         private SoftPlane[] m_Planes = new SoftPlane[6];
 
@@ -327,6 +327,17 @@ namespace NsSoftRenderer {
         private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
         private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
+
+        public RenderTarget Target {
+            get {
+                if (m_RenderTarget != null)
+                    return m_RenderTarget;
+                var device = SoftDevice.StaticDevice;
+                if (device != null)
+                    return device.Target;
+                return null;
+            }
+        }
 
         public RenderTrianglesMgr TrianglesMgr {
             get {

@@ -64,18 +64,32 @@ namespace NsSoftRenderer {
     }
 
     // 渲染队列
-    public class IRenderQueue {
-
+    public abstract class IRenderQueue {
+        
     }
 
     // 渲染管线
-    public class IRenderPipline {
-        private Dictionary<int, IRenderQueue> m_RenderQueue = null;
+    public abstract class IRenderPipline {
+        protected SortedDictionary<int, IRenderQueue> m_RenderQueue = null;
+        private static RenderQueueSort m_RenderQueueSort = new RenderQueueSort();
+
+        private class RenderQueueSort: IComparer<int> {
+            public int Compare(int x, int y) {
+                return (x - y);
+            }
+        }
 
         internal virtual void DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) { }
 
-        internal void RegisterRenderQueue(int renderQueue, IRenderQueue pass) {
+        internal bool RegisterRenderQueue(int renderQueue, IRenderQueue queue) {
+            if (queue == null)
+                return false;
 
+            if (m_RenderQueue == null) {
+                m_RenderQueue = new SortedDictionary<int, IRenderQueue>(m_RenderQueueSort);
+            }
+            m_RenderQueue[renderQueue] = queue;
+            return true;
         }
     }
 }

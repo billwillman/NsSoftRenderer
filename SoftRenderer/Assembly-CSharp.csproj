@@ -70,6 +70,7 @@
     <Compile Include="Assets\NsSoftRenderer\Core\NativeLinkedList.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\NativeList.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\RenderObjMgr.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\RenderPipline\DefaultRenderPipline.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\RenderTarget.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\RenderTrianglesMgr.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftCamera.cs" />

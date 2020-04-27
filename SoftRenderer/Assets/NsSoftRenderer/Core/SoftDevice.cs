@@ -26,6 +26,11 @@ namespace NsSoftRenderer {
         private bool m_CamListChanged = true;
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
         
+        public RenderTarget Target {
+            get {
+                return m_RenerTarget;
+            }
+        }
 
         public static SoftDevice StaticDevice {
             get {
