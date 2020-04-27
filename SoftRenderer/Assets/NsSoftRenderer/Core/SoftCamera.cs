@@ -323,6 +323,17 @@ namespace NsSoftRenderer {
         private bool m_IsMustUpdatePlanes = true;
         private SoftPlane[] m_Planes = new SoftPlane[6];
 
+        // 提交的三角形
+        private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
+        // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
+        private RenderObjMgr m_RenderObjMgr = null;
+
+        public RenderTrianglesMgr TrianglesMgr {
+            get {
+                return m_TrianglesMgr;
+            }
+        }
+
         public SoftPlane[] WorldPlanes {
             get {
                 UpdatePlanes();
@@ -557,7 +568,7 @@ namespace NsSoftRenderer {
             DoMatrixChange();
         }
 
-        public void Update(float delta) {
+        public override void Update(float delta) {
             UpdateMatrix();
         }
 

@@ -25,10 +25,7 @@ namespace NsSoftRenderer {
         private Dictionary<int, SoftRenderObject> m_RenderObjMap = null;
         private bool m_CamListChanged = true;
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
-        // 提交的三角形
-        private RenderTrianglesMgr m_TrianglesMgr = null;
-        // 用于渲染各种排序管理
-        private RenderObjMgr m_RenderObjMgr = null;
+        
 
         public static SoftDevice StaticDevice {
             get {

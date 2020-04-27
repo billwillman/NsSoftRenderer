@@ -19,6 +19,20 @@ namespace NsSoftRenderer {
         protected Matrix4x4 m_LocalToGlobalMatrix = Matrix4x4.identity;
         protected bool m_MustGlobalToLocalMatrixChg = true;
 
+        public Matrix4x4 LocalToGlobalMatrix {
+            get {
+                UpdateGlobalToLocalMatrix();
+                return m_LocalToGlobalMatrix;
+            }
+        }
+
+        public Matrix4x4 GlobalToLocalMatrix {
+            get {
+                UpdateGlobalToLocalMatrix();
+                return m_GlobalToLocalMatrix;
+            }
+        }
+
         protected virtual void DoMustGlobalToLocalMatrixChg() {
             m_MustGlobalToLocalMatrixChg = true;
         }
@@ -43,6 +57,10 @@ namespace NsSoftRenderer {
                 return m_InstanceId;
             }
         }
+
+        public virtual void Update(float delta) { }
+
+        public virtual void Render(SoftCamera camera) { }
 
         protected virtual void PositionChanged()
         { }

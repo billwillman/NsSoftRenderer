@@ -31,24 +31,65 @@ namespace NsSoftRenderer {
         private VertexColorBuffer m_ColorBuffer = null;
         private VertexNormalBuffer m_NormalBuffer = null;
         private List<SoftSubMesh> m_SubList = null;
+        // 采用的是模型坐标系
+        private SoftSpere m_BoundSpere;
 
         public SoftMesh(Mesh mesh) {
             BuildFromMesh(mesh);
         }
 
+        // 局部坐标系的
+        public SoftSpere LocalBoundSpere {
+            get {
+                return m_BoundSpere;
+            }
+        }
+
         public void BuildFromMesh(Mesh mesh) {
             Clear();
             if (mesh != null) {
-                
+
+                Vector3 minVec = Vector3.zero;
+                Vector3 maxVec = Vector3.zero;
+                bool isInitMinMax = false;
                 List<Vector3> vertexs = new List<Vector3>();
                 mesh.GetVertices(vertexs);
                 if (vertexs.Count > 0) {
                     m_VertexBuffer = new VertexBuffer();
                     m_VertexBuffer.Capacity = vertexs.Count;
                     for (int i = 0; i < vertexs.Count; ++i) {
-                        m_VertexBuffer.Add(vertexs[i]);
+                        Vector3 v = vertexs[i];
+                        m_VertexBuffer.Add(v);
+                        if (!isInitMinMax) {
+                            minVec = v;
+                            maxVec = v;
+                            isInitMinMax = true;
+                        } else {
+                            if (minVec.x > v.x)
+                                minVec.x = v.x;
+                            if (minVec.y > v.y)
+                                minVec.y = v.y;
+                            if (minVec.z > v.z)
+                                minVec.z = v.z;
+                            if (maxVec.x < v.x)
+                                maxVec.x = v.x;
+                            if (maxVec.y < v.y)
+                                maxVec.y = v.y;
+                            if (maxVec.z < v.z)
+                                maxVec.z = v.z;
+                        }
                     }
                 }
+
+                if (isInitMinMax) {
+                    Vector3 rr = (maxVec - minVec);
+                    m_BoundSpere.position = rr / 2.0f;
+                    m_BoundSpere.radius = rr.sqrMagnitude;
+                } else {
+                    m_BoundSpere.position = Vector3.zero;
+                    m_BoundSpere.radius = 0f;
+                }
+
                 List<Color> colors = new List<Color>();
                 mesh.GetColors(colors);
                 if (colors.Count > 0) {
