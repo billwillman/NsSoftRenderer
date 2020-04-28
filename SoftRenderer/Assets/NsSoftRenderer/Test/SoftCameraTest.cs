@@ -43,9 +43,10 @@ public class SoftCameraTest : MonoBehaviour
             var pt = trans.position;
             
             Triangle tt1 = new Triangle();
-            tt1.p1 = new Vector3(0.5f, -0.5f, -9.5f);
-            tt1.p2 = new Vector3(-0.5f, -0.5f, -9.5f);
-            tt1.p3 = new Vector3(0, 0, -10f);
+            tt1.p1 = new Vector3(0.5f, -0.5f, 0.5f);
+            tt1.p2 = new Vector3(-0.5f, 0.5f, 0.5f);
+            tt1.p3 = new Vector3(0, 0, 0);
+            tt1.MulMatrix(trans.localToWorldMatrix);
 
             Triangle tt2 = tt1;
 
