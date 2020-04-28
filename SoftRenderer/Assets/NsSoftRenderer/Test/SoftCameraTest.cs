@@ -31,19 +31,29 @@ public class SoftCameraTest : MonoBehaviour
             // 比较
             var trans = this.transform;
             var pt = trans.position;
-        //    pt = new Vector3(0, 0, -10f);
-          
-            var uPt = m_UnityCam.WorldToViewportPoint(pt);
-            var mat = m_SoftCam.ViewProjMatrix;
-            var sPt = mat.MultiplyPoint(pt);
-            Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
 
+            Triangle tri1 = new Triangle();
+            tri1.p1 = new Vector3(0.5f, -0.5f, -9.5f);
+            tri1.p2 = new Vector3(-0.5f, -0.5f, -9.5f);
+            tri1.p3 = new Vector3(0, 0, -10f);
+
+            Triangle tri2 = tri1;
+
+            tri2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
+
+            tri1.p1 = m_UnityCam.WorldToScreenPoint(tri1.p1);
+            tri1.p2 = m_UnityCam.WorldToScreenPoint(tri1.p2);
+            tri1.p3 = m_UnityCam.WorldToScreenPoint(tri1.p3);
+
+
+            Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", tri1.ToString(), tri2.ToString());
+            /*
             uPt = m_UnityCam.WorldToScreenPoint(pt);
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
             sPt = mat.MultiplyPoint(pt);
             Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
-          
-            
+          */
+           /* 
         if (sharedMesh != null ) {
                 if (m_VecList == null) {
                     m_VecList = new List<Vector3>();
@@ -77,7 +87,7 @@ public class SoftCameraTest : MonoBehaviour
                         Debug.LogFormat("【Unity】{0}【SoftCam】{1}", tri1.ToString(), tri2.ToString());
                     }
                 }
-            }
+            }*/
 
             /*
             bool isContains = SoftMath.PtInCamera(pt, m_SoftCam);
