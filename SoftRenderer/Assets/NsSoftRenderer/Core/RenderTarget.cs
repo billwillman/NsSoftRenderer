@@ -27,10 +27,23 @@ namespace NsSoftRenderer {
             this.p3 = p3;
         }
 
+        public static Vector3 Trans(ref Vector4 v) {
+            Vector3 ret = new Vector3(v.x / v.w, v.y / v.w, v.z / v.w);
+            return ret;
+        }
+
+        public static Vector4 Trans(ref Vector3 v) {
+            Vector4 ret = new Vector4(v.x, v.y, v.z, 1f);
+            return ret;
+        }
+
         public void MulMatrix(ref Matrix4x4 mat) {
-            p1 = mat * p1;
-            p2 = mat * p2;
-            p3 = mat * p3;
+            Vector4 v1 = mat * Trans(ref p1);
+            Vector4 v2 = mat * Trans(ref p2);
+            Vector4 v3 = mat * Trans(ref p3);
+            p1 = Trans(ref v1);
+            p2 = Trans(ref v2);
+            p3 = Trans(ref v3);
         }
     }
 
@@ -332,10 +345,7 @@ namespace NsSoftRenderer {
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, ref TriangleVertex tri, RenderPassMode passMode) {
             // 三角形
-           // string s1 = SoftCameraTest.GetVectorStr(tri.triangle.p1);
-           // string s2 = SoftCameraTest.GetVectorStr(tri.triangle.p2);
-           // string s3 = SoftCameraTest.GetVectorStr(tri.triangle.p2);
-           // Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
+           
         }
     }
 }

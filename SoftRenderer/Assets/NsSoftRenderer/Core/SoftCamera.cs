@@ -342,7 +342,27 @@ namespace NsSoftRenderer {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
             if (target != null) {
+                /*
+                var camera = Camera.main;
+                if (camera != null) {
+                    var p1 = camera.WorldToViewportPoint(vertex.triangle.p1);
+                    var p2 = camera.WorldToViewportPoint(vertex.triangle.p2);
+                    var p3 = camera.WorldToViewportPoint(vertex.triangle.p3);
+                    string s1 = SoftCameraTest.GetVectorStr(p1);
+                    string s2 = SoftCameraTest.GetVectorStr(p2);
+                    string s3 = SoftCameraTest.GetVectorStr(p2);
+                    Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
+                }*/
+
+                /*
                 vertex.triangle.MulMatrix(ref m_ViewProjLinkerScreenMatrix);
+                
+                string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
+                string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+                string s3 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+                Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
+                */
+
                 target.FlipScreenTriangle(this, ref vertex, passMode);
             }
         }
