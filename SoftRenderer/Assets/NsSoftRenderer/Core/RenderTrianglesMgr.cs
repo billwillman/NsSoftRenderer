@@ -13,9 +13,11 @@ namespace NsSoftRenderer {
             }
         }
 
-        public bool GetTrangle(int index, ref TriangleVertex vertex) {
-            if (m_List == null || index < 0 || index >= m_List.Count)
+        public bool GetTrangle(int index, out TriangleVertex vertex) {
+            if (m_List == null || index < 0 || index >= m_List.Count) {
+                vertex = new TriangleVertex();
                 return false;
+            }
             vertex = m_List[index];
             return true;
         }

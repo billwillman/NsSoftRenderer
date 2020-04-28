@@ -338,9 +338,19 @@ namespace NsSoftRenderer {
             m_TrianglesMgr.Clear();
         }
 
-        private void FlipTraiangles() {
-            for (int i = 0; i < m_TrianglesMgr.Count; ++i) {
+        private void FlipTriangle(ref TriangleVertex vertex) {
+            // 三角形转到屏幕坐标系
+            vertex.triangle.MulMatrix(ref m_LinkerScreenMatrix);
 
+        }
+
+        private void FlipTraiangles() {
+            TriangleVertex tri;
+            for (int i = 0; i < m_TrianglesMgr.Count; ++i) {
+                if (m_TrianglesMgr.GetTrangle(i, out tri)) {
+                    FlipTriangle(ref tri);
+                } else
+                    break;
             }
             m_TrianglesMgr.Clear();
         }
