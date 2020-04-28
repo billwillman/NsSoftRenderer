@@ -62,7 +62,7 @@ namespace NsSoftRenderer {
             if (camera == null || passMode == null || m_Mesh == null)
                 return;
             UpdateGlobalToLocalMatrix();
-            camera.RenderMesh(m_Mesh, ref m_LocalToGlobalMatrix, passMode);
+            camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
         }
     }
 

@@ -41,7 +41,7 @@ namespace NsSoftRenderer {
          */
 
         // 判断点是否在三角形上（三维坐标）
-        public static bool PtInTriangle(ref Vector3 pt, ref Triangle trangle, out float h) {
+        public static bool PtInTriangle(Vector3 pt, Triangle trangle, out float h) {
             // 采用重心法
             Vector3 v2 = pt - trangle.p1;
             Vector3 v0 = trangle.p2 - trangle.p1;
@@ -77,13 +77,13 @@ namespace NsSoftRenderer {
             return false;
         }
 
-        public static float PtInPlane(ref Vector3 pt, SoftPlane plane) {
+        public static float PtInPlane(Vector3 pt, SoftPlane plane) {
             float ret = plane.normal.x * pt.x + plane.normal.y * pt.y + plane.normal.z * pt.z + plane.d;
             return ret;
         }
 
         // 判断是否需要Cull
-        public static bool IsCulled(SoftCamera camera, CullMode mode, ref Triangle tri) {
+        public static bool IsCulled(SoftCamera camera, CullMode mode, Triangle tri) {
             if (mode == CullMode.none)
                 return false;
             if (camera == null)
@@ -107,7 +107,7 @@ namespace NsSoftRenderer {
         }
 
         // 點到平面的距離
-        public static float PtToPlaneDistance(ref Vector3 pt, SoftPlane panel) {
+        public static float PtToPlaneDistance(Vector3 pt, SoftPlane panel) {
             float d = panel.normal.magnitude;
             float a = Mathf.Abs(pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d);
             float ret = a / d;
@@ -117,18 +117,18 @@ namespace NsSoftRenderer {
         /*
          * 原理，点在平面上 AX + BY + CZ + D > 0，平面下 < 0。只要被包裹着，就是在视锥体里。
          */
-        public static bool PtInCamera(ref Vector3 pt, SoftCamera camera) {
+        public static bool PtInCamera(Vector3 pt, SoftCamera camera) {
             SoftPlane[] planes = camera.WorldPlanes;
             if (planes != null && planes.Length >= 6) {
-                float ret = PtInPlane(ref pt, planes[SoftCameraPlanes.NearPlane]) * PtInPlane(ref pt, planes[SoftCameraPlanes.FarPlane]);
+                float ret = PtInPlane(pt, planes[SoftCameraPlanes.NearPlane]) * PtInPlane(pt, planes[SoftCameraPlanes.FarPlane]);
                 if (ret < 0)
                     return false;
 
-                ret = PtInPlane(ref pt, planes[SoftCameraPlanes.LeftPlane]) * PtInPlane(ref pt, planes[SoftCameraPlanes.RightPlane]);
+                ret = PtInPlane(pt, planes[SoftCameraPlanes.LeftPlane]) * PtInPlane(pt, planes[SoftCameraPlanes.RightPlane]);
                 if (ret < 0)
                     return false;
 
-                ret = PtInPlane(ref pt, planes[SoftCameraPlanes.UpPlane]) * PtInPlane(ref pt, planes[SoftCameraPlanes.DownPlane]);
+                ret = PtInPlane(pt, planes[SoftCameraPlanes.UpPlane]) * PtInPlane(pt, planes[SoftCameraPlanes.DownPlane]);
                 if (ret < 0)
                     return false;
 
@@ -146,12 +146,12 @@ namespace NsSoftRenderer {
             SoftPlane[] panels = camera.WorldPlanes;
 
             // 判断包围球中心是否在摄影机范围内，如果在，则直接返回TRUE
-            if (PtInCamera(ref spere.position, camera))
+            if (PtInCamera(spere.position, camera))
                 return true;
 
             for (int i = 0; i < panels.Length; ++i) {
                 var panel = panels[i];
-                float distance = PtToPlaneDistance(ref spere.position, panel);
+                float distance = PtToPlaneDistance(spere.position, panel);
                 if (distance < r)
                     return true;
             }
@@ -193,7 +193,7 @@ namespace NsSoftRenderer {
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy][ABz, ACz, PAz]的向量，也就是这两个向量的叉乘。
          *   【注意】矩阵变换后的三角形的重心和原来三角形的重心可能会不一致。。。
         */
-        public static void GetBarycentricCoordinate(ref Vector3 A, ref Vector3 B, ref Vector3 C, ref Vector3 P, out float a, out float b, out float c) {
+        public static void GetBarycentricCoordinate(Vector3 A, Vector3 B,Vector3 C, Vector3 P, out float a, out float b, out float c) {
             Vector3 AB = B - A;
             Vector3 AC = C - A;
             Vector3 PA = A - P;

@@ -35,15 +35,15 @@ public class SoftCameraTest : MonoBehaviour
             /*
             var uPt = m_UnityCam.WorldToViewportPoint(pt);
             var mat = m_SoftCam.ViewProjMatrix;
-            var sPt = mat * pt;
+            var sPt = mat.MultiplyPoint(pt);
             Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
 
             uPt = m_UnityCam.WorldToScreenPoint(pt);
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
-            sPt = mat * pt;
+            sPt = mat.MultiplyPoint(pt);
             Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
-            */
-
+           */ 
+            
         if (sharedMesh != null ) {
                 if (m_VecList == null) {
                     m_VecList = new List<Vector3>();
@@ -80,7 +80,7 @@ public class SoftCameraTest : MonoBehaviour
             }
 
             /*
-            bool isContains = SoftMath.PtInCamera(ref pt, m_SoftCam);
+            bool isContains = SoftMath.PtInCamera(pt, m_SoftCam);
             Debug.LogFormat("【SoftCamera】{0}", isContains.ToString());
             */
         }

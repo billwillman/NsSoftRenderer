@@ -338,7 +338,7 @@ namespace NsSoftRenderer {
             m_TrianglesMgr.Clear();
         }
 
-        private void FlipTriangle(ref TriangleVertex vertex, RenderPassMode passMode) {
+        private void FlipTriangle(TriangleVertex vertex, RenderPassMode passMode) {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
             if (target != null) {
@@ -355,7 +355,7 @@ namespace NsSoftRenderer {
                 }*/
 
                 /*
-                vertex.triangle.MulMatrix(ref m_ViewProjLinkerScreenMatrix);
+                vertex.triangle.MulMatrix(m_ViewProjLinkerScreenMatrix);
                 
                 string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
                 string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
@@ -363,7 +363,7 @@ namespace NsSoftRenderer {
                 Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
                 */
 
-                target.FlipScreenTriangle(this, ref vertex, passMode);
+                target.FlipScreenTriangle(this, vertex, passMode);
             }
         }
 
@@ -371,7 +371,7 @@ namespace NsSoftRenderer {
             TriangleVertex tri;
             for (int i = 0; i < m_TrianglesMgr.Count; ++i) {
                 if (m_TrianglesMgr.GetTrangle(i, out tri)) {
-                    FlipTriangle(ref tri, passMode);
+                    FlipTriangle(tri, passMode);
                 } else
                     break;
             }
@@ -383,7 +383,7 @@ namespace NsSoftRenderer {
             FlipTraiangles(passMode);
         }
 
-        private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
+        private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
             if (subMesh == null || passMode == null)
                 return;
             var indexes = subMesh.Indexes;
@@ -415,9 +415,9 @@ namespace NsSoftRenderer {
                     Triangle tri = new Triangle(p1, p2, p3);
 
                     // 三角形转到世界坐标系
-                    tri.MulMatrix(ref objToWorld);
+                    tri.MulMatrix(objToWorld);
                     // 过CullMode
-                    if (SoftMath.IsCulled(this, passMode.Cull, ref tri)) {
+                    if (SoftMath.IsCulled(this, passMode.Cull, tri)) {
                         continue;
                     }
                     //----
@@ -430,14 +430,14 @@ namespace NsSoftRenderer {
             }
         }
 
-        public void RenderMesh(SoftMesh mesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
+        public void RenderMesh(SoftMesh mesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
             if (mesh == null || passMode == null)
                 return;
             var subMeshes = mesh.SubMeshes;
             if (subMeshes != null) {
                 for (int i = 0; i < subMeshes.Count; ++i) {
                     var subMesh = subMeshes[i];
-                    RenderSubMesh(mesh, subMesh, ref objToWorld, passMode);
+                    RenderSubMesh(mesh, subMesh, objToWorld, passMode);
                 }
             }
         }

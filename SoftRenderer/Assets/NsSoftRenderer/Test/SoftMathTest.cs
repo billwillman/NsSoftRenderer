@@ -17,7 +17,7 @@ public class SoftMathTest : MonoBehaviour
         Vector3 P = u * A + v * B + r * C;
 
         float u1, v1, r1;
-        SoftMath.GetBarycentricCoordinate(ref A, ref B, ref C, ref P, out u1, out v1, out r1);
+        SoftMath.GetBarycentricCoordinate( A,  B,  C,  P, out u1, out v1, out r1);
         Debug.LogFormat("【origin】u: {0} v: {1} r: {2}【SoftMth】u: {3} v: {4} r: {5}", u, v, r, u1, v1, r1);
 
         Vector3 AB = B - A;
