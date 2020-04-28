@@ -4,6 +4,9 @@ namespace NsSoftRenderer {
 
     [RequireComponent(typeof(MeshFilter))]
     public class SoftMeshBinder: MonoBehaviour {
+        // 材质
+        public Material sharedMaterial = null;
+
         private MeshFilter m_MeshFilter = null;
         private SoftMeshRenderer m_SoftMeshRenderer = null;
         private void Start() {
