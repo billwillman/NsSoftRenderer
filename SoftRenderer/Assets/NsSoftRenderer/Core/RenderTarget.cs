@@ -37,10 +37,19 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        private static void CheckPtIntf(ref Vector3 v) {
+            v.x = float.IsInfinity(v.x) ? 0 : v.x;
+            v.y = float.IsInfinity(v.y) ? 0 : v.y;
+            v.z = float.IsInfinity(v.z) ? 0 : v.z;
+        }
+
         public void MulMatrix(Matrix4x4 mat) {
             p1 = mat.MultiplyPoint(p1);
             p2 = mat.MultiplyPoint(p2);
             p3 = mat.MultiplyPoint(p3);
+            CheckPtIntf(ref p1);
+            CheckPtIntf(ref p2);
+            CheckPtIntf(ref p3);
         }
 
         public override string ToString() {

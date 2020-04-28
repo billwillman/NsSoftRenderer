@@ -31,18 +31,18 @@ public class SoftCameraTest : MonoBehaviour
             // 比较
             var trans = this.transform;
             var pt = trans.position;
-
-            /*
+        //    pt = new Vector3(0, 0, -10f);
+          
             var uPt = m_UnityCam.WorldToViewportPoint(pt);
             var mat = m_SoftCam.ViewProjMatrix;
             var sPt = mat.MultiplyPoint(pt);
-            Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
+            Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
 
             uPt = m_UnityCam.WorldToScreenPoint(pt);
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
             sPt = mat.MultiplyPoint(pt);
-            Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
-           */ 
+            Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
+          
             
         if (sharedMesh != null ) {
                 if (m_VecList == null) {
