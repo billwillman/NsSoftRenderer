@@ -58,12 +58,20 @@ public class SoftCameraTest : MonoBehaviour
                 }
 
                 if (m_Indexes != null && m_Indexes.Length > 0 && m_VecList != null && m_VecList.Count > 0 && m_TriangleIndexes != null && m_TriangleIndexes.Length > 0) {
-                    int idx = m_TriangleIndexes[0];
-                    Vector3 v = m_VecList[idx];
-                    Vector3 uPt = m_UnityCam.WorldToScreenPoint(v);
-                    var mat = m_SoftCam.ViewProjLinkerScreenMatrix;
-                    Vector3 sPt = mat * v;
-                    Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
+                    for (int i = 0; i < m_TriangleIndexes.Length / 3; ++i) {
+                        Triangle tri1 = new Triangle();
+                        tri1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
+                        tri1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
+                        tri1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
+
+                        tri1.MulMatrix(this.transform.localToWorldMatrix);
+
+                        Triangle tri2 = tri1;
+
+                        tri1.MulMatrix(m_UnityCam.worldToCameraMatrix);
+                        tri2.MulMatrix(m_SoftCam.GlobalToLocalMatrix);
+                        Debug.LogFormat("【Unity】{0}【SoftCam】{1}", tri1.ToString(), tri2.ToString());
+                    }
                 }
             }
 

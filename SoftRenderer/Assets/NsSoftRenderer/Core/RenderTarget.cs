@@ -45,6 +45,15 @@ namespace NsSoftRenderer {
             p2 = Trans(ref v2);
             p3 = Trans(ref v3);
         }
+
+        public void MulMatrix(Matrix4x4 mat) {
+            MulMatrix(ref mat);
+        }
+
+        public override string ToString() {
+            string ret = string.Format("p1={0} p2={1} p3={2}", p1.ToString(), p2.ToString(), p3.ToString());
+            return ret;
+        }
     }
 
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
