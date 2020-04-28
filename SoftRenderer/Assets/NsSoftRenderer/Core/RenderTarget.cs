@@ -38,12 +38,15 @@ namespace NsSoftRenderer {
         }
 
         public void MulMatrix(ref Matrix4x4 mat) {
-            Vector4 v1 = mat * Trans(ref p1);
-            Vector4 v2 = mat * Trans(ref p2);
-            Vector4 v3 = mat * Trans(ref p3);
-            p1 = Trans(ref v1);
-            p2 = Trans(ref v2);
-            p3 = Trans(ref v3);
+            //  Vector4 v1 = mat * Trans(ref p1);
+            //   Vector4 v2 = mat * Trans(ref p2);
+            //  Vector4 v3 = mat * Trans(ref p3);
+            //  p1 = Trans(ref v1);
+            //  p2 = Trans(ref v2);
+            //  p3 = Trans(ref v3);
+            p1 = mat.MultiplyPoint(p1);
+            p2 = mat.MultiplyPoint(p2);
+            p3 = mat.MultiplyPoint(p3);
         }
 
         public void MulMatrix(Matrix4x4 mat) {

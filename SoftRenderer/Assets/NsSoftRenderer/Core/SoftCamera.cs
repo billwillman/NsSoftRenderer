@@ -516,12 +516,14 @@ namespace NsSoftRenderer {
 
         public Matrix4x4 ViewProjLinkerScreenMatrix {
             get {
+                UpdateMatrix();
                 return m_ViewProjLinkerScreenMatrix;
             }
         }
 
         public Matrix4x4 LinkerScreenMatrix {
             get {
+                UpdateMatrix();
                 return m_LinkerScreenMatrix;
             }
         } 
