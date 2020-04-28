@@ -47,6 +47,7 @@ public class SoftCameraTest : MonoBehaviour
             tt1.p2 = new Vector3(-0.5f, 0.5f, 0.5f);
             tt1.p3 = new Vector3(0, 0, 0);
             tt1.MulMatrix(trans.localToWorldMatrix);
+            Debug.Log(tt1.ToString());
 
             Triangle tt2 = tt1;
 
@@ -88,6 +89,7 @@ public class SoftCameraTest : MonoBehaviour
                         tri1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
 
                         tri1.MulMatrix(this.transform.localToWorldMatrix);
+                        Debug.Log(tri1.ToString());
 
                         Triangle tri2 = tri1;
 
