@@ -230,6 +230,8 @@ namespace NsSoftRenderer {
                 // 多摄像机渲染，根据摄影机深度排序后顺序渲染
                 for (int i = 0; i < m_CamList.Count; ++i) {
                     var cam = m_CamList[i];
+                    if (cam != null)
+                        cam.Update(delta);
                     CameraRender(cam);
                 }
 
