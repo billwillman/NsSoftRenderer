@@ -328,5 +328,11 @@ namespace NsSoftRenderer {
                 m_FrontDepthBuffer = null;
             }
         }
+
+        // tri已经是屏幕坐标系
+        internal void FlipScreenTriangle(SoftCamera camera, ref TriangleVertex tri, RenderPassMode passMode) {
+            // 三角形
+
+        }
     }
 }

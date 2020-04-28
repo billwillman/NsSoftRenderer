@@ -31,7 +31,7 @@ namespace NsSoftRenderer {
                     }
                 }
             }
-            camera.DoCameraPostRender();
+            camera.DoCameraPostRender(m_DefaultPassMode);
         }
     }
 }

@@ -338,26 +338,29 @@ namespace NsSoftRenderer {
             m_TrianglesMgr.Clear();
         }
 
-        private void FlipTriangle(ref TriangleVertex vertex) {
+        private void FlipTriangle(ref TriangleVertex vertex, RenderPassMode passMode) {
             // 三角形转到屏幕坐标系
-            vertex.triangle.MulMatrix(ref m_LinkerScreenMatrix);
-
+            RenderTarget target = this.Target;
+            if (target != null) {
+                vertex.triangle.MulMatrix(ref m_LinkerScreenMatrix);
+                target.FlipScreenTriangle(this, ref vertex, passMode);
+            }
         }
 
-        private void FlipTraiangles() {
+        private void FlipTraiangles(RenderPassMode passMode) {
             TriangleVertex tri;
             for (int i = 0; i < m_TrianglesMgr.Count; ++i) {
                 if (m_TrianglesMgr.GetTrangle(i, out tri)) {
-                    FlipTriangle(ref tri);
+                    FlipTriangle(ref tri, passMode);
                 } else
                     break;
             }
             m_TrianglesMgr.Clear();
         }
 
-        internal virtual void DoCameraPostRender() {
+        internal virtual void DoCameraPostRender(RenderPassMode passMode) {
             // 提交渲染结果
-            FlipTraiangles();
+            FlipTraiangles(passMode);
         }
 
         private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
@@ -487,11 +490,6 @@ namespace NsSoftRenderer {
             get {
                 return m_ViewProjLinkerScreenMatrix;
             }
-        }
-
-        // 渲染到RenderTarget
-        internal void FlipToRenderTarget(TriangleVertex trangleInfo, RenderTarget renderTarget) {
-
         }
 
         public Matrix4x4 LinkerScreenMatrix {
