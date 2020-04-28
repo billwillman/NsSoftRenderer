@@ -342,7 +342,7 @@ namespace NsSoftRenderer {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
             if (target != null) {
-                vertex.triangle.MulMatrix(ref m_LinkerScreenMatrix);
+                vertex.triangle.MulMatrix(ref m_ViewProjLinkerScreenMatrix);
                 target.FlipScreenTriangle(this, ref vertex, passMode);
             }
         }
