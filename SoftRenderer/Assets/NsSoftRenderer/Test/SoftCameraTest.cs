@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using NsSoftRenderer;
+using System.IO;
 
 public class SoftCameraTest : MonoBehaviour
 {
@@ -12,16 +13,25 @@ public class SoftCameraTest : MonoBehaviour
     private List<Vector3> m_VecList = null;
     private int[] m_TriangleIndexes = null;
     private int[] m_Indexes = null;
+    private FileStream stream = null;
     // Start is called before the first frame update
     void Start()
     {
         m_UnityCam = Camera.main;
         m_SoftCam = SoftCamera.MainCamera;
+        stream = new FileStream("d:/test.txt", FileMode.Create);
     }
 
     public static string GetVectorStr(Vector3 vec) {
         string ret = string.Format("x: {0}  y: {1}  z: {2}", vec.x.ToString(), vec.x.ToString(), vec.z.ToString());
         return ret;
+    }
+
+    private void OnDestroy() {
+        if (stream != null) {
+            stream.Dispose();
+            stream = null;
+        }
     }
 
     // Update is called once per frame

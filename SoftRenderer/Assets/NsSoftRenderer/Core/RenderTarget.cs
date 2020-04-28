@@ -52,8 +52,13 @@ namespace NsSoftRenderer {
             CheckPtIntf(ref p3);
         }
 
+        private static string ToVecStr(Vector3 v) {
+            string ret = string.Format("x: {0} y: {1} z: {2}", v.x, v.y, v.z);
+            return ret;
+        }
+
         public override string ToString() {
-            string ret = string.Format("p1={0} p2={1} p3={2}", p1.ToString(), p2.ToString(), p3.ToString());
+            string ret = string.Format("p1={0} p2={1} p3={2}", ToVecStr(p1), ToVecStr(p2), ToVecStr(p3));
             return ret;
         }
     }
