@@ -116,6 +116,9 @@ namespace NsSoftRenderer {
 
         protected void UpdateGlobalToLocalMatrix() {
             if (m_MustGlobalToLocalMatrixChg) {
+
+                UpdateAxis();
+
                 m_MustGlobalToLocalMatrixChg = false;
                 Matrix4x4 invTranslate = Matrix4x4.Translate(-m_Position);
                 Matrix4x4 axis = Matrix4x4.identity;
