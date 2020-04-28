@@ -97,10 +97,10 @@ namespace NsSoftRenderer {
 
             switch (mode) {
                 case CullMode.front: {          
-                        return !isFront;
+                        return isFront;
                     }
                 case CullMode.back: {              
-                        return isFront;
+                        return !isFront;
                     }
             }
             return false;
