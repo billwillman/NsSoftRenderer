@@ -441,11 +441,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1527336487}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a769ce4e02a786e47822e067509a5a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sharedMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1527336489
 Transform:
   m_ObjectHideFlags: 0
@@ -503,6 +504,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d0fd3c63f0cde24cbecfce9c73d3cf2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sharedMaterial: {fileID: 0}
 --- !u!33 &1788346341
 MeshFilter:
   m_ObjectHideFlags: 0

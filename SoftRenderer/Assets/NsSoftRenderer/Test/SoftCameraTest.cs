@@ -9,6 +9,9 @@ public class SoftCameraTest : MonoBehaviour
 
     private Camera m_UnityCam = null;
     private SoftCamera m_SoftCam = null;
+    private List<Vector3> m_VecList = null;
+    private int[] m_TriangleIndexes = null;
+    private int[] m_Indexes = null;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,7 +32,7 @@ public class SoftCameraTest : MonoBehaviour
             var trans = this.transform;
             var pt = trans.position;
 
-            
+            /*
             var uPt = m_UnityCam.WorldToViewportPoint(pt);
             var mat = m_SoftCam.ViewProjMatrix;
             var sPt = mat * pt;
@@ -39,7 +42,30 @@ public class SoftCameraTest : MonoBehaviour
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
             sPt = mat * pt;
             Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
-            
+            */
+
+        if (sharedMesh != null ) {
+                if (m_VecList == null) {
+                    m_VecList = new List<Vector3>();
+                    sharedMesh.GetVertices(m_VecList);
+                }
+
+                if (m_TriangleIndexes == null && sharedMesh.subMeshCount > 0)
+                    m_TriangleIndexes = sharedMesh.GetTriangles(0);
+               
+                if (m_Indexes == null && sharedMesh.subMeshCount > 0) {
+                    m_Indexes = sharedMesh.GetIndices(0);
+                }
+
+                if (m_Indexes != null && m_Indexes.Length > 0 && m_VecList != null && m_VecList.Count > 0 && m_TriangleIndexes != null && m_TriangleIndexes.Length > 0) {
+                    int idx = m_TriangleIndexes[0];
+                    Vector3 v = m_VecList[idx];
+                    Vector3 uPt = m_UnityCam.WorldToScreenPoint(v);
+                    var mat = m_SoftCam.ViewProjLinkerScreenMatrix;
+                    Vector3 sPt = mat * v;
+                    Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
+                }
+            }
 
             /*
             bool isContains = SoftMath.PtInCamera(ref pt, m_SoftCam);
