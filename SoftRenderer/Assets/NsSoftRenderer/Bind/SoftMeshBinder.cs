@@ -9,10 +9,11 @@ namespace NsSoftRenderer {
         private void Start() {
             m_MeshFilter = GetComponent<MeshFilter>();
             var trans = this.transform;
-            m_SoftMeshRenderer = new SoftMeshRenderer(trans.position, trans.up, trans.forward, m_MeshFilter.sharedMesh);
+            m_SoftMeshRenderer = SoftMeshRenderer.Create(trans.position, trans.up, trans.forward, m_MeshFilter.sharedMesh);
+            UpdatePos();
         }
 
-        private void Update() {
+        private void UpdatePos() {
             if (m_SoftMeshRenderer != null) {
                 var trans = this.transform;
                 m_SoftMeshRenderer.Position = trans.position;
@@ -20,6 +21,10 @@ namespace NsSoftRenderer {
                 m_SoftMeshRenderer.Up = trans.up;
                 //m_SoftMeshRenderer.sharedMesh = m_MeshFilter.sharedMesh;
             }
+        }
+
+        private void Update() {
+            UpdatePos();
         }
 
         private void OnDestroy() {

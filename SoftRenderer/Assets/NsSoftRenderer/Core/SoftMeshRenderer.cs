@@ -6,7 +6,7 @@ namespace NsSoftRenderer {
 
         private SoftMesh m_Mesh = null;
 
-        public SoftMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh): base() {
+        internal SoftMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh): base() {
             this.Position = pos;
             this.Up = up;
             this.LookAt = lookAt;
@@ -14,6 +14,15 @@ namespace NsSoftRenderer {
             if (mesh != null) {
                 m_Mesh = new SoftMesh(mesh);
             }
+        }
+
+        public static SoftMeshRenderer Create(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh) {
+            var device = SoftDevice.StaticDevice;
+            if (device !=  null) {
+                SoftMeshRenderer ret = device.CreateMeshRenderer(pos, up, lookAt, mesh);
+                return ret;
+            }
+            return null;
         }
 
         // 世界坐标系包围球

@@ -112,9 +112,8 @@ namespace NsSoftRenderer {
                 }
 
                 if (isInitMinMax) {
-                    Vector3 rr = (maxVec - minVec);
-                    m_BoundSpere.position = rr / 2.0f;
-                    m_BoundSpere.radius = rr.sqrMagnitude;
+                    m_BoundSpere.position = (maxVec + minVec) / 2.0f;
+                    m_BoundSpere.radius = (maxVec - minVec).sqrMagnitude / 2.0f;
                 } else {
                     m_BoundSpere.position = Vector3.zero;
                     m_BoundSpere.radius = 0f;

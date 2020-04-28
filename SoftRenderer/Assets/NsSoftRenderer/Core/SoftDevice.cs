@@ -86,7 +86,22 @@ namespace NsSoftRenderer {
                 m_CamList = new List<SoftCamera>();
             if (RegisterRenderObject(cam) > 0)
                 m_CamList.Add(cam);
+            else {
+                if (cam != null)
+                    cam.Dispose();
+            }
             return true;
+        }
+
+        public SoftMeshRenderer CreateMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh) {
+            SoftMeshRenderer ret = new SoftMeshRenderer(pos, up, lookAt, mesh);
+            if (RegisterRenderObject(ret) > 0)
+                return ret;
+            else {
+                if (ret != null)
+                    ret.Dispose();
+            }
+            return null;
         }
 
         public SoftCamera AddPCamera(PCameraInfo info, Vector3 pos, Vector3 up, Vector3 lookAt, int depth, bool isMainCamera = false) {
@@ -123,13 +138,6 @@ namespace NsSoftRenderer {
                     return AddPCamera(info, trans.position, trans.up, trans.forward, (int)cam.depth, isMainCamera);
                 }
             }
-            return null;
-        }
-
-        public SoftMeshRenderer AddMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh) {
-            SoftMeshRenderer ret = new SoftMeshRenderer(pos, up, lookAt, mesh);
-            if (RegisterRenderObject(ret) > 0)
-                return ret;
             return null;
         }
 
