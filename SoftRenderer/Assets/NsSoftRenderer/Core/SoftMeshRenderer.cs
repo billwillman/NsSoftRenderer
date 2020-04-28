@@ -6,7 +6,7 @@ namespace NsSoftRenderer {
 
         private SoftMesh m_Mesh = null;
 
-        public SoftMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh) {
+        public SoftMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh): base() {
             this.Position = pos;
             this.Up = up;
             this.LookAt = lookAt;
