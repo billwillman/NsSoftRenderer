@@ -332,7 +332,10 @@ namespace NsSoftRenderer {
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, ref TriangleVertex tri, RenderPassMode passMode) {
             // 三角形
-
+           // string s1 = SoftCameraTest.GetVectorStr(tri.triangle.p1);
+           // string s2 = SoftCameraTest.GetVectorStr(tri.triangle.p2);
+           // string s3 = SoftCameraTest.GetVectorStr(tri.triangle.p2);
+           // Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
         }
     }
 }

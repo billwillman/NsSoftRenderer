@@ -19,7 +19,7 @@ public class SoftCameraTest : MonoBehaviour
         m_SoftCam = SoftCamera.MainCamera;
     }
 
-    private string GetVectorStr(Vector3 vec) {
+    public static string GetVectorStr(Vector3 vec) {
         string ret = string.Format("x: {0}  y: {1}  z: {2}", vec.x.ToString(), vec.x.ToString(), vec.z.ToString());
         return ret;
     }
