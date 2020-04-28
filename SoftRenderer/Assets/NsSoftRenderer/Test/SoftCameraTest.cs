@@ -5,6 +5,7 @@ using NsSoftRenderer;
 
 public class SoftCameraTest : MonoBehaviour
 {
+    public Mesh sharedMesh = null;
 
     private Camera m_UnityCam = null;
     private SoftCamera m_SoftCam = null;
