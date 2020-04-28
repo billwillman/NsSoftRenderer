@@ -30,7 +30,7 @@ namespace NsSoftRenderer {
         // 是否能渲染
         public bool CanRenderer {
             get {
-                bool ret = (m_Type == SoftRenderObjType.MeshRender) && (m_Type == SoftRenderObjType.SkinedMeshRender);
+                bool ret = (m_Type == SoftRenderObjType.MeshRender) || (m_Type == SoftRenderObjType.SkinedMeshRender);
                 return ret;
             }
         }
