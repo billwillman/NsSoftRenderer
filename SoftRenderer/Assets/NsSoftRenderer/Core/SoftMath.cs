@@ -141,6 +141,11 @@ namespace NsSoftRenderer {
 
             float r = spere.radius;
             SoftPlane[] panels = camera.WorldPlanes;
+
+            // 判断包围球中心是否在摄影机范围内，如果在，则直接返回TRUE
+            if (PtInCamera(ref spere.position, camera))
+                return true;
+
             for (int i = 0; i < panels.Length; ++i) {
                 var panel = panels[i];
                 float distance = PtToPlaneDistance(ref spere.position, panel);
