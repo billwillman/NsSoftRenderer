@@ -114,6 +114,9 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        /*
+         * 原理，点在平面上 AX + BY + CZ + D > 0，平面下 < 0。只要被包裹着，就是在视锥体里。
+         */
         public static bool PtInCamera(ref Vector3 pt, SoftCamera camera) {
             SoftPlane[] planes = camera.WorldPlanes;
             if (planes != null && planes.Length >= 6) {
