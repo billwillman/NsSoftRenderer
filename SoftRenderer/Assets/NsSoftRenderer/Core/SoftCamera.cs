@@ -369,7 +369,12 @@ namespace NsSoftRenderer {
             var indexes = subMesh.Indexes;
             var vertexs = mesh.Vertexs;
             var colors = mesh.Colors;
-            if (vertexs != null && colors != null && (vertexs.Count == colors.Count)
+
+            bool isColorEmpty = colors  == null || colors.Count <= 0;
+            Color c1 = Color.white;
+            Color c2 = Color.white;
+            Color c3 = Color.white;
+            if (vertexs != null && (isColorEmpty || vertexs.Count == colors.Count)
                 && indexes != null && indexes.Count > 0) {
 
                 int triangleCnt = ((int)indexes.Count / 3);
@@ -377,13 +382,16 @@ namespace NsSoftRenderer {
                     int idx = i * 3;
                     int index = indexes[idx];
                     Vector3 p1 = vertexs[index];
-                    Color c1 = colors[index];
+                    if (!isColorEmpty)
+                        c1 = colors[index];
                     index = indexes[idx + 1];
                     Vector3 p2 = vertexs[index];
-                    Color c2 = colors[index];
+                    if (!isColorEmpty)
+                        c2 = colors[index];
                     index = indexes[idx + 2];
                     Vector3 p3 = vertexs[index];
-                    Color c3 = colors[index];
+                    if (!isColorEmpty)
+                        c3 = colors[index];
                     Triangle tri = new Triangle(p1, p2, p3);
 
                     // 三角形转到世界坐标系
