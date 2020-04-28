@@ -58,15 +58,15 @@ public class SoftCameraTest : MonoBehaviour
 
 
             Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", tt1.ToString(), tt2.ToString());
-            
+
             /*
             uPt = m_UnityCam.WorldToScreenPoint(pt);
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
             sPt = mat.MultiplyPoint(pt);
             Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", uPt.ToString(), sPt.ToString());
           */
-           
-        if (sharedMesh != null ) {
+
+            if (sharedMesh != null ) {
                 if (m_VecList == null) {
                     m_VecList = new List<Vector3>();
                     sharedMesh.GetVertices(m_VecList);
