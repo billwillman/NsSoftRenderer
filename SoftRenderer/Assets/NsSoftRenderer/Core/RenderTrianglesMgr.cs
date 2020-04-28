@@ -13,6 +13,13 @@ namespace NsSoftRenderer {
             }
         }
 
+        public bool GetTrangle(int index, ref TriangleVertex vertex) {
+            if (m_List == null || index < 0 || index >= m_List.Count)
+                return false;
+            vertex = m_List[index];
+            return true;
+        }
+
         public void AddTriangle(TriangleVertex vertex) {
             if (m_List == null)
                 m_List = new NativeList<TriangleVertex>();
@@ -22,6 +29,14 @@ namespace NsSoftRenderer {
         public void Clear() {
             if (m_List != null) {
                 m_List.Clear(false);
+            }
+        }
+
+        public int Count {
+            get {
+                if (m_List != null)
+                    return m_List.Count;
+                return 0;
             }
         }
     }

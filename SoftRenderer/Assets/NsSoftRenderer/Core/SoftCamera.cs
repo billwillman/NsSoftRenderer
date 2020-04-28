@@ -338,8 +338,16 @@ namespace NsSoftRenderer {
             m_TrianglesMgr.Clear();
         }
 
-        internal virtual void DoCameraPostRender() {
+        private void FlipTraiangles() {
+            for (int i = 0; i < m_TrianglesMgr.Count; ++i) {
 
+            }
+            m_TrianglesMgr.Clear();
+        }
+
+        internal virtual void DoCameraPostRender() {
+            // 提交渲染结果
+            FlipTraiangles();
         }
 
         private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, ref Matrix4x4 objToWorld, RenderPassMode passMode) {
