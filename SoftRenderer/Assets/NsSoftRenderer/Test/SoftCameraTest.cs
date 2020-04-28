@@ -28,7 +28,7 @@ public class SoftCameraTest : MonoBehaviour
             var trans = this.transform;
             var pt = trans.position;
 
-            /*
+            
             var uPt = m_UnityCam.WorldToViewportPoint(pt);
             var mat = m_SoftCam.ViewProjMatrix;
             var sPt = mat * pt;
@@ -38,7 +38,7 @@ public class SoftCameraTest : MonoBehaviour
             mat = m_SoftCam.ViewProjLinkerScreenMatrix;
             sPt = mat * pt;
             Debug.LogFormat("【Screen】【Unity】{0}【SoftCamera】{0}", GetVectorStr(uPt), GetVectorStr(sPt));
-            */
+            
 
             /*
             bool isContains = SoftMath.PtInCamera(ref pt, m_SoftCam);
