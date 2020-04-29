@@ -71,11 +71,13 @@ public class SoftCameraTest : MonoBehaviour
 
                         Triangle tt2 = tt1;
 
-                        tt1.p1 = m_UnityCam.WorldToViewportPoint(tt1.p1);
-                        tt1.p2 = m_UnityCam.WorldToViewportPoint(tt1.p2);
-                        tt1.p3 = m_UnityCam.WorldToViewportPoint(tt1.p3);
+                        //tt1.p1 = m_UnityCam.WorldToViewportPoint(tt1.p1);
+                        //tt1.p2 = m_UnityCam.WorldToViewportPoint(tt1.p2);
+                        //tt1.p3 = m_UnityCam.WorldToViewportPoint(tt1.p3);
 
-                        tt2.MulMatrix(m_SoftCam.ViewProjMatrix);
+                        tt1.MulMatrix(m_UnityCam.worldToCameraMatrix);
+
+                        tt2.MulMatrix(m_SoftCam.ViewMatrix);
 
                       //  Debug.Log("[Test]" + m_SoftCam.ViewProjLinkerScreenMatrix.ToString());
 
