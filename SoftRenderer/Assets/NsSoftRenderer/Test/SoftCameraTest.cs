@@ -7,6 +7,7 @@ using System.IO;
 public class SoftCameraTest : MonoBehaviour
 {
     public Mesh sharedMesh = null;
+    public bool IsShowSoftCamerLog = false;
 
     private Camera m_UnityCam = null;
     private SoftCamera m_SoftCam = null;
@@ -34,51 +35,62 @@ public class SoftCameraTest : MonoBehaviour
         }
     }
 
+    void CheckSoftCameraLog() {
+        if (m_SoftCam != null)
+            m_SoftCam.IsShowVertexLog = IsShowSoftCamerLog;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (m_UnityCam != null && m_SoftCam != null && sharedMesh != null) {
+        CheckSoftCameraLog();
 
-            if (m_VecList == null) {
-                m_VecList = new List<Vector3>();
-                sharedMesh.GetVertices(m_VecList);
-            }
+        if (!IsShowSoftCamerLog) {
+            m_UnityCam = Camera.main;
 
-            if (m_TriangleIndexes == null && sharedMesh.subMeshCount > 0)
-                m_TriangleIndexes = sharedMesh.GetTriangles(0);
+            if (m_UnityCam != null && m_SoftCam != null && sharedMesh != null) {
 
-            if (m_Indexes == null && sharedMesh.subMeshCount > 0) {
-                m_Indexes = sharedMesh.GetIndices(0);
-            }
+                if (m_VecList == null) {
+                    m_VecList = new List<Vector3>();
+                    sharedMesh.GetVertices(m_VecList);
+                }
 
-            // 比较
-            var trans = this.transform;
-            var pt = trans.position;
+                if (m_TriangleIndexes == null && sharedMesh.subMeshCount > 0)
+                    m_TriangleIndexes = sharedMesh.GetTriangles(0);
 
-            if (m_VecList != null && m_VecList.Count > 0 && m_TriangleIndexes != null && m_TriangleIndexes.Length > 0) {
+                if (m_Indexes == null && sharedMesh.subMeshCount > 0) {
+                    m_Indexes = sharedMesh.GetIndices(0);
+                }
 
-                for (int i = 0; i < (int)m_TriangleIndexes.Length / 3; ++i) {
-                    Triangle tt1 = new Triangle();
-                    //tt1.p1 = new Vector3(0.5f, -0.5f, 0.5f);
-                    //tt1.p2 = new Vector3(-0.5f, 0.5f, 0.5f);
-                    //tt1.p3 = new Vector3(0, 0, 0);
-                    tt1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
-                    tt1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
-                    tt1.p3 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
+                // 比较
+                var trans = this.transform;
+                var pt = trans.position;
 
-                    tt1.MulMatrix(trans.localToWorldMatrix);
-                    // Debug.Log(tt1.ToString());
+                if (m_VecList != null && m_VecList.Count > 0 && m_TriangleIndexes != null && m_TriangleIndexes.Length > 0) {
 
-                    Triangle tt2 = tt1;
+                    for (int i = 0; i < (int)m_TriangleIndexes.Length / 3; ++i) {
+                        Triangle tt1 = new Triangle();
+                        //tt1.p1 = new Vector3(0.5f, -0.5f, 0.5f);
+                        //tt1.p2 = new Vector3(-0.5f, 0.5f, 0.5f);
+                        //tt1.p3 = new Vector3(0, 0, 0);
+                        tt1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
+                        tt1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
+                        tt1.p3 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
 
-                    tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
+                        tt1.MulMatrix(trans.localToWorldMatrix);
+                        // Debug.Log(tt1.ToString());
 
-                    tt1.p1 = m_UnityCam.WorldToScreenPoint(tt1.p1);
-                    tt1.p2 = m_UnityCam.WorldToScreenPoint(tt1.p2);
-                    tt1.p3 = m_UnityCam.WorldToScreenPoint(tt1.p3);
+                        Triangle tt2 = tt1;
+
+                        tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
+
+                        tt1.p1 = m_UnityCam.WorldToScreenPoint(tt1.p1);
+                        tt1.p2 = m_UnityCam.WorldToScreenPoint(tt1.p2);
+                        tt1.p3 = m_UnityCam.WorldToScreenPoint(tt1.p3);
 
 
-                    Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", tt1.ToString(), tt2.ToString());
+                        Debug.LogFormat("【Proj】【Unity】{0}【SoftCamera】{0}", tt1.ToString(), tt2.ToString());
+                    }
                 }
             }
         }

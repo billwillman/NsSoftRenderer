@@ -340,30 +340,34 @@ namespace NsSoftRenderer {
             UpdateMatrix();
         }
 
+        public bool IsShowVertexLog = false;
+
         private void FlipTriangle(TriangleVertex vertex, RenderPassMode passMode) {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
             if (target != null) {
-                
-                var camera = Camera.main;
-                if (camera != null) {
-                    var p1 = camera.WorldToScreenPoint(vertex.triangle.p1);
-                    var p2 = camera.WorldToScreenPoint(vertex.triangle.p2);
-                    var p3 = camera.WorldToScreenPoint(vertex.triangle.p3);
-                    string ss1 = SoftCameraTest.GetVectorStr(p1);
-                    string ss2 = SoftCameraTest.GetVectorStr(p2);
-                    string ss3 = SoftCameraTest.GetVectorStr(p2);
-                    Debug.LogFormat("【Camera】p1={0} p2={1} p3={2}", ss1, ss2, ss3);
+                if (IsShowVertexLog) {
+                    var camera = Camera.main;
+                    if (camera != null) {
+                        var p1 = camera.WorldToScreenPoint(vertex.triangle.p1);
+                        var p2 = camera.WorldToScreenPoint(vertex.triangle.p2);
+                        var p3 = camera.WorldToScreenPoint(vertex.triangle.p3);
+                        string ss1 = SoftCameraTest.GetVectorStr(p1);
+                        string ss2 = SoftCameraTest.GetVectorStr(p2);
+                        string ss3 = SoftCameraTest.GetVectorStr(p2);
+                        Debug.LogFormat("【Camera】p1={0} p2={1} p3={2}", ss1, ss2, ss3);
+                    }
                 }
 
-                // 世界坐标系到投影坐标系
-                vertex.triangle.MulMatrix(m_ViewProjLinkerScreenMatrix);
-                
-               string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
-               string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
-               string s3 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
-               Debug.LogFormat("【SoftCamera】p1={0} p2={1} p3={2}", s1, s2, s3);
-               
+               // 世界坐标系到投影坐标系
+               vertex.triangle.MulMatrix(this.ViewProjLinkerScreenMatrix);
+
+                if (IsShowVertexLog) {
+                    string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
+                    string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+                    string s3 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+                    Debug.LogFormat("【SoftCamera】p1={0} p2={1} p3={2}", s1, s2, s3);
+                }
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
