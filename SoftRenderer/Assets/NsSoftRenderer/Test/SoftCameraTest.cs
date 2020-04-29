@@ -86,9 +86,9 @@ public class SoftCameraTest : MonoBehaviour
                         Triangle tri1 = new Triangle();
                         tri1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
                         tri1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
-                        tri1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
+                        tri1.p3 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
 
-                        tri1.MulMatrix(this.transform.localToWorldMatrix);
+                        tri1.MulMatrix(trans.localToWorldMatrix);
                         Debug.Log(tri1.ToString());
 
                         Triangle tri2 = tri1;

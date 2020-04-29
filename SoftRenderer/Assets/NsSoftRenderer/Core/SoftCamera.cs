@@ -354,14 +354,14 @@ namespace NsSoftRenderer {
                     Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
                 }*/
 
-                /*
+               
                 vertex.triangle.MulMatrix(m_ViewProjLinkerScreenMatrix);
-                
-                string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
-                string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
-                string s3 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
-                Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
-                */
+                /*
+               string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
+               string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+               string s3 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
+               Debug.LogFormat("p1={0} p2={1} p3={2}", s1, s2, s3);
+               */
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
