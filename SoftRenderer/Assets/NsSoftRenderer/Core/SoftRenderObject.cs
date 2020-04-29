@@ -122,9 +122,9 @@ namespace NsSoftRenderer {
                 m_MustGlobalToLocalMatrixChg = false;
                 Matrix4x4 invTranslate = Matrix4x4.Translate(-m_Position);
                 Matrix4x4 axis = Matrix4x4.identity;
-                axis.m00 = m_Right.x; axis.m01 = m_Right.y; axis.m02 = m_Right.z;
+                axis.m00 = -m_Right.x; axis.m01 = -m_Right.y; axis.m02 = -m_Right.z;
                 axis.m10 = m_Up.x; axis.m11 = m_Up.y; axis.m12 = m_Up.z;
-                axis.m20 = m_LookAt.x; axis.m21 = m_LookAt.y; axis.m22 = m_LookAt.z;
+                axis.m20 = -m_LookAt.x; axis.m21 = -m_LookAt.y; axis.m22 = -m_LookAt.z;
                 m_GlobalToLocalMatrix = axis * invTranslate;
 
                 // 简单转置一下作为正交矩阵
