@@ -14,14 +14,8 @@ public class SoftCameraTest : MonoBehaviour
     private List<Vector3> m_VecList = null;
     private int[] m_TriangleIndexes = null;
     private int[] m_Indexes = null;
-    private FileStream stream = null;
+  //  private FileStream stream = null;
     // Start is called before the first frame update
-    void Start()
-    {
-        m_UnityCam = Camera.main;
-        m_SoftCam = SoftCamera.MainCamera;
-        stream = new FileStream("d:/test.txt", FileMode.Create);
-    }
 
     public static string GetVectorStr(Vector3 vec) {
         string ret = string.Format("x: {0}  y: {1}  z: {2}", vec.x.ToString(), vec.x.ToString(), vec.z.ToString());
@@ -29,10 +23,6 @@ public class SoftCameraTest : MonoBehaviour
     }
 
     private void OnDestroy() {
-        if (stream != null) {
-            stream.Dispose();
-            stream = null;
-        }
     }
 
     void CheckSoftCameraLog() {
@@ -43,6 +33,9 @@ public class SoftCameraTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        m_UnityCam = Camera.main;
+        m_SoftCam = SoftCamera.MainCamera;
+
         CheckSoftCameraLog();
 
         if (!IsShowSoftCamerLog) {
@@ -70,15 +63,11 @@ public class SoftCameraTest : MonoBehaviour
 
                     for (int i = 0; i < (int)m_TriangleIndexes.Length / 3; ++i) {
                         Triangle tt1 = new Triangle();
-                        //tt1.p1 = new Vector3(0.5f, -0.5f, 0.5f);
-                        //tt1.p2 = new Vector3(-0.5f, 0.5f, 0.5f);
-                        //tt1.p3 = new Vector3(0, 0, 0);
                         tt1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
                         tt1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
                         tt1.p3 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
 
                         tt1.MulMatrix(trans.localToWorldMatrix);
-                        // Debug.Log(tt1.ToString());
 
                         Triangle tt2 = tt1;
 
