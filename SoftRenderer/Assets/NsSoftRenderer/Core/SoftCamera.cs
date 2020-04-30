@@ -734,13 +734,10 @@ namespace NsSoftRenderer {
                 float w = m_OCameraInfo.GetCameraWidth(deviceWidth, deviceHeight);
                 float h = m_OCameraInfo.CameraHeight;
 
+                // X: 0-2, Y: 0-2 Z: 0 ~ 2(为什么前面加负号还是0-2，因为摄影机的坐标系是看向[0, 0, -1]方向)
+                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, - 2.0f/(m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
 
-                // 投影矩阵: 范围:X -1~1, Y -1~1, Z 0-W 
-                   Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 1.0f);
-                Vector3 offset = new Vector3(1f, 1f, 0f);
-                // 转到0-2， 0-2， 0-w
-                Matrix4x4 translate = Matrix4x4.Translate(offset);
-                m_ProjMatrix = translate * Matrix4x4.Scale(scale);
+                m_ProjMatrix = Matrix4x4.Scale(scale);
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
             }
