@@ -792,13 +792,13 @@ namespace NsSoftRenderer {
                 // 1.从视锥体转到正方体
                 Matrix4x4 pMatrix = m_PCameraInfo.PMatrix;
                 // 先平移到 Z 正方形中心点
-             //   Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + m_PCameraInfo.farPlane) / 2.0f);
-             //   Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
+                Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane) / 2.0f));
+                Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
                 // 3.缩放矩阵，缩放到-1~1 -1~1
-                Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, 2.0f / (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane));
+                Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, -2.0f / (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane));
                 Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
                 // 根据步骤求出ProjMatrix
-                m_ProjMatrix = scaleMat * pMatrix;
+                m_ProjMatrix = scaleMat * offsetMat * pMatrix;
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
             }
