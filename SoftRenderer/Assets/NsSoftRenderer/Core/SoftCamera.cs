@@ -90,7 +90,7 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 摄影机朝向Z轴负方向
+        // 摄影机朝向Z轴负方向(Unity系)
         public Matrix4x4 PMatrix2 {
             get {
                 /*
