@@ -129,7 +129,7 @@ namespace NsSoftRenderer {
                 axis.m20 = -m_LookAt.x; axis.m21 = -m_LookAt.y; axis.m22 = -m_LookAt.z;
                 m_GlobalToLocalMatrix = axis * invTranslate;
 
-                // 有平移就不是正交矩阵了
+                // 有平移就不是正交矩阵了（可以拆解为，正交矩阵的逆+平移矩阵的逆）
                 m_LocalToGlobalMatrix = m_GlobalToLocalMatrix.inverse;
             }
         }
