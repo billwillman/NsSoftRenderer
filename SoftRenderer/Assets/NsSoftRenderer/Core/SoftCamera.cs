@@ -746,7 +746,7 @@ namespace NsSoftRenderer {
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f * m_Linker.DeviceWidth, 0.5f * m_Linker.DeviceHeight, 1f));// x: 0~DeviceWidth, y:0~DeviceHeight
             Vector3 ret = (scaleMat * transMat * mat).MultiplyPoint(position);
             return ret;*/
-
+            
             var mat = this.ViewProjLinkerScreenMatrix;
             Vector3 ret = mat.MultiplyPoint(position);
             return ret;
