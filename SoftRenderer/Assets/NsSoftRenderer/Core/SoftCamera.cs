@@ -730,12 +730,25 @@ namespace NsSoftRenderer {
             DoMatrixChange();
         }
 
-        // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后的是0~1范围
+        // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         public Vector3 WorldToViewportPoint(Vector3 position) {
             Matrix4x4 mat = this.ViewProjMatrix;//X: -1~1 Y: -1~1
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f)); //X: 0~2, Y: 0~2, 原点移到摄影机左下角
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));// x: 0~1, y:0~1
             Vector3 ret = (scaleMat * transMat * mat).MultiplyPoint(position);
+            return ret;
+        }
+
+        public Vector3 WorldToScreenPoint(Vector3 position) {
+            /*
+            Matrix4x4 mat = this.ViewProjMatrix;//X: -1~1 Y: -1~1
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f)); //X: 0~2, Y: 0~2, 原点移到摄影机左下角
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f * m_Linker.DeviceWidth, 0.5f * m_Linker.DeviceHeight, 1f));// x: 0~DeviceWidth, y:0~DeviceHeight
+            Vector3 ret = (scaleMat * transMat * mat).MultiplyPoint(position);
+            return ret;*/
+
+            var mat = this.ViewProjLinkerScreenMatrix;
+            Vector3 ret = mat.MultiplyPoint(position);
             return ret;
         }
 
