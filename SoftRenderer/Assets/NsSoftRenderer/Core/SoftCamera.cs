@@ -790,7 +790,7 @@ namespace NsSoftRenderer {
                 m_PCameraInfo.GetNearWidthAndHeight(deviceWidth, deviceHeight, out nearW, out nearH);
 
                 // 1.从视锥体转到正方体
-                // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY是Z在负数, 最后还要转回去
+                // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY的摄影机Z视反向摄影机看向方向, 最后还要转回去
                 Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
                // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
               //  v = pMatrix.MultiplyPoint(v);
@@ -798,7 +798,7 @@ namespace NsSoftRenderer {
                 // 先平移到 Z 正方形中心点
                 Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane) / 2.0f));
                 Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
-                // 3.缩放矩阵，缩放到-1~1 -1~1
+                // 3.缩放矩阵，缩放到-1~1 -1~1，因为UNITY的摄影机Z视反向摄影机看向方向，所以这里再反转一次，所以Z的变换成了-1
                 Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, -2.0f / (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane));
                 Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
                 // 根据步骤求出ProjMatrix
