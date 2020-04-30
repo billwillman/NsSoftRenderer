@@ -90,7 +90,7 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 只有透视的矩阵，没有做-1~1的范围的，那是缩放和平移
+        // 只有透视的矩阵，坐标系是：摄影机朝向Z轴正方向
         public Matrix4x4 PMatrix {
             get {
                 /*
@@ -790,7 +790,7 @@ namespace NsSoftRenderer {
                 m_PCameraInfo.GetNearWidthAndHeight(deviceWidth, deviceHeight, out nearW, out nearH);
 
                 // 1.从视锥体转到正方体
-                // 因为PMatrix是根据正向NEAR~FAR来推到的，而UNITY是Z在负数, 最后还要转回去
+                // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY是Z在负数, 最后还要转回去
                 Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
                // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
               //  v = pMatrix.MultiplyPoint(v);
