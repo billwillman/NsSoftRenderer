@@ -52,6 +52,18 @@ namespace NsSoftRenderer {
             CheckPtIntf(ref p3);
         }
 
+
+        public void Trans(System.Func<Vector3, Vector3> onTrans) {
+            if (onTrans == null)
+                return;
+            p1 = onTrans(p1);
+            p2 = onTrans(p2);
+            p3 = onTrans(p3);
+            CheckPtIntf(ref p1);
+            CheckPtIntf(ref p2);
+            CheckPtIntf(ref p3);
+        }
+
         private static string ToVecStr(Vector3 v) {
             string ret = string.Format("x: {0} y: {1} z: {2}", v.x, v.y, v.z);
             return ret;

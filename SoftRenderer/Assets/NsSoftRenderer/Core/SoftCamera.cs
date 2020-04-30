@@ -596,10 +596,13 @@ namespace NsSoftRenderer {
 
         private void UpdateLinkerScreenMatrix() {
             if (m_Linker != null) {
-                float w = (float)m_Linker.DeviceWidth;
-                float h = (float)m_Linker.DeviceHeight;
-                Vector3 scale = new Vector3(w / 2.0f, h / 2.0f, 1.0f);
-                m_LinkerScreenMatrix = Matrix4x4.Scale(scale);
+                float halfW = (float)m_Linker.DeviceWidth/2.0f;
+                float halfH = (float)m_Linker.DeviceHeight/2.0f;
+
+                Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(halfW, halfH, 0f));
+
+                Vector3 scale = new Vector3(halfW, halfH, 1f);
+                m_LinkerScreenMatrix = transMat * Matrix4x4.Scale(scale);
             } else {
                 m_LinkerScreenMatrix = Matrix4x4.identity;
             }
@@ -667,6 +670,10 @@ namespace NsSoftRenderer {
                 DoMustUpdatePlanes();
                 DoMustGlobalToLocalMatrixChg();
             }
+        }
+
+        public void RefreshLinker() {
+            UpdateLinkerScreenMatrix();
         }
 
         public SoftCamera(ISoftCameraLinker linker): base() {
