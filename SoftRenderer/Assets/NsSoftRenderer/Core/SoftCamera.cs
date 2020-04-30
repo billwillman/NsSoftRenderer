@@ -734,10 +734,18 @@ namespace NsSoftRenderer {
                 float w = m_OCameraInfo.GetCameraWidth(deviceWidth, deviceHeight);
                 float h = m_OCameraInfo.CameraHeight;
 
-                // X: 0-2, Y: 0-2 Z: 0 ~ 2(为什么前面加负号还是0-2，因为摄影机的坐标系是看向[0, 0, -1]方向)
-                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, - 2.0f/(m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
+                // 先平移到 Z 正方形中心点
+                Vector3 offset = new Vector3(0f, 0f, (m_OCameraInfo.nearPlane + m_OCameraInfo.farPlane) / 2.0f);
+                Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
 
-                m_ProjMatrix = Matrix4x4.Scale(scale);
+                // 缩放
+                // - 2.0f/(m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane) 为什么前面加负号因为摄影机的坐标系是看向[0, 0, -1]方向, 
+                // 需要将方向变反，这样保证相机看到的Z缩放后，是从小变大)
+                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, -2.0f / (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
+               
+                // 最终变换到的结果 X:-1~1 Y:-1~1 Z: -1~1
+                // 在相机空间是Z：-near~-far，因为缩放的时候取反了，就变成了z:-1~1。
+                m_ProjMatrix = Matrix4x4.Scale(scale) * offsetMat;
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
             }
