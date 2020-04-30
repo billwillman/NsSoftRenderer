@@ -90,7 +90,7 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 只有透视的矩阵，没有做0-2的范围的，那是缩放和平移
+        // 只有透视的矩阵，没有做-1~1的范围的，那是缩放和平移
         public Matrix4x4 PMatrix {
             get {
                 /*
@@ -791,11 +791,11 @@ namespace NsSoftRenderer {
 
                 // 1.从视锥体转到正方体
                 Matrix4x4 pMatrix = m_PCameraInfo.PMatrix;
-                // 2.平移矩阵
-                Vector3 offset = new Vector3(-nearW / 2.0f, -nearH / 2.0f, 0);
+                // 先平移到 Z 正方形中心点
+                Vector3 offset = new Vector3(0f, 0f, (m_OCameraInfo.nearPlane + m_OCameraInfo.farPlane) / 2.0f);
                 Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
                 // 3.缩放矩阵，缩放到0~2
-                Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, 1.0f);
+                Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, -2.0f / (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
                 Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
 
                 // 根据步骤求出ProjMatrix
