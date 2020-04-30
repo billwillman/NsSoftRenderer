@@ -82,6 +82,11 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public static bool FloatEqual(float f1, float f2) {
+            bool ret = Mathf.Abs(f1 - f2) <= float.Epsilon;
+            return ret;
+        }
+
         // 判断是否需要Cull
         public static bool IsCulled(SoftCamera camera, CullMode mode, Triangle tri) {
             if (mode == CullMode.none)

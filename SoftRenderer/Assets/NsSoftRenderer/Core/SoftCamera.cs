@@ -208,6 +208,32 @@ namespace NsSoftRenderer {
             n = Vector3.Cross(v1, v2).normalized;
             planes[SoftCameraPlanes.DownPlane] = new SoftPlane(n, dd);
         }
+
+        private static bool Compare(PCameraInfo f1, PCameraInfo f2) {
+            bool ret = SoftMath.FloatEqual(f1.fieldOfView, f2.fieldOfView) && SoftMath.FloatEqual(f1.nearPlane, f2.nearPlane) && 
+                SoftMath.FloatEqual(f1.farPlane, f2.farPlane);
+            return ret;
+        }
+
+        public static bool operator ==(PCameraInfo f1, PCameraInfo f2) {
+            return Compare(f1, f2);
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+
+        public static bool operator !=(PCameraInfo i1, PCameraInfo i2) {
+            return !(i1 == i2);
+        }
+
+        public override bool Equals(object obj) {
+            if (obj == null)
+                return false;
+            if (!(obj is PCameraInfo))
+                return false;
+            return Compare(this, (PCameraInfo)obj);
+        }
     }
 
     // 正交摄影机数据
@@ -215,6 +241,31 @@ namespace NsSoftRenderer {
         public float Size;
         public float nearPlane;
         public float farPlane;
+
+        public static bool operator==(OCameraInfo f1, OCameraInfo f2) {
+            return Compare(f1, f2);
+        }
+
+        private static bool Compare(OCameraInfo f1, OCameraInfo f2) {
+            bool ret = SoftMath.FloatEqual(f1.Size, f2.Size) && SoftMath.FloatEqual(f1.nearPlane, f2.nearPlane) && SoftMath.FloatEqual(f1.farPlane, f2.farPlane);
+            return ret;
+        }
+
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+
+        public override bool Equals(object obj) {
+            if (obj == null)
+                return false;
+            if (!(obj is OCameraInfo))
+                return false;
+            return Compare(this, (OCameraInfo)obj);
+        }
+
+        public static bool operator !=(OCameraInfo i1, OCameraInfo i2) {
+            return !(i1 == i2);
+        }
 
         public void ResetDefault() {
             Size = 5.0f;
@@ -595,14 +646,27 @@ namespace NsSoftRenderer {
             }
         }
 
+        protected override void DoMustGlobalToLocalMatrixChg() {
+            base.DoMustGlobalToLocalMatrixChg();
+            DoMatrixChange();
+        }
+
         public void SetPCamera(PCameraInfo info) {
-            m_PCameraInfo = info;
-            this.CameraType = SoftCameraType.P;
+            if (m_PCameraInfo != info) {
+                m_PCameraInfo = info;
+                this.CameraType = SoftCameraType.P;
+                DoMustUpdatePlanes();
+                DoMustGlobalToLocalMatrixChg();
+            }
         }
 
         public void SetOCamera(OCameraInfo info) {
-            m_OCameraInfo = info;
-            this.CameraType = SoftCameraType.O;
+            if (m_OCameraInfo != info) {
+                m_OCameraInfo = info;
+                this.CameraType = SoftCameraType.O;
+                DoMustUpdatePlanes();
+                DoMustGlobalToLocalMatrixChg();
+            }
         }
 
         public SoftCamera(ISoftCameraLinker linker): base() {
@@ -670,11 +734,12 @@ namespace NsSoftRenderer {
                 float w = m_OCameraInfo.GetCameraWidth(deviceWidth, deviceHeight);
                 float h = m_OCameraInfo.CameraHeight;
 
-                 Vector3 offset = new Vector3(-w / 2.0f, -h / 2.0f, 0f);
-                 Matrix4x4 translate = Matrix4x4.Translate(offset);
 
-                // 投影矩阵: 范围:X 0-2, Y 0-2, Z 0-W 
-                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 1.0f);
+                // 投影矩阵: 范围:X -1~1, Y -1~1, Z 0-W 
+                   Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 1.0f);
+                Vector3 offset = new Vector3(1f, 1f, 0f);
+                // 转到0-2， 0-2， 0-w
+                Matrix4x4 translate = Matrix4x4.Translate(offset);
                 m_ProjMatrix = translate * Matrix4x4.Scale(scale);
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
