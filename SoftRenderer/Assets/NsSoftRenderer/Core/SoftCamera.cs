@@ -101,7 +101,7 @@ namespace NsSoftRenderer {
                  * 
                  * 推到过程：
                  * 1）普通点：视锥体【任意点】(x0, y0, z0) 到最终变换到近平面点(x1, y1, z1(Unknown))，根据相似三角形推出
-                 *    y1 = near/z0 * y0;    x1 = near/z0 * x0;   z1 = z0;
+                 *    y1 = near/z0 * y0;    x1 = near/z0 * x0;  Z1为UNKOWN，因为是一个矩形盒子里。
                  *    最终变换坐标为：(near/z0 * x0, near/z0 * y0, z0), 根据齐次坐标定义，都乘以Z得到齐次坐标：(near * x0, near * y0, z1(unknow(?)), z0),这样仍然描述同一个点。
                  *    这样构造出一个矩阵结论：
                  *    near, 0, 0, 0
@@ -128,7 +128,7 @@ namespace NsSoftRenderer {
                 mat.m11 = nearPlane;
                 mat.m22 = farPlane + nearPlane;
                 mat.m23 = -nearPlane * farPlane;
-                mat.m32 = -1.0f; // 摄影机投影坐标系是摄影机朝向[0, 0, -1],推到是1，但实际要转一个方向
+                mat.m32 = 1.0f; 
                 return mat;
             }
         }
