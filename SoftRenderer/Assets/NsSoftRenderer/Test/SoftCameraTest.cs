@@ -82,9 +82,9 @@ public class SoftCameraTest : MonoBehaviour
 
                         //  Debug.Log("[Test]" + m_SoftCam.ViewProjLinkerScreenMatrix.ToString());
 
-                        Debug.LogErrorFormat("[Unity]{0} [SoftCam]{1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
+                  //      Debug.LogErrorFormat("[Unity]{0} [SoftCam]{1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
 
-                   //    Debug.LogErrorFormat("【Proj】【Unity】{0}【SoftCamera】{1}", tt1.ToString(), tt2.ToString());
+                       Debug.LogErrorFormat("【Proj】【Unity】{0}【SoftCamera】{1}", tt1.ToString(), tt2.ToString());
                     }
                 }
             }

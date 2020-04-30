@@ -790,7 +790,11 @@ namespace NsSoftRenderer {
                 m_PCameraInfo.GetNearWidthAndHeight(deviceWidth, deviceHeight, out nearW, out nearH);
 
                 // 1.从视锥体转到正方体
-                Matrix4x4 pMatrix = m_PCameraInfo.PMatrix;
+                // 因为PMatrix是根据正向NEAR~FAR来推到的，而UNITY是Z在负数, 最后还要转回去
+                Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
+               // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
+              //  v = pMatrix.MultiplyPoint(v);
+
                 // 先平移到 Z 正方形中心点
                 Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane) / 2.0f));
                 Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
