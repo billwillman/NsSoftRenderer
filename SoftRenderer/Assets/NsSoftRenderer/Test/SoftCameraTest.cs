@@ -14,7 +14,7 @@ public class SoftCameraTest : MonoBehaviour
     private List<Vector3> m_VecList = null;
     private int[] m_TriangleIndexes = null;
     private int[] m_Indexes = null;
-  //  private FileStream stream = null;
+    //  private FileStream stream = null;
     // Start is called before the first frame update
 
     public static string GetVectorStr(Vector3 vec) {
@@ -75,9 +75,10 @@ public class SoftCameraTest : MonoBehaviour
 
                         
                         //tt1.MulMatrix(m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix);
-                        tt1.Trans(m_UnityCam.WorldToScreenPoint);
+                        tt1.Trans(m_UnityCam.WorldToViewportPoint);
 
-                        tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
+                        // tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
+                        tt2.Trans(m_SoftCam.WorldToViewportPoint);
 
                       //  Debug.Log("[Test]" + m_SoftCam.ViewProjLinkerScreenMatrix.ToString());
 

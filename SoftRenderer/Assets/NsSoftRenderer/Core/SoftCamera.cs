@@ -730,6 +730,15 @@ namespace NsSoftRenderer {
             DoMatrixChange();
         }
 
+        // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后的是0~1范围
+        public Vector3 WorldToViewportPoint(Vector3 position) {
+            Matrix4x4 mat = this.ViewProjMatrix;//X: -1~1 Y: -1~1
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f)); //X: 0~2, Y: 0~2, 原点移到摄影机左下角
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));// x: 0~1, y:0~1
+            Vector3 ret = (scaleMat * transMat * mat).MultiplyPoint(position);
+            return ret;
+        }
+
         private void UpdateViewMatrix() {
             UpdateGlobalToLocalMatrix();
         }
@@ -748,8 +757,9 @@ namespace NsSoftRenderer {
                 // 缩放
                 // - 2.0f/(m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane) 为什么前面加负号因为摄影机的坐标系是看向[0, 0, -1]方向, 
                 // 需要将方向变反，这样保证相机看到的Z缩放后，是从小变大)
-                Vector3 scale = new Vector3(2.0f / w, 2.0f / h, -2.0f / (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
-               
+                    Vector3 scale = new Vector3(2.0f / w, 2.0f / h, -2.0f / (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
+               // Vector3 scale = new Vector3(2.0f / w, 2.0f / h, 2.0f / (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane));
+
                 // 最终变换到的结果 X:-1~1 Y:-1~1 Z: -1~1
                 // 在相机空间是Z：-near~-far，因为缩放的时候取反了，就变成了z:-1~1。
                 m_ProjMatrix = Matrix4x4.Scale(scale) * offsetMat;
