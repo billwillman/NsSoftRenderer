@@ -90,6 +90,25 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        // 摄影机朝向Z轴负方向
+        public Matrix4x4 PMatrix2 {
+            get {
+                /*
+                 * -n, 0, 0, 0
+                 * 0, -n, 0, 0
+                 * 0, 0, -(f + n), -nf
+                 * 0, 0, 1, 0
+                 */
+                Matrix4x4 mat = Matrix4x4.zero;
+                mat.m00 = -nearPlane;
+                mat.m11 = -nearPlane;
+                mat.m22 = -(farPlane + nearPlane);
+                mat.m23 = -nearPlane * farPlane;
+                mat.m32 = 1.0f;
+                return mat;
+            }
+        }
+
         // 只有透视的矩阵，坐标系是：摄影机朝向Z轴正方向
         public Matrix4x4 PMatrix {
             get {
@@ -792,8 +811,11 @@ namespace NsSoftRenderer {
                 // 1.从视锥体转到正方体
                 // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY的摄影机Z视反向摄影机看向方向, 最后还要转回去
                 Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
-               // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
-              //  v = pMatrix.MultiplyPoint(v);
+                //  pMatrix = m_PCameraInfo.PMatrix2;
+
+                // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
+                //  v = pMatrix.MultiplyPoint(v);
+
 
                 // 先平移到 Z 正方形中心点
                 Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane) / 2.0f));
