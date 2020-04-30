@@ -120,8 +120,9 @@ namespace NsSoftRenderer {
         }
 
         // 添加UNITY摄影机
-        public SoftCamera AddCamera(UnityEngine.Camera cam, bool isMainCamera) {
+        public SoftCamera AddCamera(UnityEngine.Camera cam) {
             if (cam != null) {
+                bool isMainCamera = cam.CompareTag("MainCamera");
                 if (cam.orthographic) {
                     OCameraInfo info = OCameraInfo.Create();
                     info.Size = cam.orthographicSize;

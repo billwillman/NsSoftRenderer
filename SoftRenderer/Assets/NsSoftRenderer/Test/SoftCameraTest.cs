@@ -75,10 +75,10 @@ public class SoftCameraTest : MonoBehaviour
 
                         
                         //tt1.MulMatrix(m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix);
-                        tt1.Trans(m_UnityCam.WorldToScreenPoint);
+                        tt1.Trans(m_UnityCam.WorldToViewportPoint);
 
                         // tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
-                        tt2.Trans(m_SoftCam.WorldToScreenPoint);
+                        tt2.Trans(m_SoftCam.WorldToViewportPoint);
 
                       //  Debug.Log("[Test]" + m_SoftCam.ViewProjLinkerScreenMatrix.ToString());
 

@@ -14,8 +14,7 @@ public class SoftCameraBinder: MonoBehaviour {
         if (m_Cam != null) {
             var device = SoftDevice.StaticDevice;
             if (device != null) {
-                bool isMainCamera = m_Cam == Camera.main;
-                m_SoftCam = device.AddCamera(m_Cam, isMainCamera);
+                m_SoftCam = device.AddCamera(m_Cam);
             }
         }
     }
