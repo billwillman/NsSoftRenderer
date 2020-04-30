@@ -20,6 +20,12 @@ public class SoftCameraBinder: MonoBehaviour {
         }
     }
 
+    private void Update() {
+        if (m_Cam != null && m_SoftCam != null) {
+            m_SoftCam.UpdateCamera(m_Cam);
+        }
+    }
+
     private void OnDestroy() {
         if (m_SoftCam != null) {
             m_SoftCam.Dispose();

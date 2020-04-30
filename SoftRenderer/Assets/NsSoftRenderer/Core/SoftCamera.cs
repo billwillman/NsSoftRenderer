@@ -333,6 +333,31 @@ namespace NsSoftRenderer {
             m_RenderObjMgr.CameraCull(this, objMap, out visibleList);
         }
 
+        public void UpdateCamera(Camera camera) {
+            if (camera == null)
+                return;
+            bool isMainCam = camera.CompareTag("MainCamera");
+            var trans = camera.transform;
+            this.Position = trans.position;
+            this.LookAt = trans.forward;
+            this.Up = trans.up;
+            this.IsMainCamera = isMainCam;
+            this.Depth = (int)camera.depth;
+            if (camera.orthographic) {
+                OCameraInfo info = OCameraInfo.Create();
+                info.Size = camera.orthographicSize;
+                info.nearPlane = camera.nearClipPlane;
+                info.farPlane = camera.farClipPlane;
+                this.SetOCamera(info);
+            } else {
+                PCameraInfo info = PCameraInfo.Create();
+                info.nearPlane = camera.nearClipPlane;
+                info.farPlane = camera.farClipPlane;
+                info.fieldOfView = camera.fieldOfView;
+                this.SetPCamera(info);
+            }
+        }
+
         // 渲染提前调用
         internal virtual void DoCameraPreRender() {
             m_TrianglesMgr.Clear();
