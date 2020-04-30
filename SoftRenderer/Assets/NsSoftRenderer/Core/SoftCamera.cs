@@ -189,23 +189,23 @@ namespace NsSoftRenderer {
             // left plane
             Vector3 v1 = a - camPos;
             Vector3 v2 = b - camPos;
-            n = Vector3.Cross(v2, v1).normalized;
+            n = Vector3.Cross(v1, v2).normalized;
             dd = -n.x * a.x - n.y * a.y - n.z * a.z;
             planes[SoftCameraPlanes.LeftPlane] = new SoftPlane(n, dd);
             // right plane
             v1 = d - camPos;
             v2 = c - camPos;
-            n = Vector3.Cross(v1, v2).normalized;
+            n = Vector3.Cross(v2, v1).normalized;
             planes[SoftCameraPlanes.RightPlane] = new SoftPlane(n, dd);
             // up plane
             v1 = e - a;
             v2 = d - a;
-            n = Vector3.Cross(v1, v2).normalized;
+            n = Vector3.Cross(v2, v1).normalized;
             planes[SoftCameraPlanes.UpPlane] = new SoftPlane(n, dd);
             // down plane
             v1 = g - c;
             v2 = d - c;
-            n = Vector3.Cross(v2, v1).normalized;
+            n = Vector3.Cross(v1, v2).normalized;
             planes[SoftCameraPlanes.DownPlane] = new SoftPlane(n, dd);
         }
     }
