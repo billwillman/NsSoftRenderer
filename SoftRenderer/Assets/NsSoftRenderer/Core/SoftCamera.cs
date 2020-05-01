@@ -389,7 +389,7 @@ namespace NsSoftRenderer {
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
         private Matrix4x4 m_LinkerScreenMatrix = Matrix4x4.identity;
         // 世界坐标系转屏幕坐标系
-        private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
+       // private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
         // 渲染目标
         private RenderTarget m_RenderTarget = null;
         private bool m_IsMustUpdatePlanes = true;
@@ -449,7 +449,7 @@ namespace NsSoftRenderer {
                 string ss3 = SoftCameraTest.GetVectorStr(p3);
                 string ss4 = string.Format("【Camera】p1={0} p2={1} p3={2}", ss1, ss2, ss3);
 
-                vertex.triangle.MulMatrix(this.ViewProjLinkerScreenMatrix);
+                vertex.triangle.Trans(this.WorldToScreenPoint);
 
                // Debug.LogError(this.ViewProjLinkerScreenMatrix.ToString());
 
@@ -471,7 +471,7 @@ namespace NsSoftRenderer {
                 }
 
                // 世界坐标系到屏幕坐标系
-               vertex.triangle.MulMatrix(this.ViewProjLinkerScreenMatrix);
+               vertex.triangle.Trans(this.WorldToScreenPoint);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
@@ -623,12 +623,13 @@ namespace NsSoftRenderer {
             }
         }
 
+        /*
         public Matrix4x4 ViewProjLinkerScreenMatrix {
             get {
                 UpdateMatrix();
                 return m_ViewProjLinkerScreenMatrix;
             }
-        }
+        }*/
 
         public Matrix4x4 LinkerScreenMatrix {
             get {
@@ -692,6 +693,7 @@ namespace NsSoftRenderer {
         }
 
         public SoftCamera(ISoftCameraLinker linker): base() {
+            InitEvents();
             m_Linker = linker;
             m_Type = SoftRenderObjType.Camera;
             UpdateLinkerScreenMatrix();
@@ -771,19 +773,69 @@ namespace NsSoftRenderer {
 
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         // 最终UNITY的效果是 X：0~1 Y: 0~1 Z: nearPlane~farPlane
-        public Vector3 WorldToViewportPoint(Vector3 position) {
+        // 來自UNITY幫助：
+        //    Viewport space is normalized and relative to the camera. The bottom-left of the camera is (0,0); the top-right is (1,1). 
+        //    The z position is in world units from the camera.
+        private Vector3 WorldToViewportPoint(Vector3 position, bool isCheckPt) {
+
+            /*
+
             Matrix4x4 mat = this.ViewProjMatrix;//X: -1~1 Y: -1~1 Z:-1~1
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 1f)); //X: 0~2, Y: 0~2, Z: 0~2 原点移到摄影机左下角
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 0.5f * (farPlane - nearPlane)));// x: 0~1, y:0~1 Z:: 0~farPlane - nearPlane
             Matrix4x4 nearTransMat = Matrix4x4.Translate(new Vector3(0f, 0f, nearPlane));
             Vector3 ret = (nearTransMat * scaleMat * transMat * mat).MultiplyPoint(position);
-            Triangle.CheckPtIntf(ref ret);
+            */
+            
+            Matrix4x4 viewMat = this.ViewMatrix;
+            Vector3 ret = viewMat.MultiplyPoint(position);
+            float z = -ret.z; // 要取反方向
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+            ret = (scaleMat * transMat * this.ProjMatrix).MultiplyPoint(ret);
+            ret.z = z;
+            if (isCheckPt)
+                Triangle.CheckPtIntf(ref ret);
             return ret;
         }
 
-        public Vector3 WorldToScreenPoint(Vector3 position) {   
+        public Vector3 WorldToViewportPoint(Vector3 position) {
+            return WorldToViewportPoint(position, true);
+        }
+
+        private System.Func<Vector3, Vector3> m_WorldToViewPointEvt = null;
+        private System.Func<Vector3, Vector3> m_WorldToScreenPointEvt = null;
+
+        private void InitEvents() {
+            if (m_WorldToViewPointEvt == null)
+                m_WorldToViewPointEvt = new System.Func<Vector3, Vector3>(this.WorldToViewportPoint);
+            if (m_WorldToScreenPointEvt == null)
+                m_WorldToScreenPointEvt = new System.Func<Vector3, Vector3>(this.WorldToScreenPoint);
+        }
+
+        public System.Func<Vector3, Vector3> WorldToViewPointEvt {
+            get {
+                return m_WorldToViewPointEvt;
+            }
+        }
+
+        public System.Func<Vector3, Vector3> WorldToScreenPointEvt {
+            get {
+                return m_WorldToScreenPointEvt;
+            }
+        }
+
+        public Vector3 WorldToScreenPoint(Vector3 position) {
+            /*
             var mat = this.ViewProjLinkerScreenMatrix; 
             Vector3 ret = mat.MultiplyPoint(position);
+            Triangle.CheckPtIntf(ref ret);
+            return ret;
+            */
+
+            Vector3 ret = WorldToViewportPoint(position, false);
+            ret = this.LinkerScreenMatrix.MultiplyPoint(ret);
+
             Triangle.CheckPtIntf(ref ret);
             return ret;
         }
@@ -864,10 +916,12 @@ namespace NsSoftRenderer {
             m_ViewProjMatrix = m_ProjMatrix * m_GlobalToLocalMatrix;
         }
 
+        /*
         private void UpdateViewProjLinerScreenMatrix() {
             // 1. X: -1~1 Y: -1~1 Z:-1~1
             // m_ViewProjMatrix
             // 2. X: 0-2 Y: 0-2 Z: 0-2
+            
             Matrix4x4 trans = Matrix4x4.Translate(new Vector3(1f, 1f, 1f));
             // 3. X:0~1 Y: 0~1 Z: 0~farPlane - nearPlane
             Matrix4x4 scales = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 0.5f * (farPlane - nearPlane)));
@@ -876,7 +930,7 @@ namespace NsSoftRenderer {
             Matrix4x4 mat = nearTrans * scales * trans * m_ViewProjMatrix; 
             // 5. X: 0~DeviceWidth Y: 0~DeviceHeight Z: nearPlane~farPlane
             m_ViewProjLinkerScreenMatrix = m_LinkerScreenMatrix * mat;
-        }
+        }*/
 
         private void UpdateMatrix() {
             if (m_IsMustChgMatrix) {
@@ -890,7 +944,7 @@ namespace NsSoftRenderer {
                 // 更新观察投影矩阵
                 UpdateViewProjMatrix();
                 // 更新世界坐标到屏幕
-                UpdateViewProjLinerScreenMatrix();
+                //UpdateViewProjLinerScreenMatrix();
             }
         }
 
