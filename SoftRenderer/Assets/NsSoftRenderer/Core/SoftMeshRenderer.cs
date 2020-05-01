@@ -30,7 +30,8 @@ namespace NsSoftRenderer {
             get {
                 if (m_Mesh != null) {
                     SoftSpere ret = m_Mesh.LocalBoundSpere;
-                    ret.position = this.LocalToGlobalMatrix * ret.position;
+                    ret.position = this.LocalToGlobalMatrix.MultiplyPoint(ret.position);
+                    Triangle.CheckPtIntf(ref ret.position);
                     return ret;
                 } else {
                     SoftSpere ret = new SoftSpere();
