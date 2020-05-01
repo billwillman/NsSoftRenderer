@@ -19,6 +19,10 @@ namespace NsSoftRenderer {
         void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect);
     }
 
+    public struct Triangle2D {
+        public Vector2 p1, p2, p3;
+    }
+
     public struct Triangle {
        public Vector3 p1, p2, p3;
        public Triangle(Vector3 p1, Vector3 p2, Vector3 p3) {
@@ -71,6 +75,100 @@ namespace NsSoftRenderer {
 
         public override string ToString() {
             string ret = string.Format("p1={0} p2={1} p3={2}", ToVecStr(p1), ToVecStr(p2), ToVecStr(p3));
+            return ret;
+        }
+
+        // 获得拆分上下三角形的点
+        /*
+         *        Top
+         *        /|
+         *  Middle-- P
+         *        \|     
+                  Bottom
+         *     
+         *     
+         */
+         // top:选Y最大，如果有一样的Y，选X最大。middle：选次之Y最大，如果Y中有一样，则选X大者
+         public void GetScreenSpaceTopMiddleBottom(out Vector2 top, out Vector2 middle, out Vector2 bottom) {
+            // 此处完全不考虑Z, 因为这里是屏幕空间
+            top = p1;
+            if (top.y < p2.y || (Mathf.Abs(top.y - p2.y) <= float.Epsilon && p2.x > top.x)) {
+                middle = top;
+                top = p2;
+            } else
+                middle = p2;
+
+            if (top.y < p3.y || (Mathf.Abs(top.y - p2.y) <= float.Epsilon && p3.x > top.x)) {
+                bottom = top;
+                top = p3;
+            } else {
+                bottom = p3;
+            }
+
+            if (middle.y < bottom.y || (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon && bottom.x > middle.x)) {
+                Vector2 tmp = middle;
+                middle = bottom;
+                bottom = tmp;
+            }
+
+        }
+
+        // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
+        // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
+        public int GetTopBottomTriangle(out Triangle2D topTri, out Triangle2D bottomTri) {
+            int ret;
+
+            Vector2 top, middle, bottom;
+            GetScreenSpaceTopMiddleBottom(out top, out middle, out bottom);
+            if (Mathf.Abs(top.y - middle.y) <= float.Epsilon) {
+                // 说明只有下三角形
+                ret = 2;
+                topTri = new Triangle2D();
+                bottomTri = new Triangle2D();
+                bottomTri.p1 = top;
+                bottomTri.p2 = middle;
+                bottomTri.p3 = bottom;
+            } else if (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon) {
+                // 只有上三角形
+                ret = 1;
+                bottomTri = new Triangle2D();
+                topTri = new Triangle2D();
+                topTri.p1 = top;
+                topTri.p2 = middle;
+                topTri.p3 = bottom;
+            } else {
+                ret = 0;
+                // 计算重心坐标，找到P点切割点
+                // middle的Y必然大于bottom.Y
+                Vector2 AB = middle - top;
+                Vector2 AC = bottom - top;
+                Vector2 p;
+                p.y = middle.y;
+                float v = (top.y - p.y) / AC.y;
+                p.x = top.x - v * AC.x;
+
+                topTri = new Triangle2D();
+                bottomTri = new Triangle2D();
+                topTri.p1 = top;
+                bottomTri.p3 = bottom;
+                if (p.x > middle.x) {
+                    topTri.p2 = p;
+                    topTri.p3 = middle;
+
+                    bottomTri.p1 = p;
+                    bottomTri.p2 = middle;
+                } else {
+                    topTri.p2 = middle;
+                    topTri.p3 = p;
+
+                    bottomTri.p1 = middle;
+                    bottomTri.p2 = p;
+                }
+
+                
+
+            }
+
             return ret;
         }
     }
