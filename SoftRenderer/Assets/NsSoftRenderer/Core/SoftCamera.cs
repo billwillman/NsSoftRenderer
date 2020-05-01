@@ -784,7 +784,7 @@ namespace NsSoftRenderer {
                 float h = m_OCameraInfo.CameraHeight;
 
                 // 先平移到 Z 正方形中心点
-                Vector3 offset = new Vector3(0f, 0f, (m_OCameraInfo.nearPlane + m_OCameraInfo.farPlane) / 2.0f);
+                Vector3 offset = new Vector3(0f, 0f, m_OCameraInfo.nearPlane + (m_OCameraInfo.farPlane - m_OCameraInfo.nearPlane) / 2.0f);
                 Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
 
                 // 缩放
