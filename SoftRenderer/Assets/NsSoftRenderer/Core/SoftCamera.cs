@@ -387,7 +387,9 @@ namespace NsSoftRenderer {
         // 观测和投影矩阵
         private Matrix4x4 m_ViewProjMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_ProjInvMatrix = Matrix4x4.identity;
         private Matrix4x4 m_LinkerScreenMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_LinkerScreenInvMatrix = Matrix4x4.identity;
         // 世界坐标系转屏幕坐标系
        // private Matrix4x4 m_ViewProjLinkerScreenMatrix = Matrix4x4.identity;
         // 渲染目标
@@ -399,6 +401,13 @@ namespace NsSoftRenderer {
         private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
         private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
+
+       public Matrix4x4 PorjInvMatrix {
+            get {
+                UpdateMatrix();
+                return m_ProjInvMatrix;
+            }
+        }
 
        public void Cull(Dictionary<int, SoftRenderObject> objMap, out NativeList<int> visibleList) {
             m_RenderObjMgr.CameraCull(this, objMap, out visibleList);
@@ -449,7 +458,7 @@ namespace NsSoftRenderer {
                 string ss3 = SoftCameraTest.GetVectorStr(p3);
                 string ss4 = string.Format("【Camera】p1={0} p2={1} p3={2}", ss1, ss2, ss3);
 
-                vertex.triangle.Trans(this.WorldToScreenPoint);
+                vertex.triangle.Trans(this.WorldToScreenPointEvt);
 
                // Debug.LogError(this.ViewProjLinkerScreenMatrix.ToString());
 
@@ -618,8 +627,10 @@ namespace NsSoftRenderer {
             if (m_Linker != null) {
                 // X: 0-DeviceWidth Y:0`DeviceHeight Z: near~far
                 m_LinkerScreenMatrix = Matrix4x4.Scale(new Vector3(m_Linker.DeviceWidth, m_Linker.DeviceHeight, 1f));
+                m_LinkerScreenInvMatrix = m_LinkerScreenMatrix.inverse;
             } else {
                 m_LinkerScreenMatrix = Matrix4x4.identity;
+                m_LinkerScreenInvMatrix = Matrix4x4.identity;
             }
         }
 
@@ -637,6 +648,13 @@ namespace NsSoftRenderer {
                 return m_LinkerScreenMatrix;
             }
         } 
+
+        public Matrix4x4 LinkercreenInvSMatrix {
+            get {
+                UpdateMatrix();
+                return m_LinkerScreenInvMatrix;
+            }
+        }
 
         public static SoftCamera MainCamera {
             get {
@@ -723,6 +741,13 @@ namespace NsSoftRenderer {
             }
         }
 
+        public Matrix4x4 ViewInvMatrix {
+            get {
+                UpdateMatrix();
+                return m_LocalToGlobalMatrix;
+            }
+        }
+
         public Matrix4x4 ViewProjMatrix {
             get {
                 UpdateMatrix();
@@ -734,6 +759,13 @@ namespace NsSoftRenderer {
             get {
                 UpdateMatrix();
                 return m_ProjMatrix;
+            }
+        }
+
+        public Matrix4x4 ProjInvMatrix {
+            get {
+                UpdateMatrix();
+                return m_ProjInvMatrix;
             }
         }
 
@@ -769,6 +801,23 @@ namespace NsSoftRenderer {
                 }
                 return 0f;
             }
+        }
+
+        private Vector3 ViewportToWorldPoint(Vector3 position, bool isCheckPt) {
+            float z = position.z;
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(2f, 2f, 1f));
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(-1f, -1f, 0f));
+            Matrix4x4 mat = this.ProjInvMatrix * transMat * scaleMat;
+            Vector3 ret = mat.MultiplyPoint(position);
+            ret.z = -z;
+            ret = this.ViewInvMatrix.MultiplyPoint(ret);
+            if (isCheckPt)
+                Triangle.CheckPtIntf(ref ret);
+            return ret;
+        }
+
+        public Vector3 ViewportToWorldPoint(Vector3 position) {
+            return ViewportToWorldPoint(position, true);
         }
 
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
@@ -840,6 +889,12 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public Vector3 ScreenToWorldPoint(Vector3 position) {
+            Vector3 ret = this.LinkercreenInvSMatrix.MultiplyPoint(position);
+            ret = ViewportToWorldPoint(ret, true);
+            return ret;
+        }
+
         private void UpdateViewMatrix() {
             UpdateGlobalToLocalMatrix();
         }
@@ -864,8 +919,11 @@ namespace NsSoftRenderer {
                 // 最终变换到的结果 X:-1~1 Y:-1~1 Z: -1~1
                 // 在相机空间是Z：-near~-far，因为缩放的时候取反了，就变成了z:-1~1。
                 m_ProjMatrix = Matrix4x4.Scale(scale) * offsetMat;
+
+                m_ProjInvMatrix = m_ProjMatrix.inverse;
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
+                m_ProjInvMatrix = Matrix4x4.identity;
             }
         }
 
@@ -893,8 +951,11 @@ namespace NsSoftRenderer {
                 Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
                 // 根据步骤求出ProjMatrix
                 m_ProjMatrix = scaleMat * offsetMat * pMatrix;
+
+                m_ProjInvMatrix = m_ProjMatrix.inverse;
             } else {
                 m_ProjMatrix = Matrix4x4.identity;
+                m_ProjInvMatrix = Matrix4x4.identity;
             }
         }
 

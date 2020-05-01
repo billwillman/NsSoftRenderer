@@ -89,7 +89,7 @@ namespace NsSoftRenderer {
          *     
          */
          // top:选Y最大，如果有一样的Y，选X最大。middle：选次之Y最大，如果Y中有一样，则选X大者
-         public void GetScreenSpaceTopMiddleBottom(out Vector2 top, out Vector2 middle, out Vector2 bottom) {
+         internal void GetScreenSpaceTopMiddleBottom(out Vector2 top, out Vector2 middle, out Vector2 bottom) {
             // 此处完全不考虑Z, 因为这里是屏幕空间
             top = p1;
             if (top.y < p2.y || (Mathf.Abs(top.y - p2.y) <= float.Epsilon && p2.x > top.x)) {
@@ -113,16 +113,23 @@ namespace NsSoftRenderer {
 
         }
 
+        internal enum ScreenSpaceTopBottomType
+         {
+            topBottom = 0,
+            top = 1,
+            bottom = 2
+        };
+
         // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
         // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
-        public int GetTopBottomTriangle(out Triangle2D topTri, out Triangle2D bottomTri) {
-            int ret;
+        internal ScreenSpaceTopBottomType GetScreenSpaceTopBottomTriangle(out Triangle2D topTri, out Triangle2D bottomTri) {
+            ScreenSpaceTopBottomType ret;
 
             Vector2 top, middle, bottom;
             GetScreenSpaceTopMiddleBottom(out top, out middle, out bottom);
             if (Mathf.Abs(top.y - middle.y) <= float.Epsilon) {
                 // 说明只有下三角形
-                ret = 2;
+                ret = ScreenSpaceTopBottomType.bottom;
                 topTri = new Triangle2D();
                 bottomTri = new Triangle2D();
                 bottomTri.p1 = top;
@@ -130,14 +137,14 @@ namespace NsSoftRenderer {
                 bottomTri.p3 = bottom;
             } else if (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon) {
                 // 只有上三角形
-                ret = 1;
+                ret = ScreenSpaceTopBottomType.top;
                 bottomTri = new Triangle2D();
                 topTri = new Triangle2D();
                 topTri.p1 = top;
                 topTri.p2 = middle;
                 topTri.p3 = bottom;
             } else {
-                ret = 0;
+                ret = ScreenSpaceTopBottomType.topBottom;
                 // 计算重心坐标，找到P点切割点
                 // middle的Y必然大于bottom.Y
                 Vector2 AB = middle - top;
@@ -468,10 +475,29 @@ namespace NsSoftRenderer {
             }
         }
 
+        // 填充上三角形
+        protected void FillScreenTopTriangle(Triangle2D tri, Color c1, Color c2, Color c3) {
+
+        }
+        
+        // 填充下三角形
+        protected void FillScreenBottomTriangle(Triangle2D tri, Color c1, Color c2, Color c3) {
+
+        }
+
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
             // 三角形
-           
+            Triangle2D topTri, bottomTri;
+            var triType = tri.triangle.GetScreenSpaceTopBottomTriangle(out topTri, out bottomTri);
+             switch (triType) {
+                case Triangle.ScreenSpaceTopBottomType.top:
+                    break;
+                case Triangle.ScreenSpaceTopBottomType.bottom:
+                    break;
+                case Triangle.ScreenSpaceTopBottomType.topBottom:
+                    break;
+            }
         }
     }
 }
