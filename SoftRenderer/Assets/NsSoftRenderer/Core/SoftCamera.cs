@@ -767,7 +767,8 @@ namespace NsSoftRenderer {
             return ret;*/
             
             var mat = this.ViewProjLinkerScreenMatrix;
-            Vector3 ret = mat.MultiplyPoint(position);
+           // Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(1f, 1f, 0.5f));
+            Vector3 ret = (/*scaleMat * */mat).MultiplyPoint(position);
             return ret;
         }
 
