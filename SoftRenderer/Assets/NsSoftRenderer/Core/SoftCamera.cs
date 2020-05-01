@@ -450,7 +450,7 @@ namespace NsSoftRenderer {
 
                 vertex.triangle.MulMatrix(this.ViewProjLinkerScreenMatrix);
 
-                Debug.LogError(this.ViewProjLinkerScreenMatrix.ToString());
+               // Debug.LogError(this.ViewProjLinkerScreenMatrix.ToString());
 
                 string s1 = SoftCameraTest.GetVectorStr(vertex.triangle.p1);
                 string s2 = SoftCameraTest.GetVectorStr(vertex.triangle.p2);
