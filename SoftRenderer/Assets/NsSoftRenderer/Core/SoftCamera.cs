@@ -822,7 +822,7 @@ namespace NsSoftRenderer {
                 // 先平移到 Z 正方形中心点
                 Vector3 offset = new Vector3(0f, 0f, (m_PCameraInfo.nearPlane + (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane) / 2.0f));
                 Matrix4x4 offsetMat = Matrix4x4.Translate(offset);
-                // 3.缩放矩阵，缩放到-1~1 -1~1，因为UNITY的摄影机Z视反向摄影机看向方向，所以这里再反转一次，所以Z的变换成了-1
+                // 3.缩放矩阵，缩放到-1~1 -1~1，因为UNITY的摄影机Z视反向摄影机看向方向，所以这里再反转一次，所以Z的变换乘了-1
                 Vector3 scale = new Vector3(2.0f / nearW, 2.0f / nearH, -2.0f / (m_PCameraInfo.farPlane - m_PCameraInfo.nearPlane));
                 Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
                 // 根据步骤求出ProjMatrix
