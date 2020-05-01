@@ -769,6 +769,7 @@ namespace NsSoftRenderer {
             var mat = this.ViewProjLinkerScreenMatrix;
            // Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(1f, 1f, 0.5f));
             Vector3 ret = (/*scaleMat * */mat).MultiplyPoint(position);
+            Triangle.CheckPtIntf(ref ret);
             return ret;
         }
 
@@ -812,8 +813,8 @@ namespace NsSoftRenderer {
                 // 1.从视锥体转到正方体
                 // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY的摄影机Z视反向摄影机看向方向, 最后还要转回去
                 // 或者直接使用m_PCameraInfo.PMatrix2使用朝向Z轴负方向的推导。
-                Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
-                //  pMatrix = m_PCameraInfo.PMatrix2;
+               // Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
+                  Matrix4x4 pMatrix = m_PCameraInfo.PMatrix2;
 
                 // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
                 //  v = pMatrix.MultiplyPoint(v);

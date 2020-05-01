@@ -37,10 +37,10 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        private static void CheckPtIntf(ref Vector3 v) {
-            v.x = float.IsInfinity(v.x) ? 0 : v.x;
-            v.y = float.IsInfinity(v.y) ? 0 : v.y;
-            v.z = float.IsInfinity(v.z) ? 0 : v.z;
+        public static void CheckPtIntf(ref Vector3 v) {
+            v.x = float.IsInfinity(v.x) || float.IsNaN(v.x) ? 0 : v.x;
+            v.y = float.IsInfinity(v.y) || float.IsNaN(v.y) ? 0 : v.y;
+            v.z = float.IsInfinity(v.z) || float.IsNaN(v.z) ? 0 : v.z;
         }
 
         public void MulMatrix(Matrix4x4 mat) {
@@ -64,7 +64,7 @@ namespace NsSoftRenderer {
             CheckPtIntf(ref p3);
         }
 
-        private static string ToVecStr(Vector3 v) {
+        public static string ToVecStr(Vector3 v) {
             string ret = string.Format("x: {0} y: {1} z: {2}", v.x, v.y, v.z);
             return ret;
         }
