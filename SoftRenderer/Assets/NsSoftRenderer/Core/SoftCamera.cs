@@ -615,13 +615,8 @@ namespace NsSoftRenderer {
 
         private void UpdateLinkerScreenMatrix() {
             if (m_Linker != null) {
-                float halfW = (float)m_Linker.DeviceWidth/2.0f;
-                float halfH = (float)m_Linker.DeviceHeight/2.0f;
-
-                Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(halfW, halfH, 0f));
-
-                Vector3 scale = new Vector3(halfW, halfH, 1f);
-                m_LinkerScreenMatrix = transMat * Matrix4x4.Scale(scale);
+                // X: 0-DeviceWidth Y:0`DeviceHeight Z: near~far
+                m_LinkerScreenMatrix = Matrix4x4.Scale(new Vector3(m_Linker.DeviceWidth, m_Linker.DeviceHeight, 1f));
             } else {
                 m_LinkerScreenMatrix = Matrix4x4.identity;
             }
@@ -785,7 +780,7 @@ namespace NsSoftRenderer {
         }
 
         public Vector3 WorldToScreenPoint(Vector3 position) {   
-            var mat = this.ViewProjLinkerScreenMatrix;
+            var mat = this.ViewProjLinkerScreenMatrix; 
             Vector3 ret = mat.MultiplyPoint(position);
             Triangle.CheckPtIntf(ref ret);
             return ret;
@@ -870,7 +865,17 @@ namespace NsSoftRenderer {
         }
 
         private void UpdateViewProjLinerScreenMatrix() {
-            m_ViewProjLinkerScreenMatrix = m_LinkerScreenMatrix * m_ViewProjMatrix;
+            // 1. X: -1~1 Y: -1~1 Z:-1~1
+            // m_ViewProjMatrix
+            // 2. X: 0-2 Y: 0-2 Z: 0-2
+            Matrix4x4 trans = Matrix4x4.Translate(new Vector3(1f, 1f, 1f));
+            // 3. X:0~1 Y: 0~1 Z: 0~farPlane - nearPlane
+            Matrix4x4 scales = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 0.5f * (farPlane - nearPlane)));
+            // 4. X: 0~1 Y:0~1 Z: nearPlane ~ farPlane
+            Matrix4x4 nearTrans = Matrix4x4.Translate(new Vector3(0f, 0f, nearPlane));
+            Matrix4x4 mat = nearTrans * scales * trans * m_ViewProjMatrix; 
+            // 5. X: 0~DeviceWidth Y: 0~DeviceHeight Z: nearPlane~farPlane
+            m_ViewProjLinkerScreenMatrix = m_LinkerScreenMatrix * mat;
         }
 
         private void UpdateMatrix() {
