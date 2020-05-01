@@ -471,7 +471,7 @@ namespace NsSoftRenderer {
                 }
 
                // 世界坐标系到屏幕坐标系
-               vertex.triangle.Trans(this.WorldToScreenPointEvt);
+               vertex.triangle.Trans(this.WorldToScreenPoint);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
