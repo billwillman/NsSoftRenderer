@@ -46,11 +46,11 @@ public class SoftCameraTest : MonoBehaviour
                 Vector3 pt1 = transform.position;
                 Vector3 pt2 = pt1;
 
-                pt1 = m_UnityCam.WorldToScreenPoint(pt1);
-                pt2 = m_SoftCam.WorldToScreenPoint(pt2);
+                pt1 = m_UnityCam.WorldToViewportPoint(pt1);
+                pt2 = m_SoftCam.WorldToViewportPoint(pt2);
 
                  Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", Triangle.ToVecStr(pt1), Triangle.ToVecStr(pt2));
-               // Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", m_UnityCam.worldToCameraMatrix, m_SoftCam.ViewMatrix);
+              //  Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
 
                 return;
 

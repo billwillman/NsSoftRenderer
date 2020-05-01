@@ -90,15 +90,16 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        /*
         // 摄影机朝向Z轴负方向(Unity系)
         public Matrix4x4 PMatrix2 {
             get {
-                /*
-                 * -n, 0, 0, 0
-                 * 0, -n, 0, 0
-                 * 0, 0, -(f + n), -nf
-                 * 0, 0, 1, 0
-                 */
+                //
+                // -n, 0, 0, 0
+                // 0, -n, 0, 0
+                // 0, 0, -(f + n), -nf
+                // 0, 0, 1, 0
+                
                 Matrix4x4 mat = Matrix4x4.zero;
                 mat.m00 = -nearPlane;
                 mat.m11 = -nearPlane;
@@ -107,7 +108,7 @@ namespace NsSoftRenderer {
                 mat.m32 = 1.0f;
                 return mat;
             }
-        }
+        }*/
 
         // 只有透视的矩阵，坐标系是：摄影机朝向Z轴正方向
         public Matrix4x4 PMatrix {
@@ -776,6 +777,7 @@ namespace NsSoftRenderer {
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 0.5f * (farPlane - nearPlane)));// x: 0~1, y:0~1 Z:: 0~farPlane - nearPlane
             Matrix4x4 nearTransMat = Matrix4x4.Translate(new Vector3(0f, 0f, nearPlane));
             Vector3 ret = (nearTransMat * scaleMat * transMat * mat).MultiplyPoint(position);
+            Triangle.CheckPtIntf(ref ret);
             return ret;
         }
 
@@ -825,9 +827,7 @@ namespace NsSoftRenderer {
 
                 // 1.从视锥体转到正方体
                 // 因为PMatrix是根据正向NEAR~FAR（都是正数摄影机朝向Z轴正方向）来推到的，而UNITY的摄影机Z视反向摄影机看向方向, 最后还要转回去
-                // 或者直接使用m_PCameraInfo.PMatrix2使用朝向Z轴负方向的推导。
-               // Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
-                  Matrix4x4 pMatrix = m_PCameraInfo.PMatrix2;
+                Matrix4x4 pMatrix = Matrix4x4.Scale(new Vector3(1f, 1f, -1f))  * m_PCameraInfo.PMatrix * Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
 
                 // Vector3 v = new Vector3(0, 0, -m_PCameraInfo.nearPlane);
                 //  v = pMatrix.MultiplyPoint(v);
