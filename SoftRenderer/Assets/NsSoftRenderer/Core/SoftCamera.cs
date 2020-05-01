@@ -804,6 +804,11 @@ namespace NsSoftRenderer {
         }
 
         private Vector3 ViewportToWorldPoint(Vector3 position, bool isCheckPt) {
+
+            if (position == Vector3.zero) {
+                return this.Position;
+            }
+
             float z = position.z;
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(-0.5f, -0.5f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(2f, 2f, 1f));
@@ -844,6 +849,10 @@ namespace NsSoftRenderer {
             Matrix4x4 nearTransMat = Matrix4x4.Translate(new Vector3(0f, 0f, nearPlane));
             Vector3 ret = (nearTransMat * scaleMat * transMat * mat).MultiplyPoint(position);
             */
+
+            if (position == this.Position)
+                return Vector3.zero;
+
             
             Matrix4x4 viewMat = this.ViewMatrix;
             Vector3 ret = viewMat.MultiplyPoint(position);
