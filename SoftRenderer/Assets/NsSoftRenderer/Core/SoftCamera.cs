@@ -805,14 +805,21 @@ namespace NsSoftRenderer {
 
         private Vector3 ViewportToWorldPoint(Vector3 position, bool isCheckPt) {
             float z = position.z;
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(-0.5f, -0.5f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(2f, 2f, 1f));
-            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(-1f, -1f, 0f));
-            Matrix4x4 mat = this.ProjInvMatrix * transMat * scaleMat;
+            
+            Matrix4x4 mat = this.ProjInvMatrix * scaleMat * transMat;
             Vector3 ret = mat.MultiplyPoint(position);
             ret.z = -z;
             ret = this.ViewInvMatrix.MultiplyPoint(ret);
+
+          //  ret = testInvMat.MultiplyPoint(position);
+           // ret.z = -z;
+
             if (isCheckPt)
                 Triangle.CheckPtIntf(ref ret);
+
+        //    Debug.LogErrorFormat("[inv2]{0}", mat.inverse);
             return ret;
         }
 
@@ -820,8 +827,10 @@ namespace NsSoftRenderer {
             return ViewportToWorldPoint(position, true);
         }
 
+        private Matrix4x4 testInvMat;
+
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
-        // 最终UNITY的效果是 X：0~1 Y: 0~1 Z: nearPlane~farPlane
+        // 最终UNITY的效果是 X：0~1 Y: 0~1,  Z is in world units from the camera.
         // 來自UNITY幫助：
         //    Viewport space is normalized and relative to the camera. The bottom-left of the camera is (0,0); the top-right is (1,1). 
         //    The z position is in world units from the camera.
@@ -841,10 +850,17 @@ namespace NsSoftRenderer {
             float z = -ret.z; // 要取反方向
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
-            ret = (scaleMat * transMat * this.ProjMatrix).MultiplyPoint(ret);
+            Matrix4x4 mat = (scaleMat * transMat * this.ProjMatrix);
+
+            //  Debug.LogErrorFormat("[inv1]{0}", mat.inverse);
+
+            ret = mat.MultiplyPoint(ret);
             ret.z = z;
             if (isCheckPt)
                 Triangle.CheckPtIntf(ref ret);
+
+            testInvMat = (mat * viewMat).inverse;
+
             return ret;
         }
 
