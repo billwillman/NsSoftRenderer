@@ -469,7 +469,7 @@ namespace NsSoftRenderer {
                     DebugVertexLog(vertex);
                 }
 
-               // 世界坐标系到投影坐标系
+               // 世界坐标系到屏幕坐标系
                vertex.triangle.MulMatrix(this.ViewProjLinkerScreenMatrix);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
