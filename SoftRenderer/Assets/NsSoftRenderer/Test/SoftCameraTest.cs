@@ -46,17 +46,19 @@ public class SoftCameraTest : MonoBehaviour
                 Vector3 pt1 = transform.position;
                 Vector3 pt2 = pt1;
 
-              //   pt1 = (m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix).MultiplyPoint(pt1);
+             //   var mat = m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix;
+              //   pt2 = mat.MultiplyPoint(pt1);
+            //     pt2 = mat.inverse.MultiplyPoint(pt2);
              //    pt2 = m_SoftCam.ViewProjMatrix.MultiplyPoint(pt2);
-                  pt1 = m_UnityCam.WorldToViewportPoint(pt1);
+                 pt1 = m_UnityCam.WorldToViewportPoint(pt1);
                   pt2 = m_SoftCam.WorldToViewportPoint(pt2);
 
-                Debug.LogErrorFormat("111[Unity] {0} [Soft] {1}", Triangle.ToVecStr(pt1), Triangle.ToVecStr(pt2));
+                Debug.LogErrorFormat("111[Unity] {0} [Soft] {1}", pt1.ToString2(), pt2.ToString2());
 
                 pt1 = m_UnityCam.ViewportToWorldPoint(pt1);
                 pt2 = m_SoftCam.ViewportToWorldPoint(pt2);
 
-                    Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", Triangle.ToVecStr(pt1), Triangle.ToVecStr(pt2));
+               Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", pt1.ToString2(), pt2.ToString2());
 
            //     pt2 = m_SoftCam.ViewInvMatrix.MultiplyPoint(Vector3.zero);
             //    Debug.LogError(pt2.ToString());

@@ -23,6 +23,12 @@ namespace NsSoftRenderer {
         public Vector2 p1, p2, p3;
     }
 
+    public static class Vector3Helper {
+        public static string ToString2(this Vector3 v) {
+            return Triangle.ToVecStr(v);
+        }
+    }
+
     public struct Triangle {
        public Vector3 p1, p2, p3;
        public Triangle(Vector3 p1, Vector3 p2, Vector3 p3) {
@@ -42,9 +48,12 @@ namespace NsSoftRenderer {
         }
 
         public static void CheckPtIntf(ref Vector3 v) {
+            return;
+            /*
             v.x = float.IsInfinity(v.x) || float.IsNaN(v.x) ? 0 : v.x;
             v.y = float.IsInfinity(v.y) || float.IsNaN(v.y) ? 0 : v.y;
             v.z = float.IsInfinity(v.z) || float.IsNaN(v.z) ? 0 : v.z;
+            */
         }
 
         public void MulMatrix(Matrix4x4 mat) {
@@ -69,6 +78,11 @@ namespace NsSoftRenderer {
         }
 
         public static string ToVecStr(Vector3 v) {
+
+            v.x = float.IsInfinity(v.x) || float.IsNaN(v.x) ? 0 : v.x;
+            v.y = float.IsInfinity(v.y) || float.IsNaN(v.y) ? 0 : v.y;
+            v.z = float.IsInfinity(v.z) || float.IsNaN(v.z) ? 0 : v.z;
+
             string ret = string.Format("x: {0} y: {1} z: {2}", v.x, v.y, v.z);
             return ret;
         }

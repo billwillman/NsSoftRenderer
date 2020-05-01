@@ -827,7 +827,7 @@ namespace NsSoftRenderer {
             return ViewportToWorldPoint(position, true);
         }
 
-        private Matrix4x4 testInvMat;
+     //   private Matrix4x4 testInvMat;
 
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         // 最终UNITY的效果是 X：0~1 Y: 0~1,  Z is in world units from the camera.
@@ -859,7 +859,7 @@ namespace NsSoftRenderer {
             if (isCheckPt)
                 Triangle.CheckPtIntf(ref ret);
 
-            testInvMat = (mat * viewMat).inverse;
+          //  testInvMat = (mat * viewMat).inverse;
 
             return ret;
         }
