@@ -178,7 +178,7 @@ namespace NsSoftRenderer {
             }
 
             if (middle.y < bottom.y || (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon && bottom.x > middle.x)) {
-                Vector2 tmp = middle;
+                Vector3 tmp = middle;
                 Color tmpC = middleC;
                 middle = bottom;
                 middleC = bottomC;
