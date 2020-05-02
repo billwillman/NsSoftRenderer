@@ -893,12 +893,18 @@ namespace NsSoftRenderer {
 
         private System.Func<Vector3, Vector3> m_WorldToViewPointEvt = null;
         private System.Func<Vector3, Vector3> m_WorldToScreenPointEvt = null;
+        private System.Func<Vector3, bool, Vector3> m_WorldToViewPointEvt2 = null;
+        private System.Func<Vector3, bool, Vector3> m_WorldToScreenPointEvt2 = null;
 
         private void InitEvents() {
             if (m_WorldToViewPointEvt == null)
                 m_WorldToViewPointEvt = new System.Func<Vector3, Vector3>(this.WorldToViewportPoint);
             if (m_WorldToScreenPointEvt == null)
                 m_WorldToScreenPointEvt = new System.Func<Vector3, Vector3>(this.WorldToScreenPoint);
+            if (m_WorldToViewPointEvt2 == null)
+                m_WorldToViewPointEvt2 = new System.Func<Vector3, bool, Vector3>(this.WorldToViewportPoint);
+            if (m_WorldToScreenPointEvt2 == null)
+                m_WorldToScreenPointEvt2 = new System.Func<Vector3, bool, Vector3>(this.WorldToScreenPoint);
         }
 
         public System.Func<Vector3, Vector3> WorldToViewPointEvt {
@@ -910,6 +916,18 @@ namespace NsSoftRenderer {
         public System.Func<Vector3, Vector3> WorldToScreenPointEvt {
             get {
                 return m_WorldToScreenPointEvt;
+            }
+        }
+
+        public System.Func<Vector3, bool, Vector3> WorldToViewPointEvt2 {
+            get {
+                return m_WorldToViewPointEvt2;
+            }
+        }
+
+        public System.Func<Vector3, bool, Vector3> WorldToScreenPointEvt {
+            get {
+                return m_WorldToScreenPointEvt2;
             }
         }
 
