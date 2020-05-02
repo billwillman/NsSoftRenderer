@@ -925,7 +925,7 @@ namespace NsSoftRenderer {
             }
         }
 
-        public System.Func<Vector3, bool, Vector3> WorldToScreenPointEvt {
+        public System.Func<Vector3, bool, Vector3> WorldToScreenPointEvt2 {
             get {
                 return m_WorldToScreenPointEvt2;
             }
