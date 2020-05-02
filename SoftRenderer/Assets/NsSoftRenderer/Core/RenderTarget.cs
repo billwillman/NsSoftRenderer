@@ -198,7 +198,7 @@ namespace NsSoftRenderer {
 
         // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
         // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
-        internal ScreenSpaceTopBottomType GetScreenSpaceTopBottomTriangle(SoftCamera camera, out Triangle2D topTri, out Triangle2D bottomTri) {
+        internal ScreenSpaceTopBottomType GetScreenSpaceTopBottomTriangle(SoftCamera camera, out TriangleVertex topTri, out TriangleVertex bottomTri) {
             ScreenSpaceTopBottomType ret;
 
             Vector3 top, middle, bottom;
@@ -207,24 +207,24 @@ namespace NsSoftRenderer {
             if (Mathf.Abs(top.y - middle.y) <= float.Epsilon) {
                 // 说明只有下三角形
                 ret = ScreenSpaceTopBottomType.bottom;
-                topTri = new Triangle2D();
-                bottomTri = new Triangle2D();
-                bottomTri.p1 = top;
+                topTri = new TriangleVertex();
+                bottomTri = new TriangleVertex();
+                bottomTri.triangle.p1 = top;
                 bottomTri.cP1 = topC;
-                bottomTri.p2 = middle;
+                bottomTri.triangle.p2 = middle;
                 bottomTri.cP2 = middleC;
-                bottomTri.p3 = bottom;
+                bottomTri.triangle.p3 = bottom;
                 bottomTri.cP3 = bottomC;
             } else if (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon) {
                 // 只有上三角形
                 ret = ScreenSpaceTopBottomType.top;
-                bottomTri = new Triangle2D();
-                topTri = new Triangle2D();
-                topTri.p1 = top;
+                bottomTri = new TriangleVertex();
+                topTri = new TriangleVertex();
+                topTri.triangle.p1 = top;
                 topTri.cP1 = topC;
-                topTri.p2 = middle;
+                topTri.triangle.p2 = middle;
                 topTri.cP2 = middleC;
-                topTri.p3 = bottom;
+                topTri.triangle.p3 = bottom;
                 topTri.cP3 = bottomC;
             } else {
                 ret = ScreenSpaceTopBottomType.topBottom;
@@ -238,42 +238,42 @@ namespace NsSoftRenderer {
                 p.x = top.x - v * AC.x;
                 p.z = top.z - v * AC.z;
 
-                topTri = new Triangle2D();
-                bottomTri = new Triangle2D();
-                topTri.p1 = top;
+                topTri = new TriangleVertex();
+                bottomTri = new TriangleVertex();
+                topTri.triangle.p1 = top;
                 topTri.cP1 = topC;
-                bottomTri.p3 = bottom;
+                bottomTri.triangle.p3 = bottom;
                 bottomTri.cP3 = bottomC;
                 // 下面这个不对，要转到世界坐标系里算重心坐标
                 //Color pC = bottomC * v + (1 - v) * topC;
                 Vector3 A = camera.ScreenToWorldPoint(top, false);
                 Vector3 B = camera.ScreenToWorldPoint(middle, false);
                 Vector3 C = camera.ScreenToWorldPoint(bottom, false);
-                p = camera.ScreenToWorldPoint(p, false);
+                Vector3 PP = camera.ScreenToWorldPoint(p, false);
                 float a, b, c;
-                SoftMath.GetBarycentricCoordinate(A, B, C, p, out a, out b, out c);
+                SoftMath.GetBarycentricCoordinate(A, B, C, PP, out a, out b, out c);
                 Color pC = topC * a + middleC * b + bottomC * c;
                 //----------------------------------
 
                 if (p.x > middle.x) {
-                    topTri.p2 = p;
+                    topTri.triangle.p2 = p;
                     topTri.cP2 = pC;
-                    topTri.p3 = middle;
+                    topTri.triangle.p3 = middle;
                     topTri.cP3 = middleC;
 
-                    bottomTri.p1 = p;
+                    bottomTri.triangle.p1 = p;
                     bottomTri.cP1 = pC;
-                    bottomTri.p2 = middle;
+                    bottomTri.triangle.p2 = middle;
                     bottomTri.cP2 = middleC;
                 } else {
-                    topTri.p2 = middle;
+                    topTri.triangle.p2 = middle;
                     topTri.cP2 = middleC;
-                    topTri.p3 = p;
+                    topTri.triangle.p3 = p;
                     topTri.cP3 = pC;
 
-                    bottomTri.p1 = middle;
+                    bottomTri.triangle.p1 = middle;
                     bottomTri.cP1 = middleC;
-                    bottomTri.p2 = p;
+                    bottomTri.triangle.p2 = p;
                     bottomTri.cP2 = pC;
                 }
 
