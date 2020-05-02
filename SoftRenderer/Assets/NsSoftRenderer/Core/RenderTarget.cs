@@ -577,7 +577,7 @@ namespace NsSoftRenderer {
         }
 
         // 行填充
-        private void ScanLine() {
+        private void ScanLine(Vector3 screenStart, Vector3 screenEnd) {
 
         }
 
