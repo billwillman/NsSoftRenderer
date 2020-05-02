@@ -567,27 +567,30 @@ namespace NsSoftRenderer {
         }
 
         // 填充上三角形
-        protected void FillScreenTopTriangle(SoftCamera camera, RenderPassMode passMode, Triangle2D tri) {
+        protected void FillScreenTopTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
 
         }
         
         // 填充下三角形
-        protected void FillScreenBottomTriangle(SoftCamera camera, RenderPassMode passMode, Triangle2D tri) {
+        protected void FillScreenBottomTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
 
         }
 
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
             // 三角形
-            Triangle2D topTri, bottomTri;
+            TriangleVertex topTri, bottomTri;
             var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
              switch (triType) {
                 case TriangleVertex.ScreenSpaceTopBottomType.top:
-                    
+                    FillScreenTopTriangle(camera, passMode, topTri);
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.bottom:
+                    FillScreenBottomTriangle(camera, passMode, bottomTri);
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
+                    FillScreenTopTriangle(camera, passMode, topTri);
+                    FillScreenBottomTriangle(camera, passMode, bottomTri);
                     break;
             }
         }
