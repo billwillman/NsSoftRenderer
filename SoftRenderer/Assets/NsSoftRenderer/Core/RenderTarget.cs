@@ -246,6 +246,7 @@ namespace NsSoftRenderer {
                 bottomTri.cP3 = bottomC;
                 // 下面这个不对，要转到世界坐标系里算重心坐标
                 //Color pC = bottomC * v + (1 - v) * topC;
+                // 这里转到世界坐标系去算P点的重心坐标，再算出P点颜色插值
                 Vector3 A = camera.ScreenToWorldPoint(top, false);
                 Vector3 B = camera.ScreenToWorldPoint(middle, false);
                 Vector3 C = camera.ScreenToWorldPoint(bottom, false);
