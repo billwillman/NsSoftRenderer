@@ -811,7 +811,7 @@ namespace NsSoftRenderer {
             }
         }
 
-        private Vector3 ViewportToWorldPoint(Vector3 position, bool isUseViewZ) {
+        public Vector3 ViewportToWorldPoint(Vector3 position, bool isUseViewZ) {
 
             if (position == Vector3.zero) {
                 return this.Position;
