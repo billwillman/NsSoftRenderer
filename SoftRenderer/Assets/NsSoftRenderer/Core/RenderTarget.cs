@@ -21,6 +21,29 @@ namespace NsSoftRenderer {
 
     public struct Triangle2D {
         public Vector2 p1, p2, p3;
+        public Color cP1, cP2, cP3;
+
+        public void Trans(System.Func<Vector3, Vector3> onTrans) {
+            if (onTrans == null)
+                return;
+            p1 = onTrans(p1);
+            p2 = onTrans(p2);
+            p3 = onTrans(p3);
+        }
+
+        public void Trans(System.Func<Vector3, bool, Vector3> onTrans, bool isUseViewZ) {
+            if (onTrans == null)
+                return;
+            p1 = onTrans(p1, isUseViewZ);
+            p2 = onTrans(p2, isUseViewZ);
+            p3 = onTrans(p3, isUseViewZ);
+        }
+
+        public void MulMatrix(Matrix4x4 mat) {
+            p1 = mat.MultiplyPoint(p1);
+            p2 = mat.MultiplyPoint(p2);
+            p3 = mat.MultiplyPoint(p3);
+        }
     }
 
     public static class Vector3Helper {
@@ -102,107 +125,6 @@ namespace NsSoftRenderer {
             string ret = string.Format("p1={0} p2={1} p3={2}", ToVecStr(p1), ToVecStr(p2), ToVecStr(p3));
             return ret;
         }
-
-        // 获得拆分上下三角形的点
-        /*
-         *        Top
-         *        /|
-         *  Middle-- P
-         *        \|     
-                  Bottom
-         *     
-         *     
-         */
-         // top:选Y最大，如果有一样的Y，选X最大。middle：选次之Y最大，如果Y中有一样，则选X大者
-         internal void GetScreenSpaceTopMiddleBottom(out Vector2 top, out Vector2 middle, out Vector2 bottom) {
-            // 此处完全不考虑Z, 因为这里是屏幕空间
-            top = p1;
-            if (top.y < p2.y || (Mathf.Abs(top.y - p2.y) <= float.Epsilon && p2.x > top.x)) {
-                middle = top;
-                top = p2;
-            } else
-                middle = p2;
-
-            if (top.y < p3.y || (Mathf.Abs(top.y - p2.y) <= float.Epsilon && p3.x > top.x)) {
-                bottom = top;
-                top = p3;
-            } else {
-                bottom = p3;
-            }
-
-            if (middle.y < bottom.y || (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon && bottom.x > middle.x)) {
-                Vector2 tmp = middle;
-                middle = bottom;
-                bottom = tmp;
-            }
-
-        }
-
-        internal enum ScreenSpaceTopBottomType
-         {
-            topBottom = 0,
-            top = 1,
-            bottom = 2
-        };
-
-        // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
-        // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
-        internal ScreenSpaceTopBottomType GetScreenSpaceTopBottomTriangle(out Triangle2D topTri, out Triangle2D bottomTri) {
-            ScreenSpaceTopBottomType ret;
-
-            Vector2 top, middle, bottom;
-            GetScreenSpaceTopMiddleBottom(out top, out middle, out bottom);
-            if (Mathf.Abs(top.y - middle.y) <= float.Epsilon) {
-                // 说明只有下三角形
-                ret = ScreenSpaceTopBottomType.bottom;
-                topTri = new Triangle2D();
-                bottomTri = new Triangle2D();
-                bottomTri.p1 = top;
-                bottomTri.p2 = middle;
-                bottomTri.p3 = bottom;
-            } else if (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon) {
-                // 只有上三角形
-                ret = ScreenSpaceTopBottomType.top;
-                bottomTri = new Triangle2D();
-                topTri = new Triangle2D();
-                topTri.p1 = top;
-                topTri.p2 = middle;
-                topTri.p3 = bottom;
-            } else {
-                ret = ScreenSpaceTopBottomType.topBottom;
-                // 计算重心坐标，找到P点切割点
-                // middle的Y必然大于bottom.Y
-                Vector2 AB = middle - top;
-                Vector2 AC = bottom - top;
-                Vector2 p;
-                p.y = middle.y;
-                float v = (top.y - p.y) / AC.y;
-                p.x = top.x - v * AC.x;
-
-                topTri = new Triangle2D();
-                bottomTri = new Triangle2D();
-                topTri.p1 = top;
-                bottomTri.p3 = bottom;
-                if (p.x > middle.x) {
-                    topTri.p2 = p;
-                    topTri.p3 = middle;
-
-                    bottomTri.p1 = p;
-                    bottomTri.p2 = middle;
-                } else {
-                    topTri.p2 = middle;
-                    topTri.p3 = p;
-
-                    bottomTri.p1 = middle;
-                    bottomTri.p2 = p;
-                }
-
-                
-
-            }
-
-            return ret;
-        }
     }
 
     // p1, p2, p3必须按照一定顺序，逆时针或者顺时针,坐标系是屏幕坐标系0~width, 0~height，类型：浮点
@@ -217,6 +139,149 @@ namespace NsSoftRenderer {
             cP1 = p1;
             cP2 = p2;
             cP3 = p3;
+        }
+
+        // 获得拆分上下三角形的点
+        /*
+         *        Top
+         *        /|
+         *  Middle-- P
+         *        \|     
+                  Bottom
+         *     
+         *     
+         */
+        // top:选Y最大，如果有一样的Y，选X最大。middle：选次之Y最大，如果Y中有一样，则选X大者
+        internal void GetScreenSpaceTopMiddleBottom(out Vector3 top, out Vector3 middle, out Vector3 bottom,
+                                                    out Color topC, out Color middleC, out Color bottomC) {
+            // 此处完全不考虑Z, 因为这里是屏幕空间
+            top = triangle.p1 ;
+            topC = cP1;
+            if (top.y < triangle.p2.y || (Mathf.Abs(top.y - triangle.p2.y) <= float.Epsilon && triangle.p2.x > top.x)) {
+                middle = top;
+                middleC = topC;
+                top = triangle.p2;
+                topC = cP2;
+            } else {
+                middle = triangle.p2;
+                middleC = cP2;
+            }
+
+            if (top.y < triangle.p3.y || (Mathf.Abs(top.y - triangle.p2.y) <= float.Epsilon && triangle.p3.x > top.x)) {
+                bottom = top;
+                bottomC = topC;
+                top = triangle.p3;
+                topC = cP3;
+            } else {
+                bottom = triangle.p3;
+                bottomC = cP3;
+            }
+
+            if (middle.y < bottom.y || (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon && bottom.x > middle.x)) {
+                Vector2 tmp = middle;
+                Color tmpC = middleC;
+                middle = bottom;
+                middleC = bottomC;
+                bottom = tmp;
+                bottomC = tmpC;
+            }
+
+        }
+
+        internal enum ScreenSpaceTopBottomType {
+            topBottom = 0,
+            top = 1,
+            bottom = 2
+        };
+
+        
+
+        // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
+        // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
+        internal ScreenSpaceTopBottomType GetScreenSpaceTopBottomTriangle(SoftCamera camera, out Triangle2D topTri, out Triangle2D bottomTri) {
+            ScreenSpaceTopBottomType ret;
+
+            Vector3 top, middle, bottom;
+            Color topC, middleC, bottomC;
+            GetScreenSpaceTopMiddleBottom(out top, out middle, out bottom, out topC, out middleC, out bottomC);
+            if (Mathf.Abs(top.y - middle.y) <= float.Epsilon) {
+                // 说明只有下三角形
+                ret = ScreenSpaceTopBottomType.bottom;
+                topTri = new Triangle2D();
+                bottomTri = new Triangle2D();
+                bottomTri.p1 = top;
+                bottomTri.cP1 = topC;
+                bottomTri.p2 = middle;
+                bottomTri.cP2 = middleC;
+                bottomTri.p3 = bottom;
+                bottomTri.cP3 = bottomC;
+            } else if (Mathf.Abs(middle.y - bottom.y) <= float.Epsilon) {
+                // 只有上三角形
+                ret = ScreenSpaceTopBottomType.top;
+                bottomTri = new Triangle2D();
+                topTri = new Triangle2D();
+                topTri.p1 = top;
+                topTri.cP1 = topC;
+                topTri.p2 = middle;
+                topTri.cP2 = middleC;
+                topTri.p3 = bottom;
+                topTri.cP3 = bottomC;
+            } else {
+                ret = ScreenSpaceTopBottomType.topBottom;
+                // 计算重心坐标，找到P点切割点
+                // middle的Y必然大于bottom.Y
+                Vector3 AB = middle - top;
+                Vector3 AC = bottom - top;
+                Vector3 p;
+                p.y = middle.y;
+                float v = (top.y - p.y) / AC.y;
+                p.x = top.x - v * AC.x;
+                p.z = top.z - v * AC.z;
+
+                topTri = new Triangle2D();
+                bottomTri = new Triangle2D();
+                topTri.p1 = top;
+                topTri.cP1 = topC;
+                bottomTri.p3 = bottom;
+                bottomTri.cP3 = bottomC;
+                // 下面这个不对，要转到世界坐标系里算重心坐标
+                //Color pC = bottomC * v + (1 - v) * topC;
+                Vector3 A = camera.ScreenToWorldPoint(top, false);
+                Vector3 B = camera.ScreenToWorldPoint(middle, false);
+                Vector3 C = camera.ScreenToWorldPoint(bottom, false);
+                p = camera.ScreenToWorldPoint(p, false);
+                float a, b, c;
+                SoftMath.GetBarycentricCoordinate(A, B, C, p, out a, out b, out c);
+                Color pC = topC * a + middleC * b + bottomC * c;
+                //----------------------------------
+
+                if (p.x > middle.x) {
+                    topTri.p2 = p;
+                    topTri.cP2 = pC;
+                    topTri.p3 = middle;
+                    topTri.cP3 = middleC;
+
+                    bottomTri.p1 = p;
+                    bottomTri.cP1 = pC;
+                    bottomTri.p2 = middle;
+                    bottomTri.cP2 = middleC;
+                } else {
+                    topTri.p2 = middle;
+                    topTri.cP2 = middleC;
+                    topTri.p3 = p;
+                    topTri.cP3 = pC;
+
+                    bottomTri.p1 = middle;
+                    bottomTri.cP1 = middleC;
+                    bottomTri.p2 = p;
+                    bottomTri.cP2 = pC;
+                }
+
+
+
+            }
+
+            return ret;
         }
     }
 
@@ -501,12 +566,12 @@ namespace NsSoftRenderer {
         }
 
         // 填充上三角形
-        protected void FillScreenTopTriangle(Triangle2D tri, Color c1, Color c2, Color c3) {
+        protected void FillScreenTopTriangle(SoftCamera camera, RenderPassMode passMode, Triangle2D tri) {
 
         }
         
         // 填充下三角形
-        protected void FillScreenBottomTriangle(Triangle2D tri, Color c1, Color c2, Color c3) {
+        protected void FillScreenBottomTriangle(SoftCamera camera, RenderPassMode passMode, Triangle2D tri) {
 
         }
 
@@ -514,13 +579,14 @@ namespace NsSoftRenderer {
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
             // 三角形
             Triangle2D topTri, bottomTri;
-            var triType = tri.triangle.GetScreenSpaceTopBottomTriangle(out topTri, out bottomTri);
+            var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
              switch (triType) {
-                case Triangle.ScreenSpaceTopBottomType.top:
+                case TriangleVertex.ScreenSpaceTopBottomType.top:
+                    
                     break;
-                case Triangle.ScreenSpaceTopBottomType.bottom:
+                case TriangleVertex.ScreenSpaceTopBottomType.bottom:
                     break;
-                case Triangle.ScreenSpaceTopBottomType.topBottom:
+                case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
                     break;
             }
         }

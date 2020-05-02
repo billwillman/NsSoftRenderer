@@ -481,7 +481,7 @@ namespace NsSoftRenderer {
                 }
 
                // 世界坐标系到屏幕坐标系
-               vertex.triangle.Trans(this.WorldToScreenPointEvt);
+               vertex.triangle.Trans(this.WorldToViewPointEvt2, false);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
@@ -951,8 +951,12 @@ namespace NsSoftRenderer {
         }
 
         public Vector3 ScreenToWorldPoint(Vector3 position) {
+            return ScreenToWorldPoint(position, true);
+        }
+
+        public Vector3 ScreenToWorldPoint(Vector3 position, bool isUseViewZ) {
             Vector3 ret = this.LinkercreenInvSMatrix.MultiplyPoint(position);
-            ret = ViewportToWorldPoint(ret, true);
+            ret = ViewportToWorldPoint(ret, isUseViewZ);
             return ret;
         }
 
