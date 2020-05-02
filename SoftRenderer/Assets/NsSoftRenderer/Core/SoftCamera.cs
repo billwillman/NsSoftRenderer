@@ -386,6 +386,7 @@ namespace NsSoftRenderer {
         private int m_Depth = 0;
         // 观测和投影矩阵
         private Matrix4x4 m_ViewProjMatrix = Matrix4x4.identity;
+        private Matrix4x4 m_ViewProjInvMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjMatrix = Matrix4x4.identity;
         private Matrix4x4 m_ProjInvMatrix = Matrix4x4.identity;
         private Matrix4x4 m_LinkerScreenMatrix = Matrix4x4.identity;
@@ -755,6 +756,13 @@ namespace NsSoftRenderer {
             }
         }
 
+        public Matrix4x4 ViewProjInvMatrix {
+            get {
+                UpdateMatrix();
+                return m_ViewProjInvMatrix;
+            }
+        }
+
         public Matrix4x4 ProjMatrix {
             get {
                 UpdateMatrix();
@@ -803,28 +811,31 @@ namespace NsSoftRenderer {
             }
         }
 
-        private Vector3 ViewportToWorldPoint(Vector3 position, bool isCheckPt) {
+        private Vector3 ViewportToWorldPoint(Vector3 position, bool isUseViewZ) {
 
             if (position == Vector3.zero) {
                 return this.Position;
             }
 
-            float z = position.z;
+            
+            if (isUseViewZ) {
+                float z = position.z;
+                // 反求真实Z，这个要注意，投影变换（正交和透视摄影机坐标系中Z值一样，投影转换后Z也一样）
+                // 因为开启了isUseViewZ,则需要转换一次获得真实的Z
+                // 为什么乘以-1是因为，在WorldToViewport函数里Z取反了。
+                Vector3 tmp = new Vector3(0f, 0f, -z);
+                tmp = this.ProjMatrix.MultiplyPoint(tmp);
+                position.z = tmp.z;
+                
+            }
+
+     
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(-0.5f, -0.5f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(2f, 2f, 1f));
             
-            Matrix4x4 mat = this.ProjInvMatrix * scaleMat * transMat;
+            Matrix4x4 mat = this.ViewInvMatrix * this.ProjInvMatrix * scaleMat * transMat;
             Vector3 ret = mat.MultiplyPoint(position);
-            ret.z = -z;
-            ret = this.ViewInvMatrix.MultiplyPoint(ret);
 
-          //  ret = testInvMat.MultiplyPoint(position);
-           // ret.z = -z;
-
-            if (isCheckPt)
-                Triangle.CheckPtIntf(ref ret);
-
-        //    Debug.LogErrorFormat("[inv2]{0}", mat.inverse);
             return ret;
         }
 
@@ -832,14 +843,14 @@ namespace NsSoftRenderer {
             return ViewportToWorldPoint(position, true);
         }
 
-     //   private Matrix4x4 testInvMat;
+        //   private Matrix4x4 testInvMat;
 
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         // 最终UNITY的效果是 X：0~1 Y: 0~1,  Z is in world units from the camera.
-        // 來自UNITY幫助：
+        // 來自UNITY幫助：isUseViewZ 设置为TRUE的时候
         //    Viewport space is normalized and relative to the camera. The bottom-left of the camera is (0,0); the top-right is (1,1). 
         //    The z position is in world units from the camera.
-        private Vector3 WorldToViewportPoint(Vector3 position, bool isCheckPt) {
+        public Vector3 WorldToViewportPoint(Vector3 position, bool isUseViewZ) {
 
             /*
 
@@ -856,7 +867,9 @@ namespace NsSoftRenderer {
             
             Matrix4x4 viewMat = this.ViewMatrix;
             Vector3 ret = viewMat.MultiplyPoint(position);
-            float z = -ret.z; // 要取反方向
+            float z = 0f;
+            if (isUseViewZ)
+                z = -ret.z; // 要取反方向
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
             Matrix4x4 mat = (scaleMat * transMat * this.ProjMatrix);
@@ -864,9 +877,8 @@ namespace NsSoftRenderer {
             //  Debug.LogErrorFormat("[inv1]{0}", mat.inverse);
 
             ret = mat.MultiplyPoint(ret);
-            ret.z = z;
-            if (isCheckPt)
-                Triangle.CheckPtIntf(ref ret);
+            if (isUseViewZ)
+                ret.z = z;
 
           //  testInvMat = (mat * viewMat).inverse;
 
@@ -900,6 +912,10 @@ namespace NsSoftRenderer {
         }
 
         public Vector3 WorldToScreenPoint(Vector3 position) {
+            return WorldToScreenPoint(position, true);
+        }
+
+        public Vector3 WorldToScreenPoint(Vector3 position, bool isUseViewZ) {
             /*
             var mat = this.ViewProjLinkerScreenMatrix; 
             Vector3 ret = mat.MultiplyPoint(position);
@@ -907,10 +923,10 @@ namespace NsSoftRenderer {
             return ret;
             */
 
-            Vector3 ret = WorldToViewportPoint(position, false);
+            Vector3 ret = WorldToViewportPoint(position, isUseViewZ);
             ret = this.LinkerScreenMatrix.MultiplyPoint(ret);
 
-            Triangle.CheckPtIntf(ref ret);
+           // Triangle.CheckPtIntf(ref ret);
             return ret;
         }
 
@@ -1000,6 +1016,7 @@ namespace NsSoftRenderer {
 
         private void UpdateViewProjMatrix() {
             m_ViewProjMatrix = m_ProjMatrix * m_GlobalToLocalMatrix;
+            m_ViewProjInvMatrix = m_ViewProjMatrix.inverse;
         }
 
         /*
