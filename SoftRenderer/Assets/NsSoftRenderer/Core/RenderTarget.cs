@@ -77,6 +77,17 @@ namespace NsSoftRenderer {
             CheckPtIntf(ref p3);
         }
 
+        public void Trans(System.Func<Vector3, bool, Vector3> onTrans, bool isUseViewZ) {
+            if (onTrans == null)
+                return;
+            p1 = onTrans(p1, isUseViewZ);
+            p2 = onTrans(p2, isUseViewZ);
+            p3 = onTrans(p3, isUseViewZ);
+            CheckPtIntf(ref p1);
+            CheckPtIntf(ref p2);
+            CheckPtIntf(ref p3);
+        }
+
         public static string ToVecStr(Vector3 v) {
 
             v.x = float.IsInfinity(v.x) || float.IsNaN(v.x) ? 0 : v.x;
