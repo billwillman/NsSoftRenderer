@@ -43,28 +43,6 @@ public class SoftCameraTest : MonoBehaviour
 
             if (m_UnityCam != null && m_SoftCam != null && sharedMesh != null) {
 
-                Vector3 pt1 = transform.position;
-                Vector3 pt2 = pt1;
-
-               
-            //     pt2 = mat.inverse.MultiplyPoint(pt2);
-             //    pt2 = m_SoftCam.ViewProjMatrix.MultiplyPoint(pt2);
-                 pt1 = m_UnityCam.WorldToScreenPoint(pt1);
-                  pt2 = m_SoftCam.WorldToScreenPoint(pt2);
-
-                Debug.LogErrorFormat("111[Unity] {0} [Soft] {1}", pt1.ToString2(), pt2.ToString2());
-
-                     pt1 = m_UnityCam.ScreenToWorldPoint(pt1);
-                   pt2 = m_SoftCam.ScreenToWorldPoint(pt2);
-
-               Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", pt1.ToString2(), pt2.ToString2());
-
-           //     pt2 = m_SoftCam.ViewInvMatrix.MultiplyPoint(Vector3.zero);
-            //    Debug.LogError(pt2.ToString());
-              //  Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
-
-                return;
-
                 if (m_VecList == null) {
                     m_VecList = new List<Vector3>();
                     sharedMesh.GetVertices(m_VecList);
