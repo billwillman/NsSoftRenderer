@@ -212,5 +212,17 @@ namespace NsSoftRenderer {
             c = vv.y; //-->> c即是v
             a = 1f - b - c; //-->>a即是 1- u - v = r
         }
+
+        public static float GetScreenSpacePointZ(Triangle tri, float screenX, float screenY) {
+            Vector3 p = new Vector3(screenX, screenY);
+            Vector3 AB = tri.p2 - tri.p1;
+            Vector3 AC = tri.p3 - tri.p1;
+            Vector3 PA = tri.p1 - p;
+            float c = ((PA.y / AB.y) - (PA.x / AB.x)) / ((AC.x / AB.x) - (AC.y / AB.y));
+            float b = ((PA.y / AC.y) - (PA.x / AC.x)) / ((AB.x / AC.x) - (AB.y - AC.y));
+            float a = 1 - b - c;
+            p = tri.p1 * a + tri.p2 * b + tri.p3 * c;
+            return p.z;
+        }
     }
 }
