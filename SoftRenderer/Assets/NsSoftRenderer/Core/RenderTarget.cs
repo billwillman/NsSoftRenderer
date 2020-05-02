@@ -194,7 +194,17 @@ namespace NsSoftRenderer {
             bottom = 2
         };
 
-        
+        private float GetScreenSpacePointZ(Triangle tri, float screenX, float screenY) {
+            Vector3 p = new Vector3(screenX, screenY);
+            Vector3 AB = tri.p2 - tri.p1;
+            Vector3 AC = tri.p3 - tri.p1;
+            Vector3 PA = tri.p1 - p;
+            float c = ((PA.y / AB.y) - (PA.x / AB.x)) / ((AC.x/AB.x) - (AC.y/AB.y));
+            float b = ((PA.y / AC.y) - (PA.x / AC.x)) / ((AB.x / AC.x) - (AB.y - AC.y));
+            float a = 1 - b - c;
+            p = tri.p1 * a + tri.p2 * b + tri.p3 * c;
+            return p.z;
+        }
 
         // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
         // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
@@ -564,6 +574,11 @@ namespace NsSoftRenderer {
                 m_FrontDepthBuffer.Dispose();
                 m_FrontDepthBuffer = null;
             }
+        }
+
+        // 行填充
+        private void ScanLine() {
+
         }
 
         // 填充上三角形
