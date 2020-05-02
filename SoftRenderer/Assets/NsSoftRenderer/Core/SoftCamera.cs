@@ -821,8 +821,10 @@ namespace NsSoftRenderer {
             if (isUseViewZ) {
                 float z = position.z;
                 // 反求真实Z，这个要注意，投影变换（正交和透视摄影机坐标系中Z值一样，投影转换后Z也一样）
-                // 因为开启了isUseViewZ,则需要转换一次获得真实的Z
+                // 因为开启了isUseViewZ position里的Z并不是真实在ProjMatrix转换后的Z是ViewMatrix转换后的Z
+                // 如果不去获取真实的Z，因为在透视矩阵里是Z不同哪怕X,Y一样映射到近平面的值也会不一样,则需要转换一次获得真实的Z
                 // 为什么乘以-1是因为，在WorldToViewport函数里Z取反了。
+               
                 Vector3 tmp = new Vector3(0f, 0f, -z);
                 tmp = this.ProjMatrix.MultiplyPoint(tmp);
                 position.z = tmp.z;
