@@ -240,13 +240,19 @@ namespace NsSoftRenderer {
                 ret = ScreenSpaceTopBottomType.topBottom;
                 // 计算重心坐标，找到P点切割点
                 // middle的Y必然大于bottom.Y
+                // 这里是屏幕空间的X,Y
+                /*
                 Vector3 AB = middle - top;
                 Vector3 AC = bottom - top;
                 Vector3 p;
                 p.y = middle.y;
                 float v = (top.y - p.y) / AC.y;
                 p.x = top.x - v * AC.x;
-                p.z = top.z - v * AC.z;
+                p.z = top.z - v * AC.z;*/
+                Vector3 p;
+                p.y = middle.y;
+                float t;
+                p.x = SoftMath.GetScreenSpaceXFromScreenY(top, bottom, p.y, out t);
 
                 topTri = new TriangleVertex();
                 bottomTri = new TriangleVertex();
@@ -257,14 +263,22 @@ namespace NsSoftRenderer {
                 // 下面这个不对，要转到世界坐标系里算重心坐标
                 //Color pC = bottomC * v + (1 - v) * topC;
                 // 这里转到世界坐标系去算P点的重心坐标，再算出P点颜色插值
+                /*
                 Vector3 A = camera.ScreenToWorldPoint(top, false);
                 Vector3 B = camera.ScreenToWorldPoint(middle, false);
                 Vector3 C = camera.ScreenToWorldPoint(bottom, false);
                 Vector3 PP = camera.ScreenToWorldPoint(p, false);
                 float a, b, c;
                 SoftMath.GetBarycentricCoordinate(A, B, C, PP, out a, out b, out c);
-                Color pC = topC * a + middleC * b + bottomC * c;
+                Color pC = topC * a + middleC * b + bottomC * c;*/
                 //----------------------------------
+
+                /*
+                * 在摄影机VIEW空间 1/Zp = t * 1/Za + (1-t) * 1/Zc => 透视校正插值（一定要在摄影机ViewSpace[局部坐标系里]）
+                */
+                p.z = SoftMath.GetPerspectZFromLerp(top, bottom, t);
+                // 颜色UV的插值方式: Pcolor * 1/Zp = Acolor * t * 1/Za + (1 - t) * /Zc * Ccolor
+                Color pC = (topC * t * 1f / top.z + (1f - t) * bottomC / bottom.z) * p.z;
 
                 if (p.x > middle.x) {
                     topTri.triangle.p2 = p;
@@ -588,7 +602,11 @@ namespace NsSoftRenderer {
         
         // 填充下三角形
         protected void FillScreenBottomTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
-
+            // middle(p2)----top(p1)
+            //  \       /
+            //    bottom(p3)
+            int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p2.y), 0);
+            int yEnd =  Mathf.Min(Mathf.CeilToInt(tri.triangle.p3.y), m_FrontColorBuffer.Height - 1);
         }
 
         // tri已经是屏幕坐标系

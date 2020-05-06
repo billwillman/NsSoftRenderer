@@ -480,8 +480,9 @@ namespace NsSoftRenderer {
                     DebugVertexLog(vertex);
                 }
 
-               // 世界坐标系到屏幕坐标系
-               vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                // 世界坐标系到屏幕坐标系
+                // vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                vertex.triangle.Trans(this.WorldToScreenPointEvt);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }

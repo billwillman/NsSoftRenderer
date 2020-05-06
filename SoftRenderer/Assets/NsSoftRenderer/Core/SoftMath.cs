@@ -224,5 +224,21 @@ namespace NsSoftRenderer {
             p = tri.p1 * a + tri.p2 * b + tri.p3 * c;
             return p.z;
         }
+
+        // 在屏幕坐标系里使用线段上的一个Y坐标算出插值T并算出X坐标
+        public static float GetScreenSpaceXFromScreenY(Vector3 screenA, Vector3 screenB, float pY, out float t) {
+            t = (pY - screenB.y) / (screenA.y - screenB.y);
+            float ret = t * screenA.x + (1f - t) * screenB.x;
+            return ret;
+        }
+
+        // 透视校正插值获得Z
+        // 在屏幕坐标系三点其中每个点的Z都是在ViewSpace里，可根据屏幕坐标系的X,Y的插值T算出在ViewSpace中的另外一个点的Z
+        // 1/Zp = t * 1/Za + (1 - t) * 1/Zb 深度的倒数是线性的特性。
+        public static float GetPerspectZFromLerp(Vector3 screenA, Vector3 screenB, float t) {
+            float invZ = t * 1f / screenA.z + (1 - t) * 1f / screenB.z;
+            float ret = 1f / invZ;
+            return ret;
+        }
     }
 }
