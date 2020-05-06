@@ -607,6 +607,13 @@ namespace NsSoftRenderer {
             //    bottom(p3)
             int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p2.y), 0);
             int yEnd =  Mathf.Min(Mathf.CeilToInt(tri.triangle.p3.y), m_FrontColorBuffer.Height - 1);
+
+
+            for (int row = yStart; row <= yEnd; ++row) {
+
+            }
+
+            // 更新包围盒
         }
 
         // tri已经是屏幕坐标系
