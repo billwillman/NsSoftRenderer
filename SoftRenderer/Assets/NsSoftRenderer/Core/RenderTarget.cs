@@ -400,6 +400,8 @@ namespace NsSoftRenderer {
                         yMax = m_FrontColorBuffer.Height - 1;
                         xMax = m_FrontColorBuffer.Width - 1;
                     }
+
+                  //  Debug.LogErrorFormat("yMin: {0} yMax: {1} xMin: {2} xMax: {3}", yMin, yMax, xMin, xMax);
                     for (int r = yMin; r <= yMax; ++r) {
                         for (int c = xMin; c <= xMax; ++c) {
                             m_FrontColorBuffer.SetItem(c, r, m_CleanColor);

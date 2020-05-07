@@ -10,6 +10,7 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
     private Texture2D m_TargetTexture = null;
     private SoftDevice m_Device;
     public Color m_ClearColor = Color.clear;
+    public bool ApplyOneScale = true;
 
     public virtual void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect) {
         if (buffer != null && m_TargetTexture != null && buffer.IsVaild) {
@@ -80,8 +81,13 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
             m_TargetTexture = new Texture2D(m_Device.DeviceWidth, m_Device.DeviceHeight, TextureFormat.RGBA32, false, false);
             m_TargetTexture.filterMode = FilterMode.Point;
 
-            if (m_ShowRenderer != null)
+            if (m_ShowRenderer != null) {
                 m_ShowRenderer.sharedMaterial.mainTexture = m_TargetTexture;
+                if (ApplyOneScale) {
+                    m_ShowRenderer.transform.localScale = new Vector3(m_Device.DeviceWidth/100f, m_Device.DeviceHeight/100f, 1f);
+                }
+            }
+
         } else {
             DestroyTargetTexture();
         }

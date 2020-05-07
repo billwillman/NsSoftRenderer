@@ -98,7 +98,7 @@ namespace NsSoftRenderer {
             Vector3 v2 = tri.p2 - tri.p3;
             Vector3 n = Vector3.Cross(v1, v2);
             Vector3 lookAt = camera.LookAt;
-            bool isFront = Vector3.Dot(lookAt, n) < 0;
+            bool isFront = Vector3.Dot(lookAt, n) > 0;
 
             switch (mode) {
                 case CullMode.front: {          
