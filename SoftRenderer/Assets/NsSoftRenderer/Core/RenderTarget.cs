@@ -376,12 +376,32 @@ namespace NsSoftRenderer {
             return false;
         }
 
+        private bool m_IsCleanAllColorBuff = false;
+        public bool IsCleanAllColor {
+            get {
+                return m_IsCleanAllColorBuff;
+            }
+            set {
+                m_IsCleanAllColorBuff = value;
+            }
+        }
+
         private void Clear() {
-            if (m_FrontColorBuffer != null && (!m_IsCleanedColor) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Color))) {
+            if (m_FrontColorBuffer != null && ((!m_IsCleanedColor) || (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Color)))) {
                 m_IsCleanedColor = true;
                 if (m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) {
-                    for (int r = m_ColorDirthRect.yMin; r < m_ColorDirthRect.yMax; ++r) {
-                        for (int c = m_ColorDirthRect.xMin; c < m_ColorDirthRect.xMax; ++c) {
+                    int yMin = Mathf.Max(m_ColorDirthRect.yMin, 0);
+                    int yMax = Mathf.Min(m_ColorDirthRect.yMax, m_FrontColorBuffer.Height - 1);
+                    int xMin = Mathf.Max(m_ColorDirthRect.xMin, 0);
+                    int xMax = Mathf.Min(m_ColorDirthRect.xMax, m_FrontColorBuffer.Width - 1);
+                    if (m_IsCleanAllColorBuff) {
+                        yMin = 0;
+                        xMin = 0;
+                        yMax = m_FrontColorBuffer.Height - 1;
+                        xMax = m_FrontColorBuffer.Width - 1;
+                    }
+                    for (int r = yMin; r <= yMax; ++r) {
+                        for (int c = xMin; c <= xMax; ++c) {
                             m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
                         }
                     }
@@ -395,7 +415,7 @@ namespace NsSoftRenderer {
                 }
             }
 
-            if (m_FrontDepthBuffer != null && (!m_IsCleanedDepth) && (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth))) {
+            if (m_FrontDepthBuffer != null && ((!m_IsCleanedDepth) || (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth)))) {
                 m_IsCleanedDepth = true;
                 if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
                     for (int r = m_DepthDirthRect.yMin; r < m_DepthDirthRect.yMax; ++r) {
@@ -615,9 +635,10 @@ namespace NsSoftRenderer {
 
         // 行填充
         private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, 
-                Color startColor, Color endColor, RenderPassMode passMode) {
+                Color startColor, Color endColor, RenderPassMode passMode, out int minCol, out int maxCol) {
             // 扫描线
             int col = Mathf.Max(0, Mathf.FloorToInt(screenStart.x));
+            minCol = col;
             float startX = col + 0.5f;
             float endX = Mathf.Min(m_FrontColorBuffer.Width - 1, Mathf.CeilToInt(screenEnd.x)) + 0.5f;
             float e = -float.Epsilon;
@@ -647,6 +668,7 @@ namespace NsSoftRenderer {
                 startX += 1f; // 每次增加一个像素
                 ++col;
             }
+            maxCol = col;
         }
 
         // v是方向
@@ -665,6 +687,27 @@ namespace NsSoftRenderer {
             }
         }
 
+        protected void UpdateColorBufferRect(int minRow, int maxRow, int minCol, int maxCol) {
+            if (m_ColorDirthRect.size.x <= 0) {
+                m_ColorDirthRect.xMin = minCol;
+                m_ColorDirthRect.xMax = maxCol;
+            } else {
+                if (minCol < m_ColorDirthRect.xMin)
+                    m_ColorDirthRect.xMin = minCol;
+                if (maxCol > m_ColorDirthRect.xMax)
+                    m_ColorDirthRect.xMax = maxCol;
+            }
+            if (m_ColorDirthRect.size.y <= 0) {
+                m_ColorDirthRect.yMin = minRow;
+                m_ColorDirthRect.yMax = maxRow;
+            } else {
+                if (minRow < m_ColorDirthRect.yMin)
+                    m_ColorDirthRect.yMin = minRow;
+                if (maxRow > m_ColorDirthRect.yMax)
+                    m_ColorDirthRect.yMax = maxRow;
+            }
+        }
+
         // 填充上三角形
         protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
             //   top
@@ -674,12 +717,27 @@ namespace NsSoftRenderer {
             Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
             Vector2 middleTop = tri.triangle.p1 - tri.triangle.p2;
             int maxW = m_FrontColorBuffer.Width;
+            int minCol = -1;
+            int maxCol = -1;
+            int minRow = -1;
+            int maxRow = -1;
+            bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
                 float y = row + 0.5f;
                 if (y < tri.triangle.p3.y)
                     continue;
                 if (y > tri.triangle.p1.y)
                     break;
+
+                if (minRow < 0)
+                    minRow = row;
+                else if (minRow > row)
+                    minRow = row;
+
+                if (maxRow < 0)
+                    maxRow = row;
+                else if (maxRow < row)
+                    maxRow = row;
 
                 Vector3 start = Vector3.zero;
                 Vector3 end = Vector3.zero;
@@ -692,7 +750,18 @@ namespace NsSoftRenderer {
                 Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, start, tri.cP3, tri.cP1);
                 Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p2, tri.triangle.p1, end, tri.cP2, tri.cP1);
 
-                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode);
+                int miC, maC;
+                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
+                if (minCol < 0 || minCol > miC)
+                    minCol = miC;
+                if (maxCol < 0 || maxCol < maC)
+                    maxCol = maC;
+
+                isSet = true;
+            }
+
+            if (isSet) {
+                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
             }
         }
 
@@ -707,6 +776,11 @@ namespace NsSoftRenderer {
             Vector2 bottomMiddle = tri.triangle.p2 - tri.triangle.p3;
             Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
             int maxW = m_FrontColorBuffer.Width;
+            int minCol = -1;
+            int maxCol = -1;
+            int minRow = -1;
+            int maxRow = -1;
+            bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
                 
                 float y = row + 0.5f;
@@ -714,6 +788,16 @@ namespace NsSoftRenderer {
                     continue;
                 if (y > tri.triangle.p2.y)
                     break;
+
+                if (minRow < 0)
+                    minRow = row;
+                else if (minRow > row)
+                    minRow = row;
+
+                if (maxRow < 0)
+                    maxRow = row;
+                else if (maxRow < row)
+                    maxRow = row;
 
                 Vector3 start = Vector3.zero;
                 Vector3 end = Vector3.zero;
@@ -728,10 +812,20 @@ namespace NsSoftRenderer {
                 Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
 
                 // 扫描
-                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode);
+                int miC, maC;
+                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
+                if (minCol < 0 || minCol > miC)
+                    minCol = miC;
+                if (maxCol < 0 || maxCol < maC)
+                    maxCol = maC;
+
+                isSet = true;
             }
 
             // 更新填充Rect
+            if (isSet) {
+                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
+            }
         }
 
         // tri已经是屏幕坐标系

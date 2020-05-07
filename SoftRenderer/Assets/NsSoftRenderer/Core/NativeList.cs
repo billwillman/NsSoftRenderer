@@ -255,14 +255,14 @@ namespace Utils {
 
         public T this[int idx] {
             get {
-                if (IsVaild && m_Count > 0) {
+                if (IsVaild && m_Count > 0 && idx >= 0 && idx < m_Count) {
                     return m_Arr[idx];
                 }
                 return default(T);
             }
 
             set {
-                if (IsVaild && m_Count > 0) {
+                if (IsVaild && m_Count > 0 && idx >= 0 && idx < m_Count) {
                     m_Arr[idx] = value;
                 }
             }
