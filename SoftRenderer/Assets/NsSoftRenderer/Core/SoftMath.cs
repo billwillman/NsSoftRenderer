@@ -208,11 +208,38 @@ namespace NsSoftRenderer {
             Vector3 vv = Vector3.Cross(v1, v2);
             if (vv.x < 0)
                 vv = -vv;
+            vv = vv.normalized;
             b = vv.x; //-->> b即是u
             c = vv.y; //-->> c即是v
             a = 1f - b - c; //-->>a即是 1- u - v = r
         }
 
+        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c) {
+            Vector3 AA = new Vector3(A.x, A.y, 0f);
+            Vector3 BB = new Vector3(B.x, B.y, 0f);
+            Vector3 CC = new Vector3(C.x, C.y, 0f);
+            Vector3 PP = new Vector3(P.x, P.y, 0f);
+            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
+        }
+
+        public static float GetScreenSpaceBarycentricCoordinateZ(Vector3 A, Vector3 B, Vector3 C, Vector2 P) {
+            float a, b, c;
+            Vector3 AA = new Vector3(A.x, A.y, 0f);
+            Vector3 BB = new Vector3(B.x, B.y, 0f);
+            Vector3 CC = new Vector3(C.x, C.y, 0f);
+            Vector3 PP = new Vector3(P.x, P.y, 0f);
+            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
+            float invZ = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
+            float ret = 1f / invZ;
+            return ret;
+        }
+
+        public static float GetScreenSpaceBarycentricCoordinateZ(TriangleVertex tri, Vector2 P) {
+            float ret = GetScreenSpaceBarycentricCoordinateZ(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
+            return ret;
+        }
+
+        /*
         public static float GetScreenSpacePointZ(Triangle tri, float screenX, float screenY) {
             Vector3 p = new Vector3(screenX, screenY);
             Vector3 AB = tri.p2 - tri.p1;
@@ -223,12 +250,24 @@ namespace NsSoftRenderer {
             float a = 1 - b - c;
             p = tri.p1 * a + tri.p2 * b + tri.p3 * c;
             return p.z;
+        }*/
+
+        public static float GetDeltaT(float a, float b, float p) {
+            float ret = (p - b) / (a - b);
+            return ret;
         }
 
         // 在屏幕坐标系里使用线段上的一个Y坐标算出插值T并算出X坐标
         public static float GetScreenSpaceXFromScreenY(Vector3 screenA, Vector3 screenB, float pY, out float t) {
-            t = (pY - screenB.y) / (screenA.y - screenB.y);
+            t = GetDeltaT(screenA.y, screenB.y, pY);
+          //  t = (pY - screenB.y) / (screenA.y - screenB.y);
             float ret = t * screenA.x + (1f - t) * screenB.x;
+            return ret;
+        }
+
+        public static Color GetColorLerpFromScreenY(Vector3 A, Vector3 B, Vector3 P, Color aColor, Color bColor) {
+            float t = GetDeltaT(A.y, B.y, P.y);
+            Color ret = (aColor * t * 1f / A.z + bColor * (1f - t) * 1f/B.z) * P.z;
             return ret;
         }
 

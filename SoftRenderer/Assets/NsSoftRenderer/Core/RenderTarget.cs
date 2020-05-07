@@ -194,6 +194,7 @@ namespace NsSoftRenderer {
             bottom = 2
         };
 
+        /*
         private float GetScreenSpacePointZ(Triangle tri, float screenX, float screenY) {
             Vector3 p = new Vector3(screenX, screenY);
             Vector3 AB = tri.p2 - tri.p1;
@@ -204,7 +205,7 @@ namespace NsSoftRenderer {
             float a = 1 - b - c;
             p = tri.p1 * a + tri.p2 * b + tri.p3 * c;
             return p.z;
-        }
+        }*/
 
         // 返回值：0:共两个三角形，分上下。1：只有上三角形。2.只有下三角形
         // topTri和bottomTri， p1.Y >= P2.y>= P3.y 如果其中Y相等，則P1.X>=p2.X>=p3.X
@@ -591,13 +592,43 @@ namespace NsSoftRenderer {
         }
 
         // 行填充
-        private void ScanLine(Vector3 screenStart, Vector3 screenEnd) {
+        private void ScreenSpaceScanLine(TriangleVertex tri, Vector3 screenStart, Vector3 screenEnd, Color startColor, Color endColor) {
+            // 扫描线
+            float startX = Mathf.Max(0, Mathf.FloorToInt(screenStart.x)) + 0.5f;
+            float endX = Mathf.Min(m_FrontColorBuffer.Width - 1, Mathf.CeilToInt(screenEnd.x)) + 0.5f;
+            float e = -float.Epsilon;
+            while (startX <= endX) {
+                Vector2 P = new Vector2(startX, screenStart.y);
+                // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
+                float a, b, c;
+                SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
+                if (a >= e && b >= e && c >= e) {
+                    // 填充颜色
+                }
 
+                startX += 1f; // 每次增加一个像素
+            }
         }
 
         // 填充上三角形
         protected void FillScreenTopTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
 
+        }
+
+        // v是方向
+        protected float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
+            bool isZeroX = Mathf.Abs(v.x) <= float.Epsilon;
+            bool isZeroY = Mathf.Abs(v.y) <= float.Epsilon;
+            if (isZeroX && isZeroY) {
+                return 0;
+            } else if (isZeroX) {
+                return start.x;
+            } else if (isZeroY) {
+                return 0;
+            } else {
+                float ret = v.x / v.y * (y - start.y) + start.x;
+                return ret;
+            }
         }
         
         // 填充下三角形
@@ -605,15 +636,35 @@ namespace NsSoftRenderer {
             // middle(p2)----top(p1)
             //  \       /
             //    bottom(p3)
-            int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p2.y), 0);
-            int yEnd =  Mathf.Min(Mathf.CeilToInt(tri.triangle.p3.y), m_FrontColorBuffer.Height - 1);
+            int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p3.y), 0);
+            int yEnd =  Mathf.Min(Mathf.CeilToInt(tri.triangle.p2.y), m_FrontColorBuffer.Height - 1);
 
-
+            Vector2 bottomMiddle = tri.triangle.p2 - tri.triangle.p3;
+            Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
+            int maxW = m_FrontColorBuffer.Width;
             for (int row = yStart; row <= yEnd; ++row) {
+                Vector3 start = Vector3.zero;
+                Vector3 end = Vector3.zero;
+                float y = row + 0.5f;
+                if (y < tri.triangle.p3.y)
+                    continue;
+                if (y > tri.triangle.p2.y)
+                    break;
 
+                start.y = y; end.y = y;
+                start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
+                end.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
+                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
+                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
+
+                Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
+                Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
+
+                // 扫描
+                ScreenSpaceScanLine(tri, start, end, startColor, endColor);
             }
 
-            // 更新包围盒
+            // 更新填充Rect
         }
 
         // tri已经是屏幕坐标系
