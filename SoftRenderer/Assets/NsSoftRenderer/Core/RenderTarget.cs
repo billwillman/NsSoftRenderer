@@ -591,6 +591,28 @@ namespace NsSoftRenderer {
             }
         }
 
+        // ZTest检查
+        private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
+            return true;
+            /*
+            switch(passMode.ZTest) {
+                case ZTestOp.Equal:
+                    float z = 1f / p.z;
+                    float oldZ = m_FrontDepthBuffer.GetItem(row, col);
+                    return Mathf.Abs(oldZ - z) <= float.Epsilon;
+                case ZTestOp.Greate:
+                    break;
+                case ZTestOp.GreateEqual:
+                    break;
+                case ZTestOp.Less:
+                    break;
+                case ZTestOp.LessEqual:
+                    break;
+                default:
+                    return false;
+            }*/
+        }
+
         // 行填充
         private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, 
                 Color startColor, Color endColor, RenderPassMode passMode) {
@@ -616,18 +638,15 @@ namespace NsSoftRenderer {
                 SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
                 if (a >= e && b >= e && c >= e) {
                     // 填充颜色
-                    Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
-                    m_FrontColorBuffer.SetItem(col, row, color);
+                    if (CheckZTest(passMode, row, col, P)) {
+                        Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+                        m_FrontColorBuffer.SetItem(col, row, color);
+                    }
                 }
 
                 startX += 1f; // 每次增加一个像素
                 ++col;
             }
-        }
-
-        // 填充上三角形
-        protected void FillScreenTopTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
-
         }
 
         // v是方向
@@ -645,9 +664,40 @@ namespace NsSoftRenderer {
                 return ret;
             }
         }
-        
+
+        // 填充上三角形
+        protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
+            //   top
+            // bottom middle
+            int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p3.y), 0);
+            int yEnd = Mathf.Min(Mathf.CeilToInt(tri.triangle.p1.y), m_FrontColorBuffer.Height - 1);
+            Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
+            Vector2 middleTop = tri.triangle.p1 - tri.triangle.p2;
+            int maxW = m_FrontColorBuffer.Width;
+            for (int row = yStart; row <= yEnd; ++row) {
+                float y = row + 0.5f;
+                if (y < tri.triangle.p3.y)
+                    continue;
+                if (y > tri.triangle.p1.y)
+                    break;
+
+                Vector3 start = Vector3.zero;
+                Vector3 end = Vector3.zero;
+                start.y = y; end.y = y;
+                start.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
+                end.x = GetVector2XFromY(middleTop, tri.triangle.p2, y);
+                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
+                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
+
+                Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, start, tri.cP3, tri.cP1);
+                Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p2, tri.triangle.p1, end, tri.cP2, tri.cP1);
+
+                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode);
+            }
+        }
+
         // 填充下三角形
-        protected void FillScreenBottomTriangle(SoftCamera camera, RenderPassMode passMode, TriangleVertex tri) {
+        protected void FillScreenBottomTriangle(RenderPassMode passMode, TriangleVertex tri) {
             // middle(p2)----top(p1)
             //  \       /
             //    bottom(p3)
@@ -658,13 +708,15 @@ namespace NsSoftRenderer {
             Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
             int maxW = m_FrontColorBuffer.Width;
             for (int row = yStart; row <= yEnd; ++row) {
-                Vector3 start = Vector3.zero;
-                Vector3 end = Vector3.zero;
+                
                 float y = row + 0.5f;
                 if (y < tri.triangle.p3.y)
                     continue;
                 if (y > tri.triangle.p2.y)
                     break;
+
+                Vector3 start = Vector3.zero;
+                Vector3 end = Vector3.zero;
 
                 start.y = y; end.y = y;
                 start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
@@ -689,14 +741,14 @@ namespace NsSoftRenderer {
             var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
              switch (triType) {
                 case TriangleVertex.ScreenSpaceTopBottomType.top:
-                    FillScreenTopTriangle(camera, passMode, topTri);
+                    FillScreenTopTriangle(passMode, topTri);
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.bottom:
-                    FillScreenBottomTriangle(camera, passMode, bottomTri);
+                    FillScreenBottomTriangle(passMode, bottomTri);
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
-                    FillScreenTopTriangle(camera, passMode, topTri);
-                    FillScreenBottomTriangle(camera, passMode, bottomTri);
+                    FillScreenTopTriangle(passMode, topTri);
+                    FillScreenBottomTriangle(passMode, bottomTri);
                     break;
             }
         }
