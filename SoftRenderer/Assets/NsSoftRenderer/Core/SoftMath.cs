@@ -198,7 +198,7 @@ namespace NsSoftRenderer {
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy][ABz, ACz, PAz]的向量，也就是这两个向量的叉乘。
          *   【注意】矩阵变换后的三角形的重心和原来三角形的重心可能会不一致。。。
         */
-        public static void GetBarycentricCoordinate(Vector3 A, Vector3 B,Vector3 C, Vector3 P, out float a, out float b, out float c) {
+        public static void GetBarycentricCoordinate(Vector3 A, Vector3 B,Vector3 C, Vector3 P, out float a, out float b, out float c, bool isUseNormal = true) {
             Vector3 AB = B - A;
             Vector3 AC = C - A;
             Vector3 PA = A - P;
@@ -208,18 +208,19 @@ namespace NsSoftRenderer {
             Vector3 vv = Vector3.Cross(v1, v2);
             if (vv.x < 0)
                 vv = -vv;
-            vv = vv.normalized;
+            if (isUseNormal)
+                vv = vv.normalized;
             b = vv.x; //-->> b即是u
             c = vv.y; //-->> c即是v
             a = 1f - b - c; //-->>a即是 1- u - v = r
         }
 
-        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c) {
+        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c, bool isUseNormal = true) {
             Vector3 AA = new Vector3(A.x, A.y, 0f);
             Vector3 BB = new Vector3(B.x, B.y, 0f);
             Vector3 CC = new Vector3(C.x, C.y, 0f);
             Vector3 PP = new Vector3(P.x, P.y, 0f);
-            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
+            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c, isUseNormal);
         }
 
         public static float GetScreenSpaceBarycentricCoordinateZ(Vector3 A, Vector3 B, Vector3 C, Vector2 P) {
@@ -268,6 +269,12 @@ namespace NsSoftRenderer {
         public static Color GetColorLerpFromScreenY(Vector3 A, Vector3 B, Vector3 P, Color aColor, Color bColor) {
             float t = GetDeltaT(A.y, B.y, P.y);
             Color ret = (aColor * t * 1f / A.z + bColor * (1f - t) * 1f/B.z) * P.z;
+            return ret;
+        }
+
+        public static Color GetColorLerpFromScreenX(Vector3 A, Vector3 B, Vector3 P, Color aColor, Color bColor) {
+            float t = GetDeltaT(A.x, B.x, P.x);
+            Color ret = (aColor * t * 1f / A.z + bColor * (1f - t) * 1f / B.z) * P.z;
             return ret;
         }
 

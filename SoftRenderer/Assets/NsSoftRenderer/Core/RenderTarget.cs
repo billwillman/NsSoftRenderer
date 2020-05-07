@@ -592,21 +592,35 @@ namespace NsSoftRenderer {
         }
 
         // 行填充
-        private void ScreenSpaceScanLine(TriangleVertex tri, Vector3 screenStart, Vector3 screenEnd, Color startColor, Color endColor) {
+        private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, Color startColor, Color endColor) {
             // 扫描线
-            float startX = Mathf.Max(0, Mathf.FloorToInt(screenStart.x)) + 0.5f;
+            int col = Mathf.Max(0, Mathf.FloorToInt(screenStart.x));
+            float startX = col + 0.5f;
             float endX = Mathf.Min(m_FrontColorBuffer.Width - 1, Mathf.CeilToInt(screenEnd.x)) + 0.5f;
             float e = -float.Epsilon;
             while (startX <= endX) {
-                Vector2 P = new Vector2(startX, screenStart.y);
+                if (startX < screenStart.x) {
+                    startX += 1f;
+                    continue;
+                }
+                Vector3 P = new Vector2(startX, screenStart.y);
+                float t;
+                if (Mathf.Abs(screenEnd.x - screenStart.x) <= float.Epsilon)
+                    t = 1f;
+                else
+                    t = (P.x - screenEnd.x) / (screenStart.x - screenEnd.x);
+                P.z = SoftMath.GetPerspectZFromLerp(screenStart, screenEnd, t);
                 // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
                 float a, b, c;
                 SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
                 if (a >= e && b >= e && c >= e) {
                     // 填充颜色
+                    Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+                    m_FrontColorBuffer.SetItem(col, row, color);
                 }
 
                 startX += 1f; // 每次增加一个像素
+                ++col;
             }
         }
 
@@ -661,7 +675,7 @@ namespace NsSoftRenderer {
                 Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
 
                 // 扫描
-                ScreenSpaceScanLine(tri, start, end, startColor, endColor);
+                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor);
             }
 
             // 更新填充Rect
