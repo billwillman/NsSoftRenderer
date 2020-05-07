@@ -648,10 +648,10 @@ namespace NsSoftRenderer {
             float endX = Mathf.Min(m_FrontColorBuffer.Width - 1, Mathf.CeilToInt(screenEnd.x)) + 0.5f;
             float e = -float.Epsilon;
             while (startX <= endX) {
-                if (startX < screenStart.x) {
-                    startX += 1f;
-                    continue;
-                }
+              //  if (startX < screenStart.x) {
+              //      startX += 1f;
+             //       continue;
+             //   }
                 Vector3 P = new Vector2(startX, screenStart.y);
                 float t;
                 if (Mathf.Abs(screenEnd.x - screenStart.x) <= float.Epsilon)
@@ -729,10 +729,10 @@ namespace NsSoftRenderer {
             bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
                 float y = row + 0.5f;
-                if (y < tri.triangle.p3.y)
-                    continue;
-                if (y > tri.triangle.p1.y)
-                    break;
+               // if (y < tri.triangle.p3.y)
+               //     continue;
+              //  if (y > tri.triangle.p1.y)
+              //      break;
 
                 if (minRow < 0)
                     minRow = row;
