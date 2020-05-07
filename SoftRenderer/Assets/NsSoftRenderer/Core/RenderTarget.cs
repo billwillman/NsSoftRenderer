@@ -592,7 +592,8 @@ namespace NsSoftRenderer {
         }
 
         // 行填充
-        private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, Color startColor, Color endColor) {
+        private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, 
+                Color startColor, Color endColor, RenderPassMode passMode) {
             // 扫描线
             int col = Mathf.Max(0, Mathf.FloorToInt(screenStart.x));
             float startX = col + 0.5f;
@@ -675,7 +676,7 @@ namespace NsSoftRenderer {
                 Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
 
                 // 扫描
-                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor);
+                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode);
             }
 
             // 更新填充Rect
