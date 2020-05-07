@@ -79,7 +79,7 @@ namespace NsSoftRenderer {
             }
         }
 
-        internal virtual void DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) { }
+        internal virtual bool DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) { return false; }
 
         internal bool RegisterRenderQueue(int renderQueue, IRenderQueue queue) {
             if (queue == null)

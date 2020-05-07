@@ -16,22 +16,26 @@ namespace NsSoftRenderer {
         }
 
         // 排序
-        internal override void DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) {
+        internal override bool DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) {
             if (camera == null || objMap == null)
-                return;
+                return false;
             NativeList<int> visibleList;
             camera.DoCameraPreRender();
             camera.Cull(objMap, out visibleList);
+            bool ret = false;
             if (visibleList != null && visibleList.Count > 0) {
                 for (int i = 0; i < visibleList.Count; ++i) {
                     SoftRenderObject obj = camera.GetRenderObject(visibleList[i]);
                     if (obj != null) {
                         // 后面考虑排序和后面模拟可编程。。。
-                        obj.Render(camera, m_DefaultPassMode);
+                        if (obj.Render(camera, m_DefaultPassMode))
+                            ret = true;
                     }
                 }
             }
             camera.DoCameraPostRender(m_DefaultPassMode);
+
+            return ret;
         }
     }
 }

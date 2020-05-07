@@ -59,11 +59,11 @@ namespace NsSoftRenderer {
         }
 
         // 提交到渲染队列中
-        public override void Render(SoftCamera camera, RenderPassMode passMode) {
+        public override bool Render(SoftCamera camera, RenderPassMode passMode) {
             if (camera == null || passMode == null || m_Mesh == null)
-                return;
+                return false;
             UpdateGlobalToLocalMatrix();
-            camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
+            return camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
         }
     }
 

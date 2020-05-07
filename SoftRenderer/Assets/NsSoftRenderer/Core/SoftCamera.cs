@@ -505,12 +505,13 @@ namespace NsSoftRenderer {
             FlipTraiangles(passMode);
         }
 
-        private void RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
+        private bool RenderSubMesh(SoftMesh mesh, SoftSubMesh subMesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
             if (subMesh == null || passMode == null)
-                return;
+                return false;
             var indexes = subMesh.Indexes;
             var vertexs = mesh.Vertexs;
             var colors = mesh.Colors;
+            bool ret = false;
 
             bool isColorEmpty = colors  == null || colors.Count <= 0;
             Color c1 = Color.white;
@@ -548,20 +549,25 @@ namespace NsSoftRenderer {
 
                     // 进入VertexShader了， 做顶点变换等
                     m_TrianglesMgr.AddTriangle(triV);
+                    ret = true;
                 }
             }
+            return ret;
         }
 
-        public void RenderMesh(SoftMesh mesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
+        public bool RenderMesh(SoftMesh mesh, Matrix4x4 objToWorld, RenderPassMode passMode) {
             if (mesh == null || passMode == null)
-                return;
+                return false;
             var subMeshes = mesh.SubMeshes;
+            bool ret = false;
             if (subMeshes != null) {
                 for (int i = 0; i < subMeshes.Count; ++i) {
                     var subMesh = subMeshes[i];
-                    RenderSubMesh(mesh, subMesh, objToWorld, passMode);
+                    if (RenderSubMesh(mesh, subMesh, objToWorld, passMode))
+                        ret = true;
                 }
             }
+            return ret;
         }
 
         public SoftRenderObject GetRenderObject(int instanceId) {

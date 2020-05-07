@@ -436,10 +436,13 @@ namespace NsSoftRenderer {
                     RectInt fillRect = new RectInt(0, 0, this.Width, this.Height);
                     notify.OnFillColor(m_FrontColorBuffer, fillRect, _cZeroRect);
                 } else {
-                    if (m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) {
+                    if ((m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) || (m_ClearColorDirtRect.width > 0 && m_ClearColorDirtRect.height > 0)) {
                         notify.OnFillColor(m_FrontColorBuffer, m_ColorDirthRect, m_ClearColorDirtRect);
                     }
                 }
+
+                // 清理
+               // Clear();
             }
         }
 
