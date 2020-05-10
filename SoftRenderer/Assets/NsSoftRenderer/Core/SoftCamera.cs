@@ -608,6 +608,12 @@ namespace NsSoftRenderer {
                 m_RenderObjMgr = null;
             }
 
+            if (m_TrianglesMgr != null)
+            {
+                m_TrianglesMgr.Dispose();
+                m_TrianglesMgr = null;
+            }
+
             base.OnFree(isManual);
         }
 
