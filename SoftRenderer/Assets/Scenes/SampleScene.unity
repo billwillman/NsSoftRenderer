@@ -214,6 +214,7 @@ MonoBehaviour:
   DeviceHeight: 600
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
   ApplyOneScale: 1
+  DisableDirtRect: 0
   m_ShowRenderer: {fileID: 1411613832}
   m_IsShowRenderer: 1
 --- !u!4 &366691690
@@ -457,7 +458,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788346339}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1788346342
 Transform:
   m_ObjectHideFlags: 0
