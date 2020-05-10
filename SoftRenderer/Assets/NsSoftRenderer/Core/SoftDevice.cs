@@ -174,6 +174,21 @@ namespace NsSoftRenderer {
             m_StaticDevice = this;
         }
 
+        public bool DisableDirtRect
+        {
+            get
+            {
+                if (m_RenerTarget != null)
+                    return m_RenerTarget.IsCleanAllColor;
+                return false;
+            }
+            set
+            {
+                if (m_RenerTarget != null)
+                    m_RenerTarget.IsCleanAllColor = value;
+            }
+        }
+
         public Color ClearColor {
             get {
                 if (m_RenerTarget != null)
