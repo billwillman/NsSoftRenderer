@@ -167,7 +167,7 @@ namespace NsSoftRenderer {
                 middleC = cP2;
             }
 
-            if (top.y < triangle.p3.y || (Mathf.Abs(top.y - triangle.p2.y) <= float.Epsilon && triangle.p3.x > top.x)) {
+            if (top.y < triangle.p3.y || (Mathf.Abs(top.y - triangle.p3.y) <= float.Epsilon && triangle.p3.x > top.x)) {
                 bottom = top;
                 bottomC = topC;
                 top = triangle.p3;
