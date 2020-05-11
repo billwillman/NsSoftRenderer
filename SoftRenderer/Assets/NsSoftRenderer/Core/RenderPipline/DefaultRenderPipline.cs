@@ -13,6 +13,7 @@ namespace NsSoftRenderer {
 
         public DefaultRenderPipline() {
             RegisterRenderQueue(RenderQueue.Geometry, new GeometryQueue());
+            m_DefaultPassMode.vertexShader = new VertexShader();
         }
 
         // 排序
