@@ -37,6 +37,12 @@ namespace NsSoftRenderer {
                     int[] idxs = new int[3];
                     idxs[0] = 0; idxs[1] = 2; idxs[2] = 1;
                     m_CustomMesh.SetIndices(idxs, MeshTopology.Triangles, 0);
+
+                    List<Color> colors = new List<Color>();
+                    colors.Add(Color.red);
+                    colors.Add(Color.green);
+                    colors.Add(Color.blue);
+                    m_CustomMesh.SetColors(colors);
                 }
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;
