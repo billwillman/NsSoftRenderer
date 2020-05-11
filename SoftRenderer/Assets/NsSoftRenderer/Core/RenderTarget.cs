@@ -622,24 +622,33 @@ namespace NsSoftRenderer {
             return orgZ;
         }
 
+        private int CompareZBuffer(float oldZ, float newZ) {
+            if (Mathf.Abs(oldZ - newZ) <= float.Epsilon)
+                return 0;
+            if (oldZ < newZ)
+                return -1;
+            else
+                return 1;
+        }
+
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
             float z = TransZBuffer(p.z);
             float oldZ = m_FrontDepthBuffer.GetItem(row, col);
             if (oldZ < 0)
                 return true;
-
+            int cmp = CompareZBuffer(oldZ, z);
             switch (passMode.ZTest) {
                 case ZTestOp.Equal:
-                    return Mathf.Abs(oldZ - z) <= float.Epsilon;
+                    return cmp == 0;
                 case ZTestOp.Greate:
-                    return (z > oldZ);
+                    return cmp > 1;
                 case ZTestOp.GreateEqual:
-                    return (z >= oldZ);
+                    return cmp >= 0;
                 case ZTestOp.Less:
-                    return (z < oldZ);
+                    return cmp < 0;
                 case ZTestOp.LessEqual:
-                    return (z <= oldZ);
+                    return cmp <= 0;
                 default:
                     return false;
             }
