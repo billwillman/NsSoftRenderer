@@ -8,7 +8,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <ProjectGuid>{18CA33B3-E5DC-5742-7FAD-23F7B166E606}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -80,8 +81,10 @@
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMesh.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMeshRenderer.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftRenderObject.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\VertexShader.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
+    <None Include="Assets\NewUnlitShader.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>

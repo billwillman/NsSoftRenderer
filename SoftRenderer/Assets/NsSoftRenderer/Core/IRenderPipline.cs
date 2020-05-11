@@ -40,6 +40,9 @@ namespace NsSoftRenderer {
         public CullMode Cull = CullMode.back;
         // ZTest模式
         public ZTestOp ZTest = ZTestOp.Less;
+        // 当前的VertexShader
+        public VertexShader vertexShader = null;
+
     }
 
     // 渲染Pass
