@@ -617,14 +617,14 @@ namespace NsSoftRenderer {
         }
 
         private float TransZBuffer(float orgZ) {
+            if (Mathf.Abs(orgZ) > float.Epsilon)
+                return 1f/orgZ;
             return orgZ;
         }
 
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
-            float z = 0;
-            if (Mathf.Abs(p.z) > float.Epsilon)
-                z = TransZBuffer(p.z);
+            float z = z = TransZBuffer(p.z);
             float oldZ = m_FrontDepthBuffer.GetItem(row, col);
             if (oldZ < 0)
                 return true;
@@ -710,9 +710,7 @@ namespace NsSoftRenderer {
                         if (doFill) {
                             m_FrontColorBuffer.SetItem(col, row, color);
                             // 写入ZBUFFER
-                            float z = 0f;
-                            if (Mathf.Abs(P.z) > float.Epsilon)
-                                z = TransZBuffer(P.z);
+                            float z = TransZBuffer(P.z);
                             // 填充ZBUFFER
                             FillZBuffer(row, col, z);
                         }
