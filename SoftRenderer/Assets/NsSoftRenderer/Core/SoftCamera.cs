@@ -492,7 +492,8 @@ namespace NsSoftRenderer {
                 } else {
                     InitVertexShader(passMode.vertexShader);
                     passMode.vertexShader.Main(ref vertex);
-                    
+                    vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
+
                 }
                 //vertex.triangle.Trans(this.WorldToScreenPointEvt);
                 //-----------------------

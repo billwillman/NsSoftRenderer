@@ -42,7 +42,8 @@ namespace NsSoftRenderer {
         public ZTestOp ZTest = ZTestOp.Less;
         // 当前的VertexShader
         public VertexShader vertexShader = null;
-
+        // 当前的PixelShader
+        public PixelShader pixelShader = null;
     }
 
     // 渲染Pass

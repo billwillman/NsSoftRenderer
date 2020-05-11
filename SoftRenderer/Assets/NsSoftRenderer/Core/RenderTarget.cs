@@ -666,6 +666,13 @@ namespace NsSoftRenderer {
                     // 填充颜色
                     if (CheckZTest(passMode, row, col, P)) {
                         Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+                        // 这部分是PixelShader
+                        if (passMode.pixelShader != null) {
+                            PixelData data = new PixelData();
+                            data.color = color;
+                            color = passMode.pixelShader.Main(data);
+                        }
+                        // ----------------
                         m_FrontColorBuffer.SetItem(col, row, color);
                     }
                 }
