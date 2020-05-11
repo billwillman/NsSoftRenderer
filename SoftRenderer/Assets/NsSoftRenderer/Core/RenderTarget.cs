@@ -616,26 +616,50 @@ namespace NsSoftRenderer {
             }
         }
 
+        private float TransZBuffer(float orgZ) {
+            return orgZ;
+        }
+
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
-            return true;
-            /*
-            switch(passMode.ZTest) {
+            float z = 0;
+            if (Mathf.Abs(p.z) > float.Epsilon)
+                z = TransZBuffer(p.z);
+            float oldZ = m_FrontDepthBuffer.GetItem(row, col);
+            if (oldZ < 0)
+                return true;
+
+            switch (passMode.ZTest) {
                 case ZTestOp.Equal:
-                    float z = 1f / p.z;
-                    float oldZ = m_FrontDepthBuffer.GetItem(row, col);
                     return Mathf.Abs(oldZ - z) <= float.Epsilon;
                 case ZTestOp.Greate:
-                    break;
+                    return (z > oldZ);
                 case ZTestOp.GreateEqual:
-                    break;
+                    return (z >= oldZ);
                 case ZTestOp.Less:
-                    break;
+                    return (z < oldZ);
                 case ZTestOp.LessEqual:
-                    break;
+                    return (z <= oldZ);
                 default:
                     return false;
-            }*/
+            }
+        }
+
+        private void FillZBuffer(int row, int col, float z) {
+            m_FrontDepthBuffer.SetItem(col, row, z);
+            if (m_IsCleanedDepth) {
+                m_IsCleanedDepth = false;
+
+                m_DepthDirthRect.xMin = col;
+                m_DepthDirthRect.xMax = col;
+                m_DepthDirthRect.yMin = row;
+                m_DepthDirthRect.yMax = row;
+            } else {
+                m_DepthDirthRect.xMin = Mathf.Min(col, m_DepthDirthRect.xMin);
+                m_DepthDirthRect.xMax = Mathf.Max(col, m_DepthDirthRect.xMax);
+                m_DepthDirthRect.yMin = Mathf.Min(row, m_DepthDirthRect.yMin);
+                m_DepthDirthRect.yMax = Mathf.Max(row, m_DepthDirthRect.yMax);
+            }
         }
 
         // 行填充
@@ -663,17 +687,35 @@ namespace NsSoftRenderer {
                 float a, b, c;
                 SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
                 if (a >= e && b >= e && c >= e) {
-                    // 填充颜色
-                    if (CheckZTest(passMode, row, col, P)) {
+                    
+                    bool doFill = false;
+                    bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                    /*
+                     * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
+                     * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
+                     * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
+                     */
+
+                    // 填充颜色 early-z culling
+                    if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
                         Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
                         // 这部分是PixelShader
                         if (passMode.pixelShader != null) {
                             PixelData data = new PixelData();
                             data.color = color;
-                            color = passMode.pixelShader.Main(data);
+                            doFill = passMode.pixelShader.Main(data, out color);
                         }
                         // ----------------
-                        m_FrontColorBuffer.SetItem(col, row, color);
+                        if (doFill) {
+                            m_FrontColorBuffer.SetItem(col, row, color);
+                            // 写入ZBUFFER
+                            float z = 0f;
+                            if (Mathf.Abs(P.z) > float.Epsilon)
+                                z = TransZBuffer(P.z);
+                            // 填充ZBUFFER
+                            FillZBuffer(row, col, z);
+                        }
                     }
                 }
 

@@ -17,8 +17,11 @@ namespace NsSoftRenderer {
     }
 
     public class PixelShader {
-        public virtual Color Main(PixelData data) {
-            return data.color;
+        // 是否开启了Clip
+        public bool isUseClip = false;
+        public virtual bool Main(PixelData data, out Color frag) {
+            frag = data.color;
+            return true; // 这里返回值模拟clip操作
         }
     }
 }

@@ -46,6 +46,17 @@ namespace NsSoftRenderer {
                 }
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;
+            } else if (m_MeshFilter != null && m_MeshFilter.sharedMesh != null) {
+                var mesh = m_MeshFilter.sharedMesh;
+                List<Color> colors = new List<Color>();
+                mesh.GetColors(colors);
+                if (colors.Count <= 0 && mesh.vertexCount > 0) {
+                    colors.Capacity = mesh.vertexCount;
+                    for (int i = 0; i < mesh.vertexCount; ++i) {
+                        colors.Add(new Color(Random.Range(0f, 1.0f), Random.Range(0f, 1.0f), Random.Range(0f, 1.0f), 1f));
+                    }
+                    mesh.SetColors(colors);
+                }
             }
         }
 
