@@ -472,6 +472,10 @@ namespace NsSoftRenderer {
             }
         }
 
+        private void InitVertexShader(VertexShader vertexShader) {
+            vertexShader.MVPMatrix = this.Shader_MVP_Matrix;
+        }
+
         private void FlipTriangle(TriangleVertex vertex, RenderPassMode passMode) {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
@@ -485,6 +489,10 @@ namespace NsSoftRenderer {
                 if (passMode.vertexShader == null) {
                     // 默认的一个处理
                     vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                } else {
+                    InitVertexShader(passMode.vertexShader);
+                    passMode.vertexShader.Main(ref vertex);
+                    
                 }
                 //vertex.triangle.Trans(this.WorldToScreenPointEvt);
                 //-----------------------
@@ -865,6 +873,20 @@ namespace NsSoftRenderer {
 
         //   private Matrix4x4 testInvMat;
 
+        private Matrix4x4 m_Shader_MVP_Matrix;
+        private Matrix4x4 Shader_MVP_Matrix {
+            get {
+                UpdateMatrix();
+                return m_Shader_MVP_Matrix;
+            }
+        }
+
+        private void Update_Shader_MVP_Matrix() {
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+            m_Shader_MVP_Matrix = scaleMat * transMat * m_ViewProjMatrix;
+        }
+
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         // 最终UNITY的效果是 X：0~1 Y: 0~1,  Z is in world units from the camera.
         // 來自UNITY幫助：isUseViewZ 设置为TRUE的时候
@@ -1090,6 +1112,8 @@ namespace NsSoftRenderer {
                 UpdateViewProjMatrix();
                 // 更新世界坐标到屏幕
                 //UpdateViewProjLinerScreenMatrix();
+                // Shader相关
+                Update_Shader_MVP_Matrix();
             }
         }
 
