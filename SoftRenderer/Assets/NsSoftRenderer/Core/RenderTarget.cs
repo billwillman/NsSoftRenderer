@@ -624,7 +624,7 @@ namespace NsSoftRenderer {
 
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
-            float z = z = TransZBuffer(p.z);
+            float z = TransZBuffer(p.z);
             float oldZ = m_FrontDepthBuffer.GetItem(row, col);
             if (oldZ < 0)
                 return true;
