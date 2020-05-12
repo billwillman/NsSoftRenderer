@@ -618,6 +618,7 @@ namespace NsSoftRenderer {
 
         private float TransZBuffer(float orgZ) {
             if (Mathf.Abs(orgZ) > float.Epsilon)
+               // return orgZ * 1000f;
                 return 1f/orgZ;
             return orgZ;
         }
@@ -634,7 +635,7 @@ namespace NsSoftRenderer {
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
             float z = TransZBuffer(p.z);
-            float oldZ = m_FrontDepthBuffer.GetItem(row, col);
+            float oldZ = m_FrontDepthBuffer.GetItem(col, row);
             if (oldZ < 0)
                 return true;
             int cmp = CompareZBuffer(oldZ, z);

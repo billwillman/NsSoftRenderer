@@ -292,7 +292,7 @@ namespace NsSoftRenderer {
         public static Color PointLight_DiffuseColor(Vector3 lightPos, Vector3 pointPos, Color lightColor, float lightI, Vector3 pointNormal) {
             Vector3 L = lightPos - pointPos;
             float r = L.magnitude;
-            // 
+            // lightI / (r * r) 模拟衰减
             Color ret = lightColor * lightI / (r * r) * Mathf.Max(0, Vector3.Dot(L, pointNormal));
             return ret;
         }
