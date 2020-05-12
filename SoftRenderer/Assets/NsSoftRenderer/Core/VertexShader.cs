@@ -6,10 +6,11 @@ namespace NsSoftRenderer {
     public class VertexShader {
         // 主函数,没有弄额外的结构，懒得弄，简单些
         public virtual void Main(ref TriangleVertex vertex) {
-            vertex.triangle.MulMatrix(MVPMatrix);
+            vertex.triangle.MulMatrix(m_Owner.MVPMatrix);
         }
 
-        public Matrix4x4 MVPMatrix = Matrix4x4.identity;
+        
+        public RenderPassMode m_Owner = null;
     }
 
     public struct PixelData {
@@ -23,5 +24,7 @@ namespace NsSoftRenderer {
             frag = data.color;
             return true; // 这里返回值模拟clip操作
         }
+
+        public RenderPassMode m_Owner = null;
     }
 }

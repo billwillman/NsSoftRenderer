@@ -472,8 +472,8 @@ namespace NsSoftRenderer {
             }
         }
 
-        private void InitVertexShader(VertexShader vertexShader) {
-            vertexShader.MVPMatrix = this.Shader_MVP_Matrix;
+        private void InitPassMode(RenderPassMode passMode) {
+            passMode.MVPMatrix = this.Shader_MVP_Matrix;
         }
 
         private void FlipTriangle(TriangleVertex vertex, RenderPassMode passMode) {
@@ -490,7 +490,7 @@ namespace NsSoftRenderer {
                     // 默认的一个处理
                     vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
                 } else {
-                    InitVertexShader(passMode.vertexShader);
+                    InitPassMode(passMode);
                     passMode.vertexShader.Main(ref vertex);
                     vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
 

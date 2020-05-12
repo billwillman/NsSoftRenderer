@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace NsSoftRenderer {
 
@@ -44,6 +45,20 @@ namespace NsSoftRenderer {
         public VertexShader vertexShader = null;
         // 当前的PixelShader
         public PixelShader pixelShader = null;
+
+        public T CreateVertexShader<T>() where T : VertexShader, new() {
+            T ret = new T();
+            ret.m_Owner = this;
+            return ret;
+        }
+
+        public T CreatePixelShader<T>() where T: PixelShader, new() {
+            T ret = new T();
+            ret.m_Owner = this;
+            return ret;
+        }
+
+        public Matrix4x4 MVPMatrix = Matrix4x4.identity;
     }
 
     // 渲染Pass
@@ -58,9 +73,9 @@ namespace NsSoftRenderer {
         }
 
         // 渲染准备(里面可以排序)
-        protected abstract void DoRenderPrepare();
-        protected abstract void DoVertexShader();
-        protected abstract void DoPixelShader();
+      //  protected abstract void DoRenderPrepare();
+      //  protected abstract void DoVertexShader();
+      //  protected abstract void DoPixelShader();
     }
 
     public static class RenderQueue {
