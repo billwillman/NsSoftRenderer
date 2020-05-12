@@ -49,12 +49,14 @@ namespace NsSoftRenderer {
         public T CreateVertexShader<T>() where T : VertexShader, new() {
             T ret = new T();
             ret.m_Owner = this;
+            vertexShader = ret;
             return ret;
         }
 
         public T CreatePixelShader<T>() where T: PixelShader, new() {
             T ret = new T();
             ret.m_Owner = this;
+            pixelShader = ret;
             return ret;
         }
 

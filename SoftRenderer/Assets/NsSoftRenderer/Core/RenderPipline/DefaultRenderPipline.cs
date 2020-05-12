@@ -13,8 +13,8 @@ namespace NsSoftRenderer {
 
         public DefaultRenderPipline() {
             RegisterRenderQueue(RenderQueue.Geometry, new GeometryQueue());
-            m_DefaultPassMode.vertexShader = new VertexShader();
-            m_DefaultPassMode.pixelShader = new PixelShader();
+            m_DefaultPassMode.CreateVertexShader<VertexShader>();
+            m_DefaultPassMode.CreatePixelShader<PixelShader>();
         }
 
         // 排序
