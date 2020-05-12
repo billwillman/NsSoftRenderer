@@ -286,5 +286,15 @@ namespace NsSoftRenderer {
             float ret = 1f / invZ;
             return ret;
         }
+
+        // 計算Diffuse 点光源.
+        // diffuse从任何角度观察，模型上的光照效果是不变得，所以跟viewDir无关
+        public static Color PointLight_DiffuseColor(Vector3 lightPos, Vector3 pointPos, Color lightColor, float lightI, Vector3 pointNormal) {
+            Vector3 L = lightPos - pointPos;
+            float r = L.magnitude;
+            // 
+            Color ret = lightColor * lightI / (r * r) * Mathf.Max(0, Vector3.Dot(L, pointNormal));
+            return ret;
+        }
     }
 }
