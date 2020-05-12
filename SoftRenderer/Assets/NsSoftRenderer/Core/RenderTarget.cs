@@ -428,8 +428,8 @@ namespace NsSoftRenderer {
                 }
 
                 if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
-                    for (int r = m_DepthDirthRect.yMin; r < m_DepthDirthRect.yMax; ++r) {
-                        for (int c = m_DepthDirthRect.xMin; c < m_DepthDirthRect.xMax; ++c) {
+                    for (int r = m_DepthDirthRect.yMin; r <= m_DepthDirthRect.yMax; ++r) {
+                        for (int c = m_DepthDirthRect.xMin; c <= m_DepthDirthRect.xMax; ++c) {
                             m_FrontDepthBuffer.SetItem(c, r, _cFarFarZ);
                         }
                     }
