@@ -419,6 +419,14 @@ namespace NsSoftRenderer {
 
             if (m_FrontDepthBuffer != null && ((!m_IsCleanedDepth) || (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth)))) {
                 m_IsCleanedDepth = true;
+
+                if (m_IsCleanAllColorBuff) {
+                    m_DepthDirthRect.xMin = 0;
+                    m_DepthDirthRect.yMin = 0;
+                    m_DepthDirthRect.xMax = m_FrontDepthBuffer.Width - 1;
+                    m_DepthDirthRect.yMax = m_FrontDepthBuffer.Height - 1;
+                }
+
                 if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
                     for (int r = m_DepthDirthRect.yMin; r < m_DepthDirthRect.yMax; ++r) {
                         for (int c = m_DepthDirthRect.xMin; c < m_DepthDirthRect.xMax; ++c) {
@@ -442,7 +450,7 @@ namespace NsSoftRenderer {
                 }
 
                 // 清理
-               // Clear();
+              //  Clear();
             }
         }
 
