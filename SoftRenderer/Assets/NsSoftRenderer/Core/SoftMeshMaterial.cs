@@ -65,8 +65,8 @@ namespace NsSoftRenderer {
             return res;
         }
 
-        public SoftMaterial GetMaterial(int resId) {
-            SoftMaterial ret = GetSoftRes(resId) as SoftMaterial;
+        public T GetSoftRes<T>(int resId) where T: class, SoftRes {
+            T ret = GetSoftRes(resId) as T;
             return ret;
         }
 
