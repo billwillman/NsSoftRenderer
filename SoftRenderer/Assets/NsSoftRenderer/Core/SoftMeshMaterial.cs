@@ -29,10 +29,10 @@ namespace NsSoftRenderer {
 
         private Dictionary<int, SoftRes> m_ResMap = null;
 
-        // 从贴图加载
-        public SoftTexture2D LoadFromTexture2D(Texture2D tex) {
+        // 从贴图加载, 获得句柄
+        public int LoadFromTexture2D(Texture2D tex) {
             if (tex == null)
-                return null;
+                return 0;
 
             // 不考虑性能问题，直接转COLOR
             Color32[] colors = tex.GetPixels32();
@@ -44,7 +44,7 @@ namespace NsSoftRenderer {
 
             AddRes(softTex);
 
-            return softTex;
+            return softTex.uuid;
         }
 
         protected void AddRes(SoftRes res) {
