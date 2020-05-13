@@ -728,6 +728,7 @@ namespace NsSoftRenderer {
                         if (doFill) {
                             m_FrontColorBuffer.SetItem(col, row, color);
                             // 写入ZBUFFER
+                           // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
                             float z = TransZBuffer(P.z);
                             // 填充ZBUFFER
                             FillZBuffer(row, col, z);
