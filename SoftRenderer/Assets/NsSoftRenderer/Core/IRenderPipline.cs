@@ -46,6 +46,19 @@ namespace NsSoftRenderer {
         public VertexShader vertexShader = null;
         // 当前的PixelShader
         public PixelShader pixelShader = null;
+        // 暂时放这里
+        public int mainTex = 0;
+        // 主纹理
+        public SoftTexture MainTexture {
+            get {
+                if (mainTex == 0)
+                    return null;
+                var device = SoftDevice.StaticDevice;
+                if (device == null)
+                    return null;
+                return device.ResMgr.GetSoftRes<SoftTexture>(mainTex);
+            }
+        }
 
         public T CreateVertexShader<T>() where T : VertexShader, new() {
             T ret = new T();
