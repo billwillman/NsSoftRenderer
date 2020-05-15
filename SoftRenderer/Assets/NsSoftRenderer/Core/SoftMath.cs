@@ -196,6 +196,7 @@ namespace NsSoftRenderer {
             return true;
         }
 
+        /*
         // 包围球是否在摄影机内
         // 这里用世界坐标系，还可以放到投影坐标系里，X:-1~1, Y:-1~1, Z:-1~1
         public static bool BoundSpereInCamera(SoftSpere spere, SoftCamera camera) {
@@ -219,7 +220,7 @@ namespace NsSoftRenderer {
             }
 
             return false;
-        }
+        }*/
 
         /* 根据三角形三个点获得三角形中一个点的插值
          * 在重心坐标系中，三角形三点为A, B, C。有一个点P在三角形内，则P = a * A + b * B * c * C
