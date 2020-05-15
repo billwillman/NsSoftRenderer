@@ -87,7 +87,30 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 判断是否需要Cull
+        // 这里是在MVP坐标系空间做
+        public static bool Is_MVP_Culled(CullMode mode, Triangle tri) {
+            if (mode == CullMode.none)
+                return false;
+
+            Vector3 v1 = tri.p3 - tri.p1;
+            Vector3 v2 = tri.p2 - tri.p3;
+            Vector3 n = Vector3.Cross(v1, v2);
+            Vector3 lookAt = new Vector3(0, 0, 1f);
+
+            bool isFront = Vector3.Dot(lookAt, n) > 0;
+
+            switch (mode) {
+                case CullMode.front: {
+                        return isFront;
+                    }
+                case CullMode.back: {
+                        return !isFront;
+                    }
+            }
+            return false;
+        }
+
+        // 判断是否需要Cull(这里是世界坐标剔除)
         public static bool IsCulled(SoftCamera camera, CullMode mode, Triangle tri) {
             if (mode == CullMode.none)
                 return false;

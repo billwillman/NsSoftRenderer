@@ -488,15 +488,18 @@ namespace NsSoftRenderer {
                 // 世界坐标系到屏幕坐标系
                 if (passMode.vertexShader == null) {
                     // 默认的一个处理
-                    vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                    //vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                    vertex.triangle.MulMatrix(this.ViewProjMatrix);
                 } else {
                     InitPassMode(passMode);
-                    passMode.vertexShader.Main(ref vertex);
-                    vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
-
+                    passMode.vertexShader.Main(ref vertex); 
                 }
-                //vertex.triangle.Trans(this.WorldToScreenPointEvt);
-                //-----------------------
+
+                // 这里做背面剔除
+                if (SoftMath.Is_MVP_Culled(passMode.Cull, vertex.triangle))
+                    return;
+
+                vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
@@ -553,10 +556,11 @@ namespace NsSoftRenderer {
 
                     // 三角形转到世界坐标系
                     tri.MulMatrix(objToWorld);
-                    // 过CullMode
-                    if (SoftMath.IsCulled(this, passMode.Cull, tri)) {
-                        continue;
-                    }
+                    // 过CullMode 【注意】根据渲染管线VertexShader中可以任意改变三角形，所以要放到VS后面才行，也就是到MVP坐标系里判断
+                    // 不在这里做摄影机剔除，移到VS后面
+                //   if (SoftMath.IsCulled(this, passMode.Cull, tri)) {
+                 //       continue;
+                 //   }
                     //----
 
                     TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
