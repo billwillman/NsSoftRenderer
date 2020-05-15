@@ -83,6 +83,7 @@
     <Compile Include="Assets\NsSoftRenderer\Core\SoftMeshRenderer.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftRenderObject.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftTexture2D.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Core\SoftTexture3D.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\VertexShader.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
