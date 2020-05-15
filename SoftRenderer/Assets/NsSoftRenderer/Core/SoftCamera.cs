@@ -402,6 +402,12 @@ namespace NsSoftRenderer {
         private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
         private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
+        
+
+        public bool IsOpenCameraSpereCull {
+            get;
+            set;
+        }
 
        public Matrix4x4 PorjInvMatrix {
             get {
@@ -887,9 +893,13 @@ namespace NsSoftRenderer {
         }
 
         private void Update_Shader_MVP_Matrix() {
+            
             Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
             Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
             m_Shader_MVP_Matrix = scaleMat * transMat * m_ViewProjMatrix;
+            //Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+           // Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(0.5f, 0.5f, 0f));
+           // m_Shader_MVP_Matrix = transMat * scaleMat * m_ViewProjMatrix;
         }
 
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）

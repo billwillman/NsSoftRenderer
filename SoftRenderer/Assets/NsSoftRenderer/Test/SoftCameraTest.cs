@@ -47,8 +47,9 @@ public class SoftCameraTest : MonoBehaviour
                     new Vector3(0.8f, 0f, -10.1f)
                     );
                 Triangle tri2 = tri1;
-                tri1.MulMatrix(m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix);
-                tri2.MulMatrix(m_SoftCam.ViewProjMatrix);
+                tri1.Trans(m_UnityCam.WorldToScreenPoint);
+                // tri2.MulMatrix(m_SoftCam.ViewProjMatrix);
+                tri2.Trans(m_SoftCam.WorldToScreenPointEvt);
 
                 Debug.LogErrorFormat("【Unity】{0}【Soft】{1}", tri1.ToString(), tri2.ToString());
             }
