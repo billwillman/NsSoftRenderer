@@ -68,8 +68,8 @@ namespace NsSoftRenderer {
 
                         if (u1 != u0) {
                             float t0 = (uv.x - (float)u0) / (float)(u1 - u0);
-                            c0 = t0 * c00 + (1 - t0) * c01;
-                            c1 = t0 * c10 + (1 - t0) * c11;
+                            c0 = (1f - t0) * c00 + t0 * c01;
+                            c1 = (1f - t0) * c10 + t0 * c11;
                         } else {
                             c0 = c00;
                             c1 = c10;
@@ -79,7 +79,7 @@ namespace NsSoftRenderer {
 
                         if (v1 != v0) {
                             float t1 = (uv.y - (float)v0) / (float)(v1 - v0);
-                            c = t1 * c0 + (1 - t1) * c1;
+                            c = (1f - t1) * c0 + t1 * c1;
                         } else {
                             c = c0;
                         }
