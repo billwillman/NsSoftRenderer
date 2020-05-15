@@ -17,7 +17,8 @@ namespace NsSoftRenderer {
 
     public enum TextureClampType {
         Clamp = 0,
-        Repeat = 1
+        Repeat = 1,
+        RepeatSwap = 2
     }
 
     public enum TextureFliter {
@@ -47,7 +48,30 @@ namespace NsSoftRenderer {
             set;
         }
 
+        private void TransUV(ref Vector2 uv) {
+            switch (ClampType) {
+                case TextureClampType.Clamp:
+                    uv.x = Mathf.Clamp01(uv.x);
+                    uv.y = Mathf.Clamp01(uv.y);
+                    break;
+                case TextureClampType.Repeat:
+                    uv.x = Mathf.Repeat(uv.x, 1.0f);
+                    uv.y = Mathf.Repeat(uv.y, 1.0f);
+                    break;
+                case TextureClampType.RepeatSwap:
+                    uv.x = Mathf.PingPong(uv.x, 1.0f);
+                    uv.y = Mathf.PingPong(uv.y, 1.0f);
+                    break;
+                default:
+                    uv.x = Mathf.Clamp01(uv.x);
+                    uv.y = Mathf.Clamp01(uv.y);
+                    break;
+            }
+        }
+
         public Color GetColor(Vector2 uv) {
+
+            TransUV(ref uv);
 
             switch (TexFilter) {
                 case TextureFliter.Nearst:
