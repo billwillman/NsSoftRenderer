@@ -726,12 +726,15 @@ namespace NsSoftRenderer {
                         }
                         // ----------------
                         if (doFill) {
-                            m_FrontColorBuffer.SetItem(col, row, color);
-                            // 写入ZBUFFER
-                           // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
-                            float z = TransZBuffer(P.z);
-                            // 填充ZBUFFER
-                            FillZBuffer(row, col, z);
+                            // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                            if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
+                                m_FrontColorBuffer.SetItem(col, row, color);
+                                // 写入ZBUFFER
+                                // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                float z = TransZBuffer(P.z);
+                                // 填充ZBUFFER
+                                FillZBuffer(row, col, z);
+                            }
                         }
                     }
                 }
