@@ -6,7 +6,6 @@ using System.IO;
 
 public class SoftCameraTest : MonoBehaviour
 {
-    public Mesh sharedMesh = null;
     public bool IsShowSoftCamerLog = false;
 
     private Camera m_UnityCam = null;
@@ -41,53 +40,20 @@ public class SoftCameraTest : MonoBehaviour
         if (!IsShowSoftCamerLog) {
             m_UnityCam = Camera.main;
 
-            if (m_UnityCam != null && m_SoftCam != null && sharedMesh != null) {
+            if (m_UnityCam != null && m_SoftCam != null) {
+                Triangle tri1 = new Triangle(
+                    new Vector3(-0.6f, 0f, -8.6f),
+                    new Vector3(0.8f, 1.0f, -10.1f),
+                    new Vector3(0.8f, 0f, -10.1f)
+                    );
+                Triangle tri2 = tri1;
+                tri1.MulMatrix(m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix);
+                tri2.MulMatrix(m_SoftCam.ViewProjMatrix);
 
-                if (m_VecList == null) {
-                    m_VecList = new List<Vector3>();
-                    sharedMesh.GetVertices(m_VecList);
-                }
-
-                if (m_TriangleIndexes == null && sharedMesh.subMeshCount > 0)
-                    m_TriangleIndexes = sharedMesh.GetTriangles(0);
-
-                if (m_Indexes == null && sharedMesh.subMeshCount > 0) {
-                    m_Indexes = sharedMesh.GetIndices(0);
-                }
-
-                // 比较
-                var trans = this.transform;
-                var pt = trans.position;
-
-                if (m_VecList != null && m_VecList.Count > 0 && m_TriangleIndexes != null && m_TriangleIndexes.Length > 0) {
-
-                   // Debug.LogErrorFormat("[Unity]{0}  [SoftCamera]{1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
-
-                    for (int i = 0; i < (int)m_TriangleIndexes.Length / 3; ++i) {
-                        Triangle tt1 = new Triangle();
-                        tt1.p1 = m_VecList[m_TriangleIndexes[i * 3]];
-                        tt1.p2 = m_VecList[m_TriangleIndexes[i * 3 + 1]];
-                        tt1.p3 = m_VecList[m_TriangleIndexes[i * 3 + 2]];
-
-                        tt1.MulMatrix(trans.localToWorldMatrix);
-
-                        Triangle tt2 = tt1;
-
-
-                        //tt1.MulMatrix(m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix);
-                          tt1.Trans(m_UnityCam.WorldToScreenPoint);
-
-                        // tt2.MulMatrix(m_SoftCam.ViewProjLinkerScreenMatrix);
-                         tt2.Trans(m_SoftCam.WorldToScreenPoint);
-
-                        //  Debug.Log("[Test]" + m_SoftCam.ViewProjLinkerScreenMatrix.ToString());
-
-                  //      Debug.LogErrorFormat("[Unity]{0} [SoftCam]{1}", m_UnityCam.projectionMatrix, m_SoftCam.ProjMatrix);
-
-                       Debug.LogErrorFormat("【Proj】【Unity】{0}【SoftCamera】{1}", tt1.ToString(), tt2.ToString());
-                    }
-                }
+                Debug.LogErrorFormat("【Unity】{0}【Soft】{1}", tri1.ToString(), tri2.ToString());
             }
+
+
         }
     }
 }

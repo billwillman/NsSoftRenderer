@@ -284,7 +284,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 0
-  orthographic size: 5
+  orthographic size: 3
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -358,7 +358,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a769ce4e02a786e47822e067509a5a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sharedMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   IsShowSoftCamerLog: 0
 --- !u!23 &568633213
 MeshRenderer:
@@ -417,7 +416,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 568633211}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 0}
 --- !u!4 &568633216
 Transform:
   m_ObjectHideFlags: 0
@@ -628,5 +627,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a769ce4e02a786e47822e067509a5a1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sharedMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   IsShowSoftCamerLog: 0
