@@ -111,11 +111,20 @@ namespace NsSoftRenderer {
             return false;
         }
 
-        // 點到平面的距離
-        public static float PtToPlaneDistance(Vector3 pt, SoftPlane panel) {
+        // 點到平面的距離 collisionPt=>交点
+        public static float PtToPlaneDistance(Vector3 pt, SoftPlane panel, out Vector3 collisionPt) {
             float d = panel.normal.magnitude;
-            float a = Mathf.Abs(pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d);
+            float aa = pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d;
+            float a = Mathf.Abs(aa);
             float ret = a / d;
+
+            // 获得交点
+            Vector3 dir = panel.normal;
+            if (aa < 0) {
+                dir = -dir;
+            }
+            collisionPt = pt + dir * ret;
+
             return ret;
         }
 
@@ -123,6 +132,7 @@ namespace NsSoftRenderer {
          * 原理，点在平面上 AX + BY + CZ + D > 0，平面下 < 0。只要被包裹着，就是在视锥体里。
          */
         public static bool PtInCamera(Vector3 pt, SoftCamera camera) {
+
             SoftPlane[] planes = camera.WorldPlanes;
             if (planes != null && planes.Length >= 6) {
                 float ret = PtInPlane(pt, planes[SoftCameraPlanes.NearPlane]) * PtInPlane(pt, planes[SoftCameraPlanes.FarPlane]);
@@ -143,6 +153,7 @@ namespace NsSoftRenderer {
         }
 
         // 包围球是否在摄影机内
+        // 这里用世界坐标系，还可以放到投影坐标系里，X:-1~1, Y:-1~1, Z:-1~1
         public static bool BoundSpereInCamera(SoftSpere spere, SoftCamera camera) {
             if (camera == null)
                 return false;
@@ -154,11 +165,13 @@ namespace NsSoftRenderer {
             if (PtInCamera(spere.position, camera))
                 return true;
 
+            Vector3 collisionPt;
             for (int i = 0; i < panels.Length; ++i) {
                 var panel = panels[i];
-                float distance = PtToPlaneDistance(spere.position, panel);
-                if (distance < r)
+                float distance = PtToPlaneDistance(spere.position, panel, out collisionPt);
+                if ((distance < r) && PtInCamera(collisionPt, camera)) {
                     return true;
+                }
             }
 
             return false;
