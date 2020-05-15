@@ -175,6 +175,27 @@ namespace NsSoftRenderer {
             return false;
         }
 
+        public static bool BoundSpereInCamera_UseMVP(SoftSpere spere, SoftCamera camera) {
+            Vector3 localPt = camera.WorldToViewportPoint(spere.position, false);
+
+            float left = localPt.x - spere.radius;
+            float right = localPt.x + spere.radius;
+            if (right <= -1 || left >= 1)
+                return false;
+
+            float top = localPt.y + spere.radius;
+            float bottom = localPt.y - spere.radius;
+            if (bottom >= 1 || top <= -1)
+                return false;
+
+            float front = localPt.z + spere.radius;
+            float back = localPt.z - spere.radius;
+            if (back >= 1 || front <= -1)
+                return false;
+
+            return true;
+        }
+
         // 包围球是否在摄影机内
         // 这里用世界坐标系，还可以放到投影坐标系里，X:-1~1, Y:-1~1, Z:-1~1
         public static bool BoundSpereInCamera(SoftSpere spere, SoftCamera camera) {

@@ -37,7 +37,8 @@ namespace NsSoftRenderer {
                     switch (obj.ObjType) {
                         case SoftRenderObjType.MeshRender:
                             SoftSpere spere = (obj as SoftMeshRenderer).WorldBoundSpere;
-                            if (!camera.IsOpenCameraSpereCull || SoftMath.BoundSpereInCamera(spere, camera)) {
+                            // if (!camera.IsOpenCameraSpereCull || SoftMath.BoundSpereInCamera(spere, camera)) {
+                            if (!camera.IsOpenCameraSpereCull || SoftMath.BoundSpereInCamera_UseMVP(spere, camera)) {
                                 m_Objs.Add(obj.InstanceId);
                             }
                             break;
