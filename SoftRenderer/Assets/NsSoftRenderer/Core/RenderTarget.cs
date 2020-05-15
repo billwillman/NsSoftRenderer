@@ -746,7 +746,7 @@ namespace NsSoftRenderer {
         }
 
         // v是方向
-        protected float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
+        public static float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
             bool isZeroX = Mathf.Abs(v.x) <= float.Epsilon;
             bool isZeroY = Mathf.Abs(v.y) <= float.Epsilon;
             if (isZeroX && isZeroY) {

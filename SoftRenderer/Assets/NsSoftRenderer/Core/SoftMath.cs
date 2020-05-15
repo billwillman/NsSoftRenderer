@@ -264,13 +264,21 @@ namespace NsSoftRenderer {
             Vector3 v1 = new Vector3(AB.x, AC.x, PA.x);
             Vector3 v2 = new Vector3(AB.y, AC.y, PA.y);
             Vector3 vv = Vector3.Cross(v1, v2);
-            if (vv.x < 0)
-                vv = -vv;
             if (isUseNormal)
                 vv = vv.normalized;
+
+            vv.x = Mathf.Abs(vv.x) <= float.Epsilon ? 0f: vv.x;
+            vv.y = Mathf.Abs(vv.y) <= float.Epsilon ? 0f : vv.y;
+
+            if (vv.x < 0)
+                vv = -vv;
             b = vv.x; //-->> b即是u
             c = vv.y; //-->> c即是v
             a = 1f - b - c; //-->>a即是 1- u - v = r
+        }
+
+        public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c, bool isUseNormal = true) {
+            GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c, isUseNormal);
         }
 
         public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c, bool isUseNormal = true) {
@@ -290,6 +298,11 @@ namespace NsSoftRenderer {
             GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
             float invZ = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
             float ret = 1f / invZ;
+            return ret;
+        }
+
+        public static float GetScreenSpaceBarycentricCoordinateZ(Triangle tri, Vector2 P) {
+            float ret = GetScreenSpaceBarycentricCoordinateZ(tri.p1, tri.p2, tri.p3, P);
             return ret;
         }
 

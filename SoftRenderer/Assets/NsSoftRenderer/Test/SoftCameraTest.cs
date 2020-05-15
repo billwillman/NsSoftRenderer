@@ -8,6 +8,8 @@ public class SoftCameraTest : MonoBehaviour
 {
     public bool IsShowSoftCamerLog = false;
 
+    public float EditorY = 0f;
+
     private Camera m_UnityCam = null;
     private SoftCamera m_SoftCam = null;
     private List<Vector3> m_VecList = null;
@@ -41,6 +43,7 @@ public class SoftCameraTest : MonoBehaviour
             m_UnityCam = Camera.main;
 
             if (m_UnityCam != null && m_SoftCam != null) {
+                /*
                 Triangle tri1 = new Triangle(
                     new Vector3(-0.6f, 0f, -8.6f),
                     new Vector3(0.8f, 1.0f, -10.1f),
@@ -52,6 +55,24 @@ public class SoftCameraTest : MonoBehaviour
                 tri2.Trans(m_SoftCam.WorldToScreenPointEvt);
 
                 Debug.LogErrorFormat("【Unity】{0}【Soft】{1}", tri1.ToString(), tri2.ToString());
+                */
+
+                Triangle tri = new Triangle(
+                    new Vector3(-100f, 0, 0),
+                    new Vector3(100f, 0, 0),
+                    new Vector3(100f, 100f, 0)
+                    );
+
+                 var bottomTop = tri.p3 - tri.p1;
+
+                  EditorY = Mathf.Clamp(EditorY, tri.p1.y, tri.p3.y);
+
+                  float x = RenderTarget.GetVector2XFromY(bottomTop, tri.p1, EditorY);
+                Vector3 P = new Vector3(x, EditorY, 0f);
+                float a, b, c;
+                SoftMath.GetBarycentricCoordinate(tri, P, out a, out b, out c);
+
+                Debug.LogErrorFormat("a: {0}, b: {1}, c: {2}", a.ToString(), b.ToString(), c.ToString());
             }
 
 
