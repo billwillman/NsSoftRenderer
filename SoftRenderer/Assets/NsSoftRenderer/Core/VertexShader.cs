@@ -22,6 +22,7 @@ namespace NsSoftRenderer {
         public bool isUseClip = false;
         public virtual bool Main(PixelData data, out Color frag) {
             frag = data.color;
+            frag.a = 1.0f;
             return true; // 这里返回值模拟clip操作
         }
 
