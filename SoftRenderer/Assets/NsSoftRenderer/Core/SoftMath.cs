@@ -267,8 +267,8 @@ namespace NsSoftRenderer {
             if (isUseNormal)
                 vv = vv.normalized;
 
-            vv.x = Mathf.Abs(vv.x) <= float.Epsilon ? 0f: vv.x;
-            vv.y = Mathf.Abs(vv.y) <= float.Epsilon ? 0f : vv.y;
+            vv.x = Mathf.Abs(vv.x) < EPS ? 0f: vv.x;
+            vv.y = Mathf.Abs(vv.y) < EPS ? 0f : vv.y;
 
             if (vv.x < 0)
                 vv = -vv;
