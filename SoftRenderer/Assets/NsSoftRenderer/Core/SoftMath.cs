@@ -272,8 +272,8 @@ namespace NsSoftRenderer {
 
             if (vv.x < 0)
                 vv = -vv;
-            b = vv.y; //-->> b即是v
-            c = vv.x; //-->> c即是u
+            b = vv.x; //-->> b即是v
+            c = vv.y; //-->> c即是u
             a = 1f - b - c; //-->>a即是 1- u - v = r
         }
 
