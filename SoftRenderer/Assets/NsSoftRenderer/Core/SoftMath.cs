@@ -87,7 +87,30 @@ namespace NsSoftRenderer {
             return ret;
         }
 
-        // 判断是否需要Cull
+        // 这里是在MVP坐标系空间做
+        public static bool Is_MVP_Culled(CullMode mode, Triangle tri) {
+            if (mode == CullMode.none)
+                return false;
+
+            Vector3 v1 = tri.p3 - tri.p1;
+            Vector3 v2 = tri.p2 - tri.p3;
+            Vector3 n = Vector3.Cross(v1, v2);
+            Vector3 lookAt = new Vector3(0, 0, 1f);
+
+            bool isFront = Vector3.Dot(lookAt, n) > 0;
+
+            switch (mode) {
+                case CullMode.front: {
+                        return isFront;
+                    }
+                case CullMode.back: {
+                        return !isFront;
+                    }
+            }
+            return false;
+        }
+
+        // 判断是否需要Cull(这里是世界坐标剔除)
         public static bool IsCulled(SoftCamera camera, CullMode mode, Triangle tri) {
             if (mode == CullMode.none)
                 return false;
@@ -111,11 +134,20 @@ namespace NsSoftRenderer {
             return false;
         }
 
-        // 點到平面的距離
-        public static float PtToPlaneDistance(Vector3 pt, SoftPlane panel) {
+        // 點到平面的距離 collisionPt=>交点
+        public static float PtToPlaneDistance(Vector3 pt, SoftPlane panel, out Vector3 collisionPt) {
             float d = panel.normal.magnitude;
-            float a = Mathf.Abs(pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d);
+            float aa = pt.x * panel.normal.x + pt.y * panel.normal.y + pt.z * panel.normal.z + panel.d;
+            float a = Mathf.Abs(aa);
             float ret = a / d;
+
+            // 获得交点
+            Vector3 dir = panel.normal;
+            if (aa < 0) {
+                dir = -dir;
+            }
+            collisionPt = pt + dir * ret;
+
             return ret;
         }
 
@@ -123,6 +155,7 @@ namespace NsSoftRenderer {
          * 原理，点在平面上 AX + BY + CZ + D > 0，平面下 < 0。只要被包裹着，就是在视锥体里。
          */
         public static bool PtInCamera(Vector3 pt, SoftCamera camera) {
+
             SoftPlane[] planes = camera.WorldPlanes;
             if (planes != null && planes.Length >= 6) {
                 float ret = PtInPlane(pt, planes[SoftCameraPlanes.NearPlane]) * PtInPlane(pt, planes[SoftCameraPlanes.FarPlane]);
@@ -142,7 +175,30 @@ namespace NsSoftRenderer {
             return false;
         }
 
+        public static bool BoundSpereInCamera_UseMVP(SoftSpere spere, SoftCamera camera) {
+            Vector3 localPt = camera.WorldToViewportPoint(spere.position, false);
+
+            float left = localPt.x - spere.radius;
+            float right = localPt.x + spere.radius;
+            if (right <= -1 || left >= 1)
+                return false;
+
+            float top = localPt.y + spere.radius;
+            float bottom = localPt.y - spere.radius;
+            if (bottom >= 1 || top <= -1)
+                return false;
+
+            float front = localPt.z + spere.radius;
+            float back = localPt.z - spere.radius;
+            if (back >= 1 || front <= -1)
+                return false;
+
+            return true;
+        }
+
+        /*
         // 包围球是否在摄影机内
+        // 这里用世界坐标系，还可以放到投影坐标系里，X:-1~1, Y:-1~1, Z:-1~1
         public static bool BoundSpereInCamera(SoftSpere spere, SoftCamera camera) {
             if (camera == null)
                 return false;
@@ -154,15 +210,17 @@ namespace NsSoftRenderer {
             if (PtInCamera(spere.position, camera))
                 return true;
 
+            Vector3 collisionPt;
             for (int i = 0; i < panels.Length; ++i) {
                 var panel = panels[i];
-                float distance = PtToPlaneDistance(spere.position, panel);
-                if (distance < r)
+                float distance = PtToPlaneDistance(spere.position, panel, out collisionPt);
+                if ((distance < r) && PtInCamera(collisionPt, camera)) {
                     return true;
+                }
             }
 
             return false;
-        }
+        }*/
 
         /* 根据三角形三个点获得三角形中一个点的插值
          * 在重心坐标系中，三角形三点为A, B, C。有一个点P在三角形内，则P = a * A + b * B * c * C
@@ -206,13 +264,21 @@ namespace NsSoftRenderer {
             Vector3 v1 = new Vector3(AB.x, AC.x, PA.x);
             Vector3 v2 = new Vector3(AB.y, AC.y, PA.y);
             Vector3 vv = Vector3.Cross(v1, v2);
-            if (vv.x < 0)
-                vv = -vv;
             if (isUseNormal)
                 vv = vv.normalized;
-            b = vv.x; //-->> b即是u
-            c = vv.y; //-->> c即是v
+
+            vv.x = Mathf.Abs(vv.x) < EPS ? 0f: vv.x;
+            vv.y = Mathf.Abs(vv.y) < EPS ? 0f : vv.y;
+
+            if (vv.x < 0)
+                vv = -vv;
+            b = vv.y; //-->> b即是v
+            c = vv.x; //-->> c即是u
             a = 1f - b - c; //-->>a即是 1- u - v = r
+        }
+
+        public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c, bool isUseNormal = true) {
+            GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c, isUseNormal);
         }
 
         public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c, bool isUseNormal = true) {
@@ -232,6 +298,11 @@ namespace NsSoftRenderer {
             GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
             float invZ = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
             float ret = 1f / invZ;
+            return ret;
+        }
+
+        public static float GetScreenSpaceBarycentricCoordinateZ(Triangle tri, Vector2 P) {
+            float ret = GetScreenSpaceBarycentricCoordinateZ(tri.p1, tri.p2, tri.p3, P);
             return ret;
         }
 
@@ -284,6 +355,16 @@ namespace NsSoftRenderer {
         public static float GetPerspectZFromLerp(Vector3 screenA, Vector3 screenB, float t) {
             float invZ = t * 1f / screenA.z + (1 - t) * 1f / screenB.z;
             float ret = 1f / invZ;
+            return ret;
+        }
+
+        // 計算Diffuse 点光源.
+        // diffuse从任何角度观察，模型上的光照效果是不变得，所以跟viewDir无关
+        public static Color PointLight_DiffuseColor(Vector3 lightPos, Vector3 pointPos, Color lightColor, float lightI, Vector3 pointNormal) {
+            Vector3 L = lightPos - pointPos;
+            float r = L.magnitude;
+            // lightI / (r * r) 模拟衰减
+            Color ret = lightColor * lightI / (r * r) * Mathf.Max(0, Vector3.Dot(L, pointNormal));
             return ret;
         }
     }

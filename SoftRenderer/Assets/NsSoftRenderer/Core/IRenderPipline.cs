@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
+using Utils;
 
 namespace NsSoftRenderer {
 
@@ -39,7 +41,77 @@ namespace NsSoftRenderer {
         // 剔除模式
         public CullMode Cull = CullMode.back;
         // ZTest模式
-        public ZTestOp ZTest = ZTestOp.Less;
+        public ZTestOp ZTest = ZTestOp.LessEqual;
+        // 当前的VertexShader
+        public VertexShader vertexShader = null;
+        // 当前的PixelShader
+        public PixelShader pixelShader = null;
+        // 暂时放这里
+        public int mainTex = 0;
+        // 主纹理
+        public SoftTexture MainTexture {
+            get {
+                if (mainTex == 0)
+                    return null;
+                var device = SoftDevice.StaticDevice;
+                if (device == null)
+                    return null;
+                return device.ResMgr.GetSoftRes<SoftTexture>(mainTex);
+            }
+        }
+
+        public T CreateVertexShader<T>() where T : VertexShader, new() {
+            T ret = new T();
+            ret.m_Owner = this;
+            vertexShader = ret;
+            return ret;
+        }
+
+        public void AttachVertexShader(VertexShader vert) {
+            if (vert != null) {
+                vert.m_Owner = this;
+            }
+            vertexShader = vert;
+        }
+
+        public T CreatePixelShader<T>() where T: PixelShader, new() {
+            T ret = new T();
+            ret.m_Owner = this;
+            pixelShader = ret;
+            return ret;
+        }
+
+        public void AttachPixelShader(PixelShader pixel) {
+            if (pixel != null) {
+                pixel.m_Owner = this;
+            }
+            pixelShader = pixel;
+        }
+
+        public Matrix4x4 MVPMatrix = Matrix4x4.identity;
+        // 参与相关光照
+        public NativeList<int> LightHandles = null; // 光源列表
+
+        public int LightCount {
+            get {
+                if (LightHandles == null)
+                    return 0;
+                return LightHandles.Count;
+            }
+        }
+
+        public SoftLight GetLight(int index) {
+            if (LightHandles == null)
+                return null;
+            int handle = LightHandles[index];
+            if (handle == 0)
+                return null;
+            var device = SoftDevice.StaticDevice;
+            if (device == null)
+                return null;
+            SoftLight ret = device.GetRenderObject(handle) as SoftLight;
+            return ret;
+        }
     }
 
     // 渲染Pass
@@ -54,9 +126,9 @@ namespace NsSoftRenderer {
         }
 
         // 渲染准备(里面可以排序)
-        protected abstract void DoRenderPrepare();
-        protected abstract void DoVertexShader();
-        protected abstract void DoPixelShader();
+      //  protected abstract void DoRenderPrepare();
+      //  protected abstract void DoVertexShader();
+      //  protected abstract void DoPixelShader();
     }
 
     public static class RenderQueue {

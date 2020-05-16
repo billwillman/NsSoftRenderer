@@ -36,6 +36,7 @@ namespace NsSoftRenderer {
         private VertexBuffer m_VertexBuffer = null;
         private VertexColorBuffer m_ColorBuffer = null;
         private VertexNormalBuffer m_NormalBuffer = null;
+        private UVBuffer m_UV1Buffer = null; // UV1坐标
         private List<SoftSubMesh> m_SubList = null;
         // 采用的是模型坐标系
         private SoftSpere m_BoundSpere;
@@ -65,6 +66,12 @@ namespace NsSoftRenderer {
         internal VertexNormalBuffer Normals {
             get {
                 return m_NormalBuffer;
+            }
+        }
+
+        internal UVBuffer UV1s {
+            get {
+                return m_UV1Buffer;
             }
         }
 
@@ -129,6 +136,18 @@ namespace NsSoftRenderer {
                     }
                 }
 
+                // UV 1坐标
+                List<Vector4> uvs = new List<Vector4>();
+                mesh.GetUVs(0, uvs);
+                if (uvs.Count > 0) {
+                    if (m_UV1Buffer == null)
+                        m_UV1Buffer = new UVBuffer();
+                    m_UV1Buffer.Capacity = uvs.Count;
+                    for (int i = 0; i < uvs.Count; ++i) {
+                        m_UV1Buffer.Add(uvs[i]);
+                    }
+                }
+
                 for (int i = 0; i < mesh.subMeshCount; ++i) {
                     if (m_SubList == null)
                         m_SubList = new List<SoftSubMesh>();  
@@ -165,6 +184,11 @@ namespace NsSoftRenderer {
             if (m_NormalBuffer != null) {
                 m_NormalBuffer.Dispose();
                 m_NormalBuffer = null;
+            }
+
+            if (m_UV1Buffer != null) {
+                m_UV1Buffer.Dispose();
+                m_UV1Buffer = null;
             }
         }
 

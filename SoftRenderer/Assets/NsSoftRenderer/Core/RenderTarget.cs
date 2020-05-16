@@ -419,9 +419,17 @@ namespace NsSoftRenderer {
 
             if (m_FrontDepthBuffer != null && ((!m_IsCleanedDepth) || (RenderTarget.IncludeUseFlag(m_ClearFlags, RenderTargetClearFlag.Depth)))) {
                 m_IsCleanedDepth = true;
+
+                if (m_IsCleanAllColorBuff) {
+                    m_DepthDirthRect.xMin = 0;
+                    m_DepthDirthRect.yMin = 0;
+                    m_DepthDirthRect.xMax = m_FrontDepthBuffer.Width - 1;
+                    m_DepthDirthRect.yMax = m_FrontDepthBuffer.Height - 1;
+                }
+
                 if (m_DepthDirthRect.width > 0 && m_DepthDirthRect.height > 0) {
-                    for (int r = m_DepthDirthRect.yMin; r < m_DepthDirthRect.yMax; ++r) {
-                        for (int c = m_DepthDirthRect.xMin; c < m_DepthDirthRect.xMax; ++c) {
+                    for (int r = m_DepthDirthRect.yMin; r <= m_DepthDirthRect.yMax; ++r) {
+                        for (int c = m_DepthDirthRect.xMin; c <= m_DepthDirthRect.xMax; ++c) {
                             m_FrontDepthBuffer.SetItem(c, r, _cFarFarZ);
                         }
                     }
@@ -442,7 +450,7 @@ namespace NsSoftRenderer {
                 }
 
                 // 清理
-               // Clear();
+              //  Clear();
             }
         }
 
@@ -616,26 +624,60 @@ namespace NsSoftRenderer {
             }
         }
 
+        private float TransZBuffer(float orgZ) {
+            if (Mathf.Abs(orgZ) > float.Epsilon)
+               // return orgZ * 1000f;
+                return 1f/orgZ;
+            return orgZ;
+        }
+
+        private int CompareZBuffer(float oldZ, float newZ) {
+            if (Mathf.Abs(oldZ - newZ) <= float.Epsilon)
+                return 0;
+            if (oldZ < newZ)
+                return -1;
+            else
+                return 1;
+        }
+
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
-            return true;
-            /*
-            switch(passMode.ZTest) {
+            float z = TransZBuffer(p.z);
+            float oldZ = m_FrontDepthBuffer.GetItem(col, row);
+            if (oldZ < 0)
+                return true;
+            int cmp = CompareZBuffer(oldZ, z);
+            switch (passMode.ZTest) {
                 case ZTestOp.Equal:
-                    float z = 1f / p.z;
-                    float oldZ = m_FrontDepthBuffer.GetItem(row, col);
-                    return Mathf.Abs(oldZ - z) <= float.Epsilon;
+                    return cmp == 0;
                 case ZTestOp.Greate:
-                    break;
+                    return cmp > 1;
                 case ZTestOp.GreateEqual:
-                    break;
+                    return cmp >= 0;
                 case ZTestOp.Less:
-                    break;
+                    return cmp < 0;
                 case ZTestOp.LessEqual:
-                    break;
+                    return cmp <= 0;
                 default:
                     return false;
-            }*/
+            }
+        }
+
+        private void FillZBuffer(int row, int col, float z) {
+            m_FrontDepthBuffer.SetItem(col, row, z);
+            if (m_IsCleanedDepth) {
+                m_IsCleanedDepth = false;
+
+                m_DepthDirthRect.xMin = col;
+                m_DepthDirthRect.xMax = col;
+                m_DepthDirthRect.yMin = row;
+                m_DepthDirthRect.yMax = row;
+            } else {
+                m_DepthDirthRect.xMin = Mathf.Min(col, m_DepthDirthRect.xMin);
+                m_DepthDirthRect.xMax = Mathf.Max(col, m_DepthDirthRect.xMax);
+                m_DepthDirthRect.yMin = Mathf.Min(row, m_DepthDirthRect.yMin);
+                m_DepthDirthRect.yMax = Mathf.Max(row, m_DepthDirthRect.yMax);
+            }
         }
 
         // 行填充
@@ -663,10 +705,37 @@ namespace NsSoftRenderer {
                 float a, b, c;
                 SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
                 if (a >= e && b >= e && c >= e) {
-                    // 填充颜色
-                    if (CheckZTest(passMode, row, col, P)) {
+                    
+                    bool doFill = false;
+                    bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                    /*
+                     * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
+                     * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
+                     * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
+                     */
+
+                    // 填充颜色 early-z culling
+                    if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
                         Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
-                        m_FrontColorBuffer.SetItem(col, row, color);
+                        // 这部分是PixelShader
+                        if (passMode.pixelShader != null) {
+                            PixelData data = new PixelData();
+                            data.color = color;
+                            doFill = passMode.pixelShader.Main(data, out color);
+                        }
+                        // ----------------
+                        if (doFill) {
+                            // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                            if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
+                                m_FrontColorBuffer.SetItem(col, row, color);
+                                // 写入ZBUFFER
+                                // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                float z = TransZBuffer(P.z);
+                                // 填充ZBUFFER
+                                FillZBuffer(row, col, z);
+                            }
+                        }
                     }
                 }
 
@@ -677,7 +746,7 @@ namespace NsSoftRenderer {
         }
 
         // v是方向
-        protected float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
+        public static float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
             bool isZeroX = Mathf.Abs(v.x) <= float.Epsilon;
             bool isZeroY = Mathf.Abs(v.y) <= float.Epsilon;
             if (isZeroX && isZeroY) {

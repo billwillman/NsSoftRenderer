@@ -2,6 +2,8 @@
 
 namespace NsSoftRenderer {
 
+    
+
     public class SoftMeshRenderer : SoftRenderObject {
 
         private SoftMesh m_Mesh = null;

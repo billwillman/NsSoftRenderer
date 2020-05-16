@@ -27,10 +27,17 @@ namespace NsSoftRenderer {
         private IComparer<SoftCamera> m_CamSortFunc = new CameraSort();
         // 默认渲染管线
         private IRenderPipline m_RenderPipline = new DefaultRenderPipline();
+        private SoftMaterialManager m_ResMgr = new SoftMaterialManager();
 
         public RenderTarget Target {
             get {
                 return m_RenerTarget;
+            }
+        }
+
+        public SoftMaterialManager ResMgr {
+            get {
+                return m_ResMgr;
             }
         }
 

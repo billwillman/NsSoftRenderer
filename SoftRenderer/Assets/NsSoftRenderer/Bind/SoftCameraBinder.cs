@@ -4,6 +4,9 @@ using NsSoftRenderer;
 [RequireComponent(typeof(Camera))]
 public class SoftCameraBinder: MonoBehaviour {
 
+    // 是否开启视锥体球面剪裁
+    public bool IsOpenCameraSpereCull = true;
+
     private Camera m_Cam = null;
     private SoftCamera m_SoftCam = null;
 
@@ -22,6 +25,7 @@ public class SoftCameraBinder: MonoBehaviour {
     private void Update() {
         if (m_Cam != null && m_SoftCam != null) {
             m_SoftCam.UpdateCamera(m_Cam);
+            m_SoftCam.IsOpenCameraSpereCull = this.IsOpenCameraSpereCull;
         }
     }
 

@@ -402,6 +402,12 @@ namespace NsSoftRenderer {
         private RenderTrianglesMgr m_TrianglesMgr = new RenderTrianglesMgr();
         // 用于渲染各种排序管理,做过剔除的都会在里面，只存ID索引
         private RenderObjMgr m_RenderObjMgr = new RenderObjMgr();
+        
+
+        public bool IsOpenCameraSpereCull {
+            get;
+            set;
+        }
 
        public Matrix4x4 PorjInvMatrix {
             get {
@@ -472,6 +478,10 @@ namespace NsSoftRenderer {
             }
         }
 
+        private void InitPassMode(RenderPassMode passMode) {
+            passMode.MVPMatrix = this.Shader_MVP_Matrix;
+        }
+
         private void FlipTriangle(TriangleVertex vertex, RenderPassMode passMode) {
             // 三角形转到屏幕坐标系
             RenderTarget target = this.Target;
@@ -480,9 +490,22 @@ namespace NsSoftRenderer {
                     DebugVertexLog(vertex);
                 }
 
+                // 这里是VertexShader的部分
                 // 世界坐标系到屏幕坐标系
-                 vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
-                //vertex.triangle.Trans(this.WorldToScreenPointEvt);
+                if (passMode.vertexShader == null) {
+                    // 默认的一个处理
+                    //vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
+                    vertex.triangle.MulMatrix(this.ViewProjMatrix);
+                } else {
+                    InitPassMode(passMode);
+                    passMode.vertexShader.Main(ref vertex); 
+                }
+
+                // 这里做背面剔除
+                if (SoftMath.Is_MVP_Culled(passMode.Cull, vertex.triangle))
+                    return;
+
+                vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
 
                 target.FlipScreenTriangle(this, vertex, passMode);
             }
@@ -539,10 +562,11 @@ namespace NsSoftRenderer {
 
                     // 三角形转到世界坐标系
                     tri.MulMatrix(objToWorld);
-                    // 过CullMode
-                    if (SoftMath.IsCulled(this, passMode.Cull, tri)) {
-                        continue;
-                    }
+                    // 过CullMode 【注意】根据渲染管线VertexShader中可以任意改变三角形，所以要放到VS后面才行，也就是到MVP坐标系里判断
+                    // 不在这里做摄影机剔除，移到VS后面
+                //   if (SoftMath.IsCulled(this, passMode.Cull, tri)) {
+                 //       continue;
+                 //   }
                     //----
 
                     TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
@@ -860,6 +884,24 @@ namespace NsSoftRenderer {
 
         //   private Matrix4x4 testInvMat;
 
+        private Matrix4x4 m_Shader_MVP_Matrix;
+        private Matrix4x4 Shader_MVP_Matrix {
+            get {
+                UpdateMatrix();
+                return m_Shader_MVP_Matrix;
+            }
+        }
+
+        private void Update_Shader_MVP_Matrix() {
+            
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+            m_Shader_MVP_Matrix = scaleMat * transMat * m_ViewProjMatrix;
+            //Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+           // Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(0.5f, 0.5f, 0f));
+           // m_Shader_MVP_Matrix = transMat * scaleMat * m_ViewProjMatrix;
+        }
+
         // 摄影机左下角为0,0， 右上角为1,1, 注意：ViewProjMatrix是-1~1,但转换后要是是0~1范围（Unity的规则）
         // 最终UNITY的效果是 X：0~1 Y: 0~1,  Z is in world units from the camera.
         // 來自UNITY幫助：isUseViewZ 设置为TRUE的时候
@@ -1085,6 +1127,8 @@ namespace NsSoftRenderer {
                 UpdateViewProjMatrix();
                 // 更新世界坐标到屏幕
                 //UpdateViewProjLinerScreenMatrix();
+                // Shader相关
+                Update_Shader_MVP_Matrix();
             }
         }
 

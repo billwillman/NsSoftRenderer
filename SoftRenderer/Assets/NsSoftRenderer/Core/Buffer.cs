@@ -76,4 +76,9 @@ namespace NsSoftRenderer {
     public class VertexNormalBuffer: NativeList<Vector3> {
 
     }
+
+    // UV坐标
+    public class UVBuffer: NativeList<Vector4> {
+
+    }
 }
