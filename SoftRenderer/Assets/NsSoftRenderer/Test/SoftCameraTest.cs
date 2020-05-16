@@ -8,7 +8,10 @@ public class SoftCameraTest : MonoBehaviour
 {
     public bool IsShowSoftCamerLog = false;
 
+    public float EditorX = 0f;
     public float EditorY = 0f;
+    private float m_LastEditorY = 0f;
+    private bool m_IsEditorInited = false;
 
     private Camera m_UnityCam = null;
     private SoftCamera m_SoftCam = null;
@@ -64,15 +67,25 @@ public class SoftCameraTest : MonoBehaviour
                     );
 
                  var bottomTop = tri.p3 - tri.p1;
+                var middleTop = tri.p3 - tri.p2;
 
                   EditorY = Mathf.Clamp(EditorY, tri.p1.y, tri.p3.y);
+                bool isResetX = (Mathf.Abs(m_LastEditorY - EditorY) > float.Epsilon) || !m_IsEditorInited;
+                m_LastEditorY = EditorY;
 
-                  float x = RenderTarget.GetVector2XFromY(bottomTop, tri.p1, EditorY);
-                Vector3 P = new Vector3(x, EditorY, 0f);
+                  float startX = RenderTarget.GetVector2XFromY(bottomTop, tri.p1, EditorY);
+                float endX = RenderTarget.GetVector2XFromY(middleTop, tri.p2, EditorY);
+                if (isResetX)
+                    EditorX = startX;
+                EditorX = Mathf.Clamp(EditorX, startX, endX);
+                m_IsEditorInited = true;
+
+                Vector3 P = new Vector3(EditorX, EditorY, 0f);
                 float a, b, c;
                 SoftMath.GetBarycentricCoordinate(tri, P, out a, out b, out c);
+                Vector3 PP = tri.p1 * a +tri.p2 * b + tri.p3 * c;
 
-                Debug.LogErrorFormat("a: {0}, b: {1}, c: {2}", a.ToString(), b.ToString(), c.ToString());
+                Debug.LogErrorFormat("a: {0}, b: {1}, c: {2} || {3}", a.ToString(), b.ToString(), c.ToString(), PP.ToString2());
             }
 
 
