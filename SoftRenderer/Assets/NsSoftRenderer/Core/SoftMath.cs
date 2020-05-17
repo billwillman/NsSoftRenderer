@@ -94,7 +94,7 @@ namespace NsSoftRenderer {
 
             Vector3 v1 = tri.p3 - tri.p2;
             Vector3 v2 = tri.p2 - tri.p1;
-            Vector3 n = Vector3.Cross(v2, v1);
+            Vector3 n = Vector3.Cross(v1, v2);
             Vector3 lookAt = new Vector3(0, 0, 1f);
 
             bool isFront = Vector3.Dot(lookAt, n) < 0;
@@ -119,7 +119,7 @@ namespace NsSoftRenderer {
 
             Vector3 v1 = tri.p3 - tri.p2;
             Vector3 v2 = tri.p2 - tri.p1;
-            Vector3 n = Vector3.Cross(v2, v1);
+            Vector3 n = Vector3.Cross(v1, v2);
             Vector3 lookAt = camera.LookAt;
             bool isFront = Vector3.Dot(lookAt, n) < 0;
 
