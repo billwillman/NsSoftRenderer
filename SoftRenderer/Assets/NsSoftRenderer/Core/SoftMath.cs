@@ -92,12 +92,12 @@ namespace NsSoftRenderer {
             if (mode == CullMode.none)
                 return false;
 
-            Vector3 v1 = tri.p3 - tri.p1;
-            Vector3 v2 = tri.p2 - tri.p3;
-            Vector3 n = Vector3.Cross(v1, v2);
+            Vector3 v1 = tri.p3 - tri.p2;
+            Vector3 v2 = tri.p2 - tri.p1;
+            Vector3 n = Vector3.Cross(v2, v1);
             Vector3 lookAt = new Vector3(0, 0, 1f);
 
-            bool isFront = Vector3.Dot(lookAt, n) > 0;
+            bool isFront = Vector3.Dot(lookAt, n) < 0;
 
             switch (mode) {
                 case CullMode.front: {
@@ -117,11 +117,11 @@ namespace NsSoftRenderer {
             if (camera == null)
                 return true;
 
-            Vector3 v1 = tri.p3 - tri.p1;
-            Vector3 v2 = tri.p2 - tri.p3;
-            Vector3 n = Vector3.Cross(v1, v2);
+            Vector3 v1 = tri.p3 - tri.p2;
+            Vector3 v2 = tri.p2 - tri.p1;
+            Vector3 n = Vector3.Cross(v2, v1);
             Vector3 lookAt = camera.LookAt;
-            bool isFront = Vector3.Dot(lookAt, n) > 0;
+            bool isFront = Vector3.Dot(lookAt, n) < 0;
 
             switch (mode) {
                 case CullMode.front: {          
@@ -256,7 +256,8 @@ namespace NsSoftRenderer {
          *   【结论】也就是求同时垂直 [ABx, ACx, PAx]和[ABy, ACy, PAy][ABz, ACz, PAz]的向量，也就是这两个向量的叉乘。
          *   【注意】矩阵变换后的三角形的重心和原来三角形的重心可能会不一致。。。
         */
-        public static void GetBarycentricCoordinate(Vector3 A, Vector3 B,Vector3 C, Vector3 P, out float a, out float b, out float c, bool isUseNormal = true) {
+        public static void GetBarycentricCoordinate(Vector3 A, Vector3 B,Vector3 C, Vector3 P, 
+            out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             Vector3 AB = B - A;
             Vector3 AC = C - A;
             Vector3 PA = A - P;
@@ -264,10 +265,14 @@ namespace NsSoftRenderer {
             Vector3 v1 = new Vector3(AB.x, AC.x, PA.x);
             Vector3 v2 = new Vector3(AB.y, AC.y, PA.y);
             Vector3 vv = Vector3.Cross(v1, v2);
-            if (isUseNormal)
-                vv = vv.normalized;
+         //   if (isUseNormal)
+         //       vv = vv.normalized;
 
-            vv.x = Mathf.Abs(vv.x) < EPS ? 0f: vv.x;
+            // 这里要除以Z，因为推到公式里是 u, v, 1
+            if (Mathf.Abs(vv.z) > EPS)
+                vv /= vv.z;
+
+            vv.x = Mathf.Abs(vv.x) < EPS ? 0f : vv.x;
             vv.y = Mathf.Abs(vv.y) < EPS ? 0f : vv.y;
 
             if (vv.x < 0)
@@ -277,16 +282,17 @@ namespace NsSoftRenderer {
             a = 1f - b - c; //-->>a即是 1- u - v = r
         }
 
-        public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c, bool isUseNormal = true) {
-            GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c, isUseNormal);
+        public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c/*, bool isUseNormal = true*/) {
+            GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c/*, isUseNormal*/);
         }
 
-        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P, out float a, out float b, out float c, bool isUseNormal = true) {
+        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P,
+            out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             Vector3 AA = new Vector3(A.x, A.y, 0f);
             Vector3 BB = new Vector3(B.x, B.y, 0f);
             Vector3 CC = new Vector3(C.x, C.y, 0f);
             Vector3 PP = new Vector3(P.x, P.y, 0f);
-            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c, isUseNormal);
+            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c/*, isUseNormal*/);
         }
 
         public static float GetScreenSpaceBarycentricCoordinateZ(Vector3 A, Vector3 B, Vector3 C, Vector2 P) {
