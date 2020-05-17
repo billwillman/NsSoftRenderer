@@ -495,7 +495,7 @@ namespace NsSoftRenderer {
                 if (passMode.vertexShader == null) {
                     // 默认的一个处理
                     //vertex.triangle.Trans(this.WorldToScreenPointEvt2, false);
-                    vertex.triangle.MulMatrix(this.ViewProjMatrix);
+                    vertex.triangle.MulMatrix(this.Shader_MVP_Matrix);
                 } else {
                     InitPassMode(passMode);
                     passMode.vertexShader.Main(ref vertex); 
@@ -894,8 +894,8 @@ namespace NsSoftRenderer {
 
         private void Update_Shader_MVP_Matrix() {
             
-            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 0f));
-            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
+            Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(1f, 1f, 1f));
+            Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 0.5f));
             m_Shader_MVP_Matrix = scaleMat * transMat * m_ViewProjMatrix;
             //Matrix4x4 scaleMat = Matrix4x4.Scale(new Vector3(0.5f, 0.5f, 1f));
            // Matrix4x4 transMat = Matrix4x4.Translate(new Vector3(0.5f, 0.5f, 0f));

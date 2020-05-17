@@ -44,6 +44,20 @@ namespace NsSoftRenderer {
             }
         }
 
+        // 暂时这样
+        private CullMode m_CullMode = CullMode.back;
+        public CullMode cullMode
+        {
+            get
+            {
+                return m_CullMode;
+            }
+            set
+            {
+                m_CullMode = value;
+            }
+        }
+
         protected override void OnFree(bool isManual) {
             if (m_Mesh != null) {
                 m_Mesh.Dispose();
@@ -65,7 +79,10 @@ namespace NsSoftRenderer {
             if (camera == null || passMode == null || m_Mesh == null)
                 return false;
             UpdateGlobalToLocalMatrix();
+            CullMode old = passMode.Cull;
+            passMode.Cull = this.cullMode;
             return camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
+            passMode.Cull = old;
         }
     }
 

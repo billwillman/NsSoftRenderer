@@ -7,6 +7,7 @@ namespace NsSoftRenderer {
     public class SoftMeshBinder: MonoBehaviour {
         // 材质
         public Material sharedMaterial = null;
+        public CullMode cullMode = CullMode.back;
 
         private Mesh m_CustomMesh = null;
         private MeshFilter m_MeshFilter = null;
@@ -66,6 +67,7 @@ namespace NsSoftRenderer {
                 m_SoftMeshRenderer.Position = trans.position;
                 m_SoftMeshRenderer.LookAt = trans.forward;
                 m_SoftMeshRenderer.Up = trans.up;
+                m_SoftMeshRenderer.cullMode = this.cullMode;
                 //m_SoftMeshRenderer.sharedMesh = m_MeshFilter.sharedMesh;
             }
         }
