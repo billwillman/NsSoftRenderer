@@ -331,6 +331,8 @@ namespace NsSoftRenderer {
         }*/
 
         public static float GetDeltaT(float a, float b, float p) {
+            if (Mathf.Abs(a - b) <= float.Epsilon)
+                return 1f;
             float ret = (p - b) / (a - b);
             return ret;
         }
@@ -343,6 +345,40 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public static float GetZFromVectorsX(Vector3 p1, Vector3 p2, Vector2 p)
+        {
+           // if (Mathf.Abs(p1.z) > float.Epsilon)
+         //       p1.z = 1f / p1.z;
+         //   if (Mathf.Abs(p2.z) > float.Epsilon)
+         //       p2.z = 1f / p2.z;
+            Vector3 l = p2 - p1;
+            float dZ = Mathf.Abs(l.z);
+            if (dZ <= float.Epsilon)
+                return p1.z;
+            float dA = Mathf.Abs(l.x);
+            bool isDA = dA <= float.Epsilon;
+            float dB = Mathf.Abs(l.y);
+            bool isDB = dB <= float.Epsilon;
+            if (isDA && isDB)
+            {
+                return Mathf.Max(p1.z, p2.z);
+            }
+
+            float ret;
+            if (isDA)
+            {
+                ret = (l.z / l.y * (p.y - p1.y) + p1.z);
+            }
+
+         //   if (isDB)
+          //  {
+                ret = (l.z/l.x * (p.x - p1.x) + p1.z);
+            //  } 
+         //   if (Mathf.Abs(ret) > float.Epsilon)
+        //        ret = 1f / ret;
+            return ret;
+        }
+
         public static Color GetColorLerpFromScreenY(Vector3 A, Vector3 B, Vector3 P, Color aColor, Color bColor) {
             float t = GetDeltaT(A.y, B.y, P.y);
             Color ret = (aColor * t * 1f / A.z + bColor * (1f - t) * 1f/B.z) * P.z;
@@ -352,6 +388,22 @@ namespace NsSoftRenderer {
         public static Color GetColorLerpFromScreenX(Vector3 A, Vector3 B, Vector3 P, Color aColor, Color bColor) {
             float t = GetDeltaT(A.x, B.x, P.x);
             Color ret = (aColor * t * 1f / A.z + bColor * (1f - t) * 1f / B.z) * P.z;
+            return ret;
+        }
+
+        public static Color GetColorFromProjZ(float z1, float z2, float pz, Color c1, Color c2)
+        {
+            float invZ1 = 0;
+            if (Mathf.Abs(z1) > float.Epsilon)
+                invZ1 = 1f / z1;
+            float invZ2 = 0;
+            if (Mathf.Abs(z2) > float.Epsilon)
+                invZ2 = 1f / z2;
+            float invPZ = 0;
+            if (Mathf.Abs(pz) > float.Epsilon)
+                invPZ = 1f / pz;
+            float t = GetDeltaT(invZ2, invZ2, invPZ);
+            Color ret = c1 * t + (1f - t) * c2;
             return ret;
         }
 

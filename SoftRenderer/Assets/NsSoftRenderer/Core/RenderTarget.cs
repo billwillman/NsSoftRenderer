@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿#define _USE_NEW_LERP_Z
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
@@ -695,12 +697,16 @@ namespace NsSoftRenderer {
              //       continue;
              //   }
                 Vector3 P = new Vector2(startX, screenStart.y);
+#if !_USE_NEW_LERP_Z
                 float t;
                 if (Mathf.Abs(screenEnd.x - screenStart.x) <= float.Epsilon)
                     t = 1f;
                 else
                     t = (P.x - screenEnd.x) / (screenStart.x - screenEnd.x);
                 P.z = SoftMath.GetPerspectZFromLerp(screenStart, screenEnd, t);
+#else 
+                P.z = SoftMath.GetZFromVectorsX(screenStart, screenEnd, P);
+#endif
                 // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
                 float a, b, c;
                 SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
@@ -718,6 +724,7 @@ namespace NsSoftRenderer {
                     // 填充颜色 early-z culling
                     if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
                         Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+                        //Color color = SoftMath.GetColorFromProjZ(screenStart.z, screenEnd.z, P.z, startColor, endColor);
                         // 这部分是PixelShader
                         if (passMode.pixelShader != null) {
                             PixelData data = new PixelData();
