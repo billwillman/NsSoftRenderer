@@ -891,8 +891,14 @@ namespace NsSoftRenderer {
                 start.y = y; end.y = y;
                 start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
+
+#if !_USE_NEW_LERP_Z
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
+#else
+                start.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p3, start);
+                end.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p2, end);
+#endif
 
                 Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
                 Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
