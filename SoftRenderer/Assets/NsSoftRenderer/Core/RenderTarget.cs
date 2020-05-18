@@ -62,6 +62,15 @@ namespace NsSoftRenderer {
             this.p3 = p3;
         }
 
+        public void InvZ() {
+            if (Mathf.Abs(p1.z) > float.Epsilon)
+                p1.z = 1f / p1.z;
+            if (Mathf.Abs(p2.z) > float.Epsilon)
+                p2.z = 1f / p2.z;
+            if (Mathf.Abs(p3.z) > float.Epsilon)
+                p3.z = 1f / p3.z;
+        }
+
         public bool IsAllZGreateOne {
             get {
                 return (p1.z > 1f) && (p2.z > 1f) && (p3.z > 1f);

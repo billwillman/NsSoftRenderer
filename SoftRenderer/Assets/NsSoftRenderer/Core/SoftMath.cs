@@ -286,14 +286,6 @@ namespace NsSoftRenderer {
             GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c/*, isUseNormal*/);
         }
 
-        public static Color GetColorFromBarycentricCoordinate(TriangleVertex tri, Vector3 P) {
-            float a, b, c;
-            tri.triangle.InvZ();
-            GetBarycentricCoordinate(tri.triangle, P, out a, out b, out c);
-            Color ret = a * tri.cP1 + b * tri.cP2 + c * tri.cP3;
-            return ret;
-        }
-
         public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P,
             out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             Vector3 AA = new Vector3(A.x, A.y, 0f);
