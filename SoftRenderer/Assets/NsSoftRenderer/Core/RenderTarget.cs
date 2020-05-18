@@ -151,7 +151,7 @@ namespace NsSoftRenderer {
 
         public bool IsAllZGreateOne {
             get {
-                return triangle;
+                return triangle.IsAllZGreateOne;
             }
         }
 
