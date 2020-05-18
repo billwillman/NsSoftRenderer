@@ -793,11 +793,14 @@ namespace NsSoftRenderer {
                             }
                         }
 
+                    } else {
+                        Debug.LogErrorFormat("x: y: ")
                     }
                 }
             }
         }
 
+#if !_USE_NEW_LERP_Z
         // 行填充
         private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd,
                 Color startColor, Color endColor,
@@ -871,6 +874,7 @@ namespace NsSoftRenderer {
             }
             maxCol = col;
         }
+#endif
 
         // 在投影坐标系中的
         /*
@@ -1072,6 +1076,7 @@ namespace NsSoftRenderer {
 
         }
 
+#if !_USE_NEW_LERP_Z
         // 填充上三角形
         protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
             //   top
@@ -1199,6 +1204,7 @@ namespace NsSoftRenderer {
                 UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
             }
         }
+#endif
 
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
