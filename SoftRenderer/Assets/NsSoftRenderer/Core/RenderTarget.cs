@@ -793,8 +793,6 @@ namespace NsSoftRenderer {
                             }
                         }
 
-                    } else {
-                        Debug.LogErrorFormat("x: y: ")
                     }
                 }
             }
