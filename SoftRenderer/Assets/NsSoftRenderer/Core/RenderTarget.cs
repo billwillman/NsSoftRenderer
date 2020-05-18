@@ -732,6 +732,9 @@ namespace NsSoftRenderer {
             maxCol = -1;
             for (float x = start.x; x <= end.x; x += 1.0f) {
                 int xIndex = (int)(x + 0.5f);
+                if (xIndex >= m_FrontColorBuffer.Width)
+                    break;
+
                 if (xIndex >= 0 && xIndex < m_FrontColorBuffer.Width) {
                     float lerpFactor = 1f;
                     if (Mathf.Abs(dx) > float.Epsilon) {
@@ -980,6 +983,9 @@ namespace NsSoftRenderer {
             float dd = tri.triangle.p1.y - tri.triangle.p3.y;
             for (float y = tri.triangle.p3.y; y <= tri.triangle.p1.y; y += 1.0f) {
                 int yIndex = (int)(y + 0.5f);
+                if (yIndex >= m_FrontColorBuffer.Height)
+                    break;
+
                 if (yIndex >= 0 && yIndex < m_FrontColorBuffer.Height) {
 
                     if (minRow < 0)
@@ -1003,12 +1009,16 @@ namespace NsSoftRenderer {
                     int miC, maC;
                     ScanlineFill(tri, yIndex, start, end, startColor, endColor, passMode, out miC, out maC);
 
-                    if (minCol < 0 || minCol > miC)
+                    if (miC >= 0 && (minCol < 0 || minCol > miC)) {
                         minCol = miC;
-                    if (maxCol < 0 || maxCol < maC)
+                        isSet = true;
+                    }
+                    if (maC >= 0 && (maxCol < 0 || maxCol < maC)) {
                         maxCol = maC;
+                        isSet = true;
+                    }
 
-                    isSet = true;
+                    
                 }
             }
 
@@ -1035,6 +1045,9 @@ namespace NsSoftRenderer {
             float dd = tri.triangle.p1.y - tri.triangle.p3.y;
             for (float y = tri.triangle.p3.y; y <= tri.triangle.p1.y; y += 1.0f) {
                 int yIndex = (int)(y + 0.5f);
+                if (yIndex >= m_FrontColorBuffer.Height)
+                    break;
+
                 if (yIndex >= 0 && yIndex < m_FrontColorBuffer.Height) {
 
                     if (minRow < 0)
@@ -1058,12 +1071,16 @@ namespace NsSoftRenderer {
                     int miC, maC;
                     ScanlineFill(tri, yIndex, start, end, startColor, endColor, passMode, out miC, out maC);
 
-                    if (minCol < 0 || minCol > miC)
+                    if (miC >= 0 && (minCol < 0 || minCol > miC)) {
                         minCol = miC;
-                    if (maxCol < 0 || maxCol < maC)
+                        isSet = true;
+                    }
+                    if (maC >= 0 && (maxCol < 0 || maxCol < maC)) {
                         maxCol = maC;
+                        isSet = true;
+                    }
 
-                    isSet = true;
+                    
                 }
             }
 
