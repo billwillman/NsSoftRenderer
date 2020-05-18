@@ -8,6 +8,7 @@ namespace NsSoftRenderer {
         // 材质
         public Material sharedMaterial = null;
         public CullMode cullMode = CullMode.back;
+        public bool isMeshRevert_Z = false;
 
         private Mesh m_CustomMesh = null;
         private MeshFilter m_MeshFilter = null;
@@ -16,7 +17,14 @@ namespace NsSoftRenderer {
             m_MeshFilter = GetComponent<MeshFilter>();
             CheckMesh();
             var trans = this.transform;
-            m_SoftMeshRenderer = SoftMeshRenderer.Create(trans.position, trans.up, trans.forward, m_MeshFilter.sharedMesh);
+
+            Mesh mesh;
+            if (m_CustomMesh != null)
+                mesh = m_CustomMesh;
+            else
+                mesh = m_MeshFilter.sharedMesh;
+
+            m_SoftMeshRenderer = SoftMeshRenderer.Create(trans.position, trans.up, trans.forward, mesh);
             UpdatePos();
         }
 
@@ -48,7 +56,24 @@ namespace NsSoftRenderer {
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;
             } else if (m_MeshFilter != null && m_MeshFilter.sharedMesh != null) {
-                var mesh = m_MeshFilter.sharedMesh;
+
+                Mesh mesh;
+                if (isMeshRevert_Z) {
+                    m_CustomMesh = GameObject.Instantiate(m_MeshFilter.sharedMesh);
+
+                    List<Vector3> lst = new List<Vector3>();
+                    Matrix4x4 mat = Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
+                    m_CustomMesh.GetVertices(lst);
+                    for (int i = 0; i < lst.Count; ++i) {
+                        lst[i] = mat.MultiplyPoint3x4(lst[i]);
+                    }
+                    m_CustomMesh.SetVertices(lst);
+
+                    mesh = m_CustomMesh;
+                } else {
+                    mesh = m_MeshFilter.sharedMesh;
+                }
+
                 List<Color> colors = new List<Color>();
                 mesh.GetColors(colors);
                 if (colors.Count <= 0 && mesh.vertexCount > 0) {

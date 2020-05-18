@@ -413,6 +413,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sharedMaterial: {fileID: 0}
   cullMode: 2
+  isMeshRevert_Z: 0
 --- !u!33 &568633215
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -561,6 +562,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sharedMaterial: {fileID: 0}
   cullMode: 2
+  isMeshRevert_Z: 1
 --- !u!33 &1788346341
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -568,7 +570,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788346339}
-  m_Mesh: {fileID: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1788346342
 Transform:
   m_ObjectHideFlags: 0
