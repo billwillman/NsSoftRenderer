@@ -845,6 +845,17 @@ namespace NsSoftRenderer {
             }
         }
 
+        protected float GetZFromBarycentricCoordinate(Triangle tri, Vector2 P) {
+            float a, b, c;
+            SoftMath.GetBarycentricCoordinate(tri, P, out a, out b, out c);
+            if (a >= 0 && b >=0 && c >= 0) {
+                float ret = tri.p1.z * a + tri.p2.z * b + tri.p3.z * c;
+                return ret;
+            }
+
+            return 1.1f; // 让它被裁剪
+        }
+
         // 填充上三角形
         protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
             //   top
@@ -887,10 +898,9 @@ namespace NsSoftRenderer {
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #else
-                //  start = GetProjSpaceVector3FromY(bottomTop, tri.triangle.p3, y);
-                //  end = GetProjSpaceVector3FromY(middleTop, tri.triangle.p2, y);
-                start.z = GetZFromVector2(bottomTop, tri.triangle.p3, y);
-                end.z = GetZFromVector2(middleTop, tri.triangle.p2, y);
+
+                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
+                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #endif
 
                 if (start.z <= 1f || end.z <= 1f) {
@@ -960,8 +970,8 @@ namespace NsSoftRenderer {
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #else
-                start.z = GetZFromVector2(bottomMiddle, tri.triangle.p3, y);
-                end.z = GetZFromVector2(bottomTop, tri.triangle.p2, y);
+                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
+                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #endif
                 if (start.z <= 1f || end.z <= 1f) {
                     Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);

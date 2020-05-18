@@ -64,7 +64,7 @@ public class SoftCameraTest : MonoBehaviour
                 Triangle tri = new Triangle(
                     new Vector3(-100f, 0, 0),
                     new Vector3(100f, 0, 0),
-                    new Vector3(100f, 100f, 0)
+                    new Vector3(100f, 100f, 100f)
                     );
 
                  var bottomTop = tri.p3 - tri.p1;
