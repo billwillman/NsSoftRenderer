@@ -286,6 +286,14 @@ namespace NsSoftRenderer {
             GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c/*, isUseNormal*/);
         }
 
+        public static Color GetColorFromBarycentricCoordinate(TriangleVertex tri, Vector3 P) {
+            float a, b, c;
+            tri.triangle.InvZ();
+            GetBarycentricCoordinate(tri.triangle, P, out a, out b, out c);
+            Color ret = a * tri.cP1 + b * tri.cP2 + c * tri.cP3;
+            return ret;
+        }
+
         public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P,
             out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             Vector3 AA = new Vector3(A.x, A.y, 0f);
@@ -391,6 +399,10 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public static Color GetColorFromProjZ(Vector3 A, Vector3 B, Vector3 P, Color c1, Color c2) {
+            return GetColorFromProjZ(A.z, B.z, P.z, c1, c2);
+        }
+
         public static Color GetColorFromProjZ(float z1, float z2, float pz, Color c1, Color c2)
         {
             float invZ1 = 0;
@@ -402,7 +414,7 @@ namespace NsSoftRenderer {
             float invPZ = 0;
             if (Mathf.Abs(pz) > float.Epsilon)
                 invPZ = 1f / pz;
-            float t = GetDeltaT(invZ2, invZ2, invPZ);
+            float t = GetDeltaT(invZ1, invZ2, invPZ);
             Color ret = c1 * t + (1f - t) * c2;
             return ret;
         }
