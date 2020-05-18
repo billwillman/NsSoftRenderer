@@ -337,6 +337,18 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public static float GetFloatDeltaT(float a, float b, float t) {
+            return (a * t + (1f - t) * b);
+        }
+
+        public static Vector3 GetVector3DeltaT(Vector3 a, Vector3 b, float t) {
+            return (a * t + (1f - t) * b);
+        }
+
+        public static Color GetColorDeltaT(Color a, Color b, float t) {
+            return (a * t + (1f - t) * b);
+        }
+
         // 在屏幕坐标系里使用线段上的一个Y坐标算出插值T并算出X坐标
         public static float GetScreenSpaceXFromScreenY(Vector3 screenA, Vector3 screenB, float pY, out float t) {
             t = GetDeltaT(screenA.y, screenB.y, pY);

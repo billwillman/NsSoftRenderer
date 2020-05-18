@@ -663,6 +663,27 @@ namespace NsSoftRenderer {
                 return 1;
         }
 
+        private bool CheckInvZTest(RenderPassMode passMode, int row, int col, float z) {
+            float oldZ = m_FrontDepthBuffer.GetItem(col, row);
+            if (oldZ < 0)
+                return true;
+            int cmp = CompareZBuffer(oldZ, z);
+            switch (passMode.ZTest) {
+                case ZTestOp.Equal:
+                    return cmp == 0;
+                case ZTestOp.Greate:
+                    return cmp > 1;
+                case ZTestOp.GreateEqual:
+                    return cmp >= 0;
+                case ZTestOp.Less:
+                    return cmp < 0;
+                case ZTestOp.LessEqual:
+                    return cmp <= 0;
+                default:
+                    return false;
+            }
+        }
+
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
             float z = TransZBuffer(p.z);
@@ -703,9 +724,84 @@ namespace NsSoftRenderer {
             }
         }
 
+        private void ScanlineFill(TriangleVertex tri, int row, Vector3 start, Vector3 end, 
+              Color startColor, Color endColor,
+              RenderPassMode passMode, out int minCol, out int maxCol) {
+            float dx = end.x - start.x;
+            minCol = -1;
+            maxCol = -1;
+            for (float x = start.x; x <= end.x; x += 1.0f) {
+                int xIndex = (int)(x + 0.5f);
+                if (xIndex >= 0 && xIndex < m_FrontColorBuffer.Width) {
+                    float lerpFactor = 1f;
+                    if (Mathf.Abs(dx) > float.Epsilon) {
+                        lerpFactor = 1f - (x - start.x) / dx;
+                    }
+
+                    // //深度测试
+                    //1/z’与x’和y'是线性关系的
+
+                    float startInvZ = start.z;
+                    if (Mathf.Abs(startInvZ) > float.Epsilon)
+                        startInvZ = 1f / startInvZ;
+
+                    float endInvZ = end.z;
+                    if (Mathf.Abs(endInvZ) > float.Epsilon)
+                        endInvZ = 1f / endInvZ;
+
+                    float oneDivZ = SoftMath.GetFloatDeltaT(startInvZ, endInvZ, lerpFactor);
+
+                    bool doFill = false;
+                    bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                    /*
+                         * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
+                         * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
+                         * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
+                         */
+
+                    // 填充颜色 early-z culling
+                    if ((!isUseEarlyZ) || CheckInvZTest(passMode, row, xIndex, oneDivZ)) {
+
+                        float w = 1f / oneDivZ;
+                        //插值顶点 原先需要插值的信息均乘以oneDivZ
+                        //现在得到插值后的信息需要除以oneDivZ得到真实值
+                        Color color = SoftMath.GetColorDeltaT(startColor, endColor, lerpFactor) * w;
+                        // 这部分是PixelShader
+                        if (passMode.pixelShader != null) {
+                            PixelData data = new PixelData();
+                            data.color = color;
+                            doFill = passMode.pixelShader.Main(data, out color);
+                        }
+
+                        if (doFill) {
+                            // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                            if (isUseEarlyZ || CheckInvZTest(passMode, row, xIndex, oneDivZ)) {
+                                m_FrontColorBuffer.SetItem(xIndex, row, color);
+                                // 写入ZBUFFER
+                                // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                // 填充ZBUFFER
+                                FillZBuffer(row, xIndex, oneDivZ);
+
+                                if (minCol < 0 && maxCol < 0) {
+                                    minCol = xIndex;
+                                    maxCol = xIndex;
+                                } else {
+                                    minCol = minCol > xIndex? xIndex : minCol;
+                                    maxCol = maxCol < xIndex ? xIndex : maxCol;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
         // 行填充
-        private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd, 
-                Color startColor, Color endColor, RenderPassMode passMode, out int minCol, out int maxCol) {
+        private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd,
+                Color startColor, Color endColor,
+                RenderPassMode passMode, out int minCol, out int maxCol) {
             // 扫描线
             int col = Mathf.Max(0, Mathf.FloorToInt(screenStart.x));
             minCol = col;
@@ -718,16 +814,16 @@ namespace NsSoftRenderer {
              //       continue;
              //   }
                 Vector3 P = new Vector2(startX, screenStart.y);
-#if !_USE_NEW_LERP_Z
+                
                 float t;
                 if (Mathf.Abs(screenEnd.x - screenStart.x) <= float.Epsilon)
                     t = 1f;
                 else
                     t = (P.x - screenEnd.x) / (screenStart.x - screenEnd.x);
                 P.z = SoftMath.GetPerspectZFromLerp(screenStart, screenEnd, t);
-#else 
-                P.z = SoftMath.GetZFromVectorsX(screenStart, screenEnd, P);
-#endif
+
+             //   P.z = SoftMath.GetZFromVectorsX(screenStart, screenEnd, P);
+
                 if (P.z <= 1f) {
 
                     // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
@@ -865,6 +961,117 @@ namespace NsSoftRenderer {
             return 1.1f; // 让它被裁剪
         }
 
+        protected void DrawTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
+
+            /*
+             *    top(p1)
+             * bottom(p3) middle(p2)
+             */
+
+            int minCol = -1;
+            int maxCol = -1;
+            int minRow = -1;
+            int maxRow = -1;
+            bool isSet = false;
+
+            float dy = 0;
+            float dd = tri.triangle.p1.y - tri.triangle.p3.y;
+            for (float y = tri.triangle.p3.y; y <= tri.triangle.p1.y; y += 1.0f) {
+                int yIndex = (int)(y + 0.5f);
+                if (yIndex >= 0 && yIndex < m_FrontColorBuffer.Height) {
+
+                    if (minRow < 0)
+                        minRow = yIndex;
+                    else if (minRow > yIndex)
+                        minRow = yIndex;
+
+                    if (maxRow < 0)
+                        maxRow = yIndex;
+                    else if (maxRow < yIndex)
+                        maxRow = yIndex;
+
+                    float t = 1f - dy / dd;
+                    Vector3 start = SoftMath.GetVector3DeltaT(tri.triangle.p3, tri.triangle.p1, t);
+                    Vector3 end = SoftMath.GetVector3DeltaT(tri.triangle.p2, tri.triangle.p1, t);
+                    dy += 1.0f;
+
+                    Color startColor = SoftMath.GetColorDeltaT(tri.cP3, tri.cP1, t);
+                    Color endColor = SoftMath.GetColorDeltaT(tri.cP2, tri.cP1, t);
+
+                    int miC, maC;
+                    ScanlineFill(tri, yIndex, start, end, startColor, endColor, passMode, out miC, out maC);
+
+                    if (minCol < 0 || minCol > miC)
+                        minCol = miC;
+                    if (maxCol < 0 || maxCol < maC)
+                        maxCol = maC;
+
+                    isSet = true;
+                }
+            }
+
+            // 更新填充Rect
+            if (isSet) {
+                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
+            }
+
+        }
+
+        protected void DrawBottomTriangle(RenderPassMode passMode, TriangleVertex tri) {
+
+            // middle(p2)----top(p1)
+            //  \       /
+            //    bottom(p3)
+
+            int minCol = -1;
+            int maxCol = -1;
+            int minRow = -1;
+            int maxRow = -1;
+            bool isSet = false;
+
+            float dy = 0;
+            float dd = tri.triangle.p1.y - tri.triangle.p3.y;
+            for (float y = tri.triangle.p3.y; y <= tri.triangle.p1.y; y += 1.0f) {
+                int yIndex = (int)(y + 0.5f);
+                if (yIndex >= 0 && yIndex < m_FrontColorBuffer.Height) {
+
+                    if (minRow < 0)
+                        minRow = yIndex;
+                    else if (minRow > yIndex)
+                        minRow = yIndex;
+
+                    if (maxRow < 0)
+                        maxRow = yIndex;
+                    else if (maxRow < yIndex)
+                        maxRow = yIndex;
+
+                    float t = 1f - dy / dd;
+                    Vector3 start = SoftMath.GetVector3DeltaT(tri.triangle.p3, tri.triangle.p2, t);
+                    Vector3 end = SoftMath.GetVector3DeltaT(tri.triangle.p3, tri.triangle.p1, t);
+                    dy += 1.0f;
+
+                    Color startColor = SoftMath.GetColorDeltaT(tri.cP3, tri.cP2, t);
+                    Color endColor = SoftMath.GetColorDeltaT(tri.cP3, tri.cP1, t);
+
+                    int miC, maC;
+                    ScanlineFill(tri, yIndex, start, end, startColor, endColor, passMode, out miC, out maC);
+
+                    if (minCol < 0 || minCol > miC)
+                        minCol = miC;
+                    if (maxCol < 0 || maxCol < maC)
+                        maxCol = maC;
+
+                    isSet = true;
+                }
+            }
+
+            // 更新填充Rect
+            if (isSet) {
+                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
+            }
+
+        }
+
         // 填充上三角形
         protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
             //   top
@@ -881,10 +1088,10 @@ namespace NsSoftRenderer {
             bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
                 float y = row + 0.5f;
-               // if (y < tri.triangle.p3.y)
-               //     continue;
-              //  if (y > tri.triangle.p1.y)
-              //      break;
+                // if (y < tri.triangle.p3.y)
+                //     continue;
+                //  if (y > tri.triangle.p1.y)
+                //      break;
 
                 if (minRow < 0)
                     minRow = row;
@@ -903,14 +1110,8 @@ namespace NsSoftRenderer {
                 start.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(middleTop, tri.triangle.p2, y);
 
-#if !_USE_NEW_LERP_Z
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
-#else
-
-                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
-                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
-#endif
 
                 if (start.z <= 1f || end.z <= 1f) {
 
@@ -939,7 +1140,7 @@ namespace NsSoftRenderer {
             //  \       /
             //    bottom(p3)
             int yStart = Mathf.Max(Mathf.FloorToInt(tri.triangle.p3.y), 0);
-            int yEnd =  Mathf.Min(Mathf.CeilToInt(tri.triangle.p2.y), m_FrontColorBuffer.Height - 1);
+            int yEnd = Mathf.Min(Mathf.CeilToInt(tri.triangle.p2.y), m_FrontColorBuffer.Height - 1);
 
             Vector2 bottomMiddle = tri.triangle.p2 - tri.triangle.p3;
             Vector2 bottomTop = tri.triangle.p1 - tri.triangle.p3;
@@ -950,7 +1151,7 @@ namespace NsSoftRenderer {
             int maxRow = -1;
             bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
-                
+
                 float y = row + 0.5f;
                 if (y < tri.triangle.p3.y)
                     continue;
@@ -974,14 +1175,9 @@ namespace NsSoftRenderer {
 
                 start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
-#if !_USE_NEW_LERP_Z
-                
+
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
-#else
-                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
-                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
-#endif
                 if (start.z <= 1f || end.z <= 1f) {
                     Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
                     Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
@@ -1011,14 +1207,29 @@ namespace NsSoftRenderer {
             var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
              switch (triType) {
                 case TriangleVertex.ScreenSpaceTopBottomType.top:
-                    FillScreenTopTriangle(passMode, topTri);
+
+#if !_USE_NEW_LERP_Z
+                     FillScreenTopTriangle(passMode, topTri);
+#else
+                    DrawTopTriangle(passMode, topTri);
+#endif
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.bottom:
-                    FillScreenBottomTriangle(passMode, bottomTri);
+
+#if !_USE_NEW_LERP_Z
+                   FillScreenBottomTriangle(passMode, bottomTri);
+#else
+                    DrawBottomTriangle(passMode, bottomTri);
+#endif
                     break;
                 case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
+#if !_USE_NEW_LERP_Z
                     FillScreenTopTriangle(passMode, topTri);
-                    FillScreenBottomTriangle(passMode, bottomTri);
+                     DrawBottomTriangle(passMode, bottomTri);
+#else
+                    DrawTopTriangle(passMode, topTri);
+                    DrawBottomTriangle(passMode, bottomTri);
+#endif
                     break;
             }
         }
