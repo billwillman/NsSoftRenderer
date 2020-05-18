@@ -767,6 +767,47 @@ namespace NsSoftRenderer {
             maxCol = col;
         }
 
+        // 在投影坐标系中的
+        /*
+        public static Vector3 GetProjSpaceVector3FromY(Vector3 v, Vector3 start, float y) {
+            Vector3 ret;
+            ret.y = y;
+            
+            bool isDY = Mathf.Abs(v.y) <= float.Epsilon; 
+            if (isDY) {
+                ret.x = 0f;
+                ret.z = 1.1f; // 这个就是让它剔除
+                return ret;
+            }
+
+            bool isDX = Mathf.Abs(v.x) <= float.Epsilon;
+            
+            bool isDZ = Mathf.Abs(v.z) <= float.Epsilon;
+            if (isDX || (isDZ && isDY)) {
+                ret.x = start.x;
+            } else {
+                ret.x = v.x * ((ret.y - start.y) / v.y) + start.x;
+            }
+
+
+            if (isDZ || (isDX && isDY)) {
+                ret.z = start.z;
+            } else {
+                ret.z = v.z * ((ret.y - start.y) / v.y) + start.z;
+            }
+
+            return ret;
+        }*/
+
+            // v 是方向
+        public static float GetZFromVector2(Vector3 v, Vector3 start, float y) {
+            bool isZeroY = Mathf.Abs(v.y) <= float.Epsilon;
+            if (isZeroY)
+                return 1.1f; // 让它被剔除
+            float ret = (y - start.y) * v.z / v.y + start.z;
+            return ret;
+        }
+
         // v是方向
         public static float GetVector2XFromY(Vector2 v, Vector2 start, float y) {
             bool isZeroX = Mathf.Abs(v.x) <= float.Epsilon;
@@ -838,14 +879,18 @@ namespace NsSoftRenderer {
                 Vector3 start = Vector3.zero;
                 Vector3 end = Vector3.zero;
                 start.y = y; end.y = y;
+
                 start.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(middleTop, tri.triangle.p2, y);
+
 #if !_USE_NEW_LERP_Z
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #else
-                start.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p3, start);
-                end.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p2, end);
+                //  start = GetProjSpaceVector3FromY(bottomTop, tri.triangle.p3, y);
+                //  end = GetProjSpaceVector3FromY(middleTop, tri.triangle.p2, y);
+                start.z = GetZFromVector2(bottomTop, tri.triangle.p3, y);
+                end.z = GetZFromVector2(middleTop, tri.triangle.p2, y);
 #endif
 
                 if (start.z <= 1f || end.z <= 1f) {
@@ -907,15 +952,16 @@ namespace NsSoftRenderer {
                 Vector3 end = Vector3.zero;
 
                 start.y = y; end.y = y;
+
                 start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
-
 #if !_USE_NEW_LERP_Z
+                
                 start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
                 end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
 #else
-                start.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p3, start);
-                end.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p2, end);
+                start.z = GetZFromVector2(bottomMiddle, tri.triangle.p3, y);
+                end.z = GetZFromVector2(bottomTop, tri.triangle.p2, y);
 #endif
                 if (start.z <= 1f || end.z <= 1f) {
                     Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);

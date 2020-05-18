@@ -29,7 +29,7 @@ namespace NsSoftRenderer {
     }
 
     public static class SoftMath {
-
+      
         private static readonly float EPS = 1e-6f;
 
         /*

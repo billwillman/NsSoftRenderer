@@ -86,12 +86,7 @@ public class SoftCameraTest : MonoBehaviour
                 SoftMath.GetBarycentricCoordinate(tri, P, out a, out b, out c);
                 Vector3 PP = tri.p1 * a +tri.p2 * b + tri.p3 * c;
 
-                // Debug.LogErrorFormat("a: {0}, b: {1}, c: {2} || {3}", a.ToString(), b.ToString(), c.ToString(), PP.ToString2());
-
-                Vector3 sss = new Vector3(0, 0, 1000);
-                Vector3 sss1 = m_SoftCam.ViewProjMatrix.MultiplyPoint(sss);
-                Vector3 sss2 = (m_UnityCam.projectionMatrix * m_UnityCam.worldToCameraMatrix).MultiplyPoint(sss);
-                Debug.LogErrorFormat("[Unity] {0} [SoftCam] {1}", sss2.ToString2(), sss1.ToString2());
+                 Debug.LogErrorFormat("a: {0}, b: {1}, c: {2} || {3}", a.ToString(), b.ToString(), c.ToString(), PP.ToString2());
                 
             }
 
