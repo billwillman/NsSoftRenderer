@@ -51,7 +51,7 @@ namespace NsSoftRenderer {
             }
         }
 
-        // 排序
+        // 排序(非透明排序)
         protected virtual void DoVisibleRenderObjectsSort(SoftCamera camera, NativeList<int> visibleList) {
             if (visibleList == null || visibleList.Count <= 0)
                 return;

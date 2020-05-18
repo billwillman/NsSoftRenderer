@@ -707,40 +707,43 @@ namespace NsSoftRenderer {
 #else 
                 P.z = SoftMath.GetZFromVectorsX(screenStart, screenEnd, P);
 #endif
-                // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
-                float a, b, c;
-                SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
-                if (a >= e && b >= e && c >= e) {
-                    
-                    bool doFill = false;
-                    bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+                if (P.z <= 1f) {
 
-                    /*
-                     * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
-                     * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
-                     * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
-                     */
+                    // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
+                    float a, b, c;
+                    SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
+                    if (a >= e && b >= e && c >= e) {
 
-                    // 填充颜色 early-z culling
-                    if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
-                        Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
-                        //Color color = SoftMath.GetColorFromProjZ(screenStart.z, screenEnd.z, P.z, startColor, endColor);
-                        // 这部分是PixelShader
-                        if (passMode.pixelShader != null) {
-                            PixelData data = new PixelData();
-                            data.color = color;
-                            doFill = passMode.pixelShader.Main(data, out color);
-                        }
-                        // ----------------
-                        if (doFill) {
-                            // 如果不是Early-Z模式，需要再执行一次ZTEST检查
-                            if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
-                                m_FrontColorBuffer.SetItem(col, row, color);
-                                // 写入ZBUFFER
-                                // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
-                                float z = TransZBuffer(P.z);
-                                // 填充ZBUFFER
-                                FillZBuffer(row, col, z);
+                        bool doFill = false;
+                        bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                        /*
+                         * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
+                         * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
+                         * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
+                         */
+
+                        // 填充颜色 early-z culling
+                        if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
+                            Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+                            //Color color = SoftMath.GetColorFromProjZ(screenStart.z, screenEnd.z, P.z, startColor, endColor);
+                            // 这部分是PixelShader
+                            if (passMode.pixelShader != null) {
+                                PixelData data = new PixelData();
+                                data.color = color;
+                                doFill = passMode.pixelShader.Main(data, out color);
+                            }
+                            // ----------------
+                            if (doFill) {
+                                // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                                if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
+                                    m_FrontColorBuffer.SetItem(col, row, color);
+                                    // 写入ZBUFFER
+                                    // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                    float z = TransZBuffer(P.z);
+                                    // 填充ZBUFFER
+                                    FillZBuffer(row, col, z);
+                                }
                             }
                         }
                     }
@@ -833,17 +836,20 @@ namespace NsSoftRenderer {
                 end.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p2, end);
 #endif
 
-                Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, start, tri.cP3, tri.cP1);
-                Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p2, tri.triangle.p1, end, tri.cP2, tri.cP1);
+                if (start.z <= 1f || end.z <= 1f) {
 
-                int miC, maC;
-                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
-                if (minCol < 0 || minCol > miC)
-                    minCol = miC;
-                if (maxCol < 0 || maxCol < maC)
-                    maxCol = maC;
+                    Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, start, tri.cP3, tri.cP1);
+                    Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p2, tri.triangle.p1, end, tri.cP2, tri.cP1);
 
-                isSet = true;
+                    int miC, maC;
+                    ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
+                    if (minCol < 0 || minCol > miC)
+                        minCol = miC;
+                    if (maxCol < 0 || maxCol < maC)
+                        maxCol = maC;
+
+                    isSet = true;
+                }
             }
 
             if (isSet) {
@@ -899,19 +905,20 @@ namespace NsSoftRenderer {
                 start.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p3, start);
                 end.z = SoftMath.GetZFromVectorsX(tri.triangle.p1, tri.triangle.p2, end);
 #endif
+                if (start.z <= 1f || end.z <= 1f) {
+                    Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
+                    Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
 
-                Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
-                Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
+                    // 扫描
+                    int miC, maC;
+                    ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
+                    if (minCol < 0 || minCol > miC)
+                        minCol = miC;
+                    if (maxCol < 0 || maxCol < maC)
+                        maxCol = maC;
 
-                // 扫描
-                int miC, maC;
-                ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
-                if (minCol < 0 || minCol > miC)
-                    minCol = miC;
-                if (maxCol < 0 || maxCol < maC)
-                    maxCol = maC;
-
-                isSet = true;
+                    isSet = true;
+                }
             }
 
             // 更新填充Rect
