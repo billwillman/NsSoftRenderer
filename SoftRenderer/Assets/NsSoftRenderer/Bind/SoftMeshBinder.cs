@@ -82,6 +82,8 @@ namespace NsSoftRenderer {
                         colors.Add(new Color(Random.Range(0f, 1.0f), Random.Range(0f, 1.0f), Random.Range(0f, 1.0f), 1f));
                     }
                     mesh.SetColors(colors);
+                    if (mesh != m_MeshFilter.sharedMesh)
+                        m_MeshFilter.sharedMesh.SetColors(colors);
                 }
             }
         }
