@@ -501,6 +501,10 @@ namespace NsSoftRenderer {
                     passMode.vertexShader.Main(ref vertex); 
                 }
 
+                // 做个三角形的判断
+                if (vertex.IsAllZGreateOne)
+                    return;
+
                 // 这里做背面剔除
                 if (SoftMath.Is_MVP_Culled(passMode.Cull, vertex.triangle))
                     return;

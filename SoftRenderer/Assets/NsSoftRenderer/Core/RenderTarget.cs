@@ -62,6 +62,12 @@ namespace NsSoftRenderer {
             this.p3 = p3;
         }
 
+        public bool IsAllZGreateOne {
+            get {
+                return (p1.z > 1f) && (p2.z > 1f) && (p3.z > 1f);
+            }
+        }
+
         public static Vector3 Trans(Vector4 v) {
             Vector3 ret = new Vector3(v.x / v.w, v.y / v.w, v.z / v.w);
             return ret;
@@ -141,6 +147,12 @@ namespace NsSoftRenderer {
             cP1 = p1;
             cP2 = p2;
             cP3 = p3;
+        }
+
+        public bool IsAllZGreateOne {
+            get {
+                return triangle;
+            }
         }
 
         // 获得拆分上下三角形的点
