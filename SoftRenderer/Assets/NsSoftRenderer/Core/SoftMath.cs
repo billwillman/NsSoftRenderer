@@ -92,7 +92,7 @@ namespace NsSoftRenderer {
                 z3 = -z3;
             }
 
-            return (z1 > 0 && z2 > 0 && z3 > 0);
+            return (z1 >= 0 && z2 >= 0 && z3 >= 0);
         }
 
         public static float PtInPlane(Vector3 pt, SoftPlane plane) {

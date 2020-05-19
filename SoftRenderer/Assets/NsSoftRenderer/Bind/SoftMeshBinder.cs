@@ -126,6 +126,9 @@ namespace NsSoftRenderer {
                 m_SoftMeshRenderer.Up = trans.up;
                 m_SoftMeshRenderer.cullMode = this.cullMode;
                 //m_SoftMeshRenderer.sharedMesh = m_MeshFilter.sharedMesh;
+
+            //    Debug.LogErrorFormat("[Unity] {0} [Soft] {1}", 
+            //        this.transform.localToWorldMatrix *, m_SoftMeshRenderer.LocalToGlobalMatrix.ToString());
             }
         }
 

@@ -1342,7 +1342,7 @@ namespace NsSoftRenderer {
                         float a, b, c;
                         float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
 
-                        bool isVaildP = (pz <= 1.0f) && (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ);
+                        bool isVaildP = (pz <= 1.0f) /*&& (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ)*/;
                         if (isVaildP) {
 
                             bool doFill = false;

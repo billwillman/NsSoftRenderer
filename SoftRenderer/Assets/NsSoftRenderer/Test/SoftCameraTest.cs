@@ -87,6 +87,8 @@ public class SoftCameraTest : MonoBehaviour
                 Vector3 PP = tri.p1 * a +tri.p2 * b + tri.p3 * c;
 
                  Debug.LogErrorFormat("a: {0}, b: {1}, c: {2} || {3}", a.ToString(), b.ToString(), c.ToString(), PP.ToString2());
+
+                
                 
             }
 
