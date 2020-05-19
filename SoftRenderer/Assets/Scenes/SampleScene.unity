@@ -562,7 +562,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sharedMaterial: {fileID: 0}
   cullMode: 2
-  isMeshRevert_Z: 1
+  isMeshRevert_Z: 0
 --- !u!33 &1788346341
 MeshFilter:
   m_ObjectHideFlags: 0

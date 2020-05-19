@@ -1284,13 +1284,13 @@ namespace NsSoftRenderer {
             Rect r = tri.triangle.GetRect(out minZ, out maxZ);
             int yStart = Mathf.Clamp((int)r.yMin, 0, m_FrontColorBuffer.Height - 1);
             int yEnd = Mathf.Clamp((int)r.yMax, 0, m_FrontColorBuffer.Height - 1);
-            int xStart =  Mathf.Clamp((int)r.xMin, 0, m_FrontColorBuffer.Width - 1);
+            int xStart = Mathf.Clamp((int)r.xMin, 0, m_FrontColorBuffer.Width - 1);
             int xEnd = Mathf.Clamp((int)r.xMax, 0, m_FrontColorBuffer.Width - 1);
 
             //if (yEnd - yStart <= 1)
             //    return;
 
-           // if (xEnd - xStart <= 1)
+            // if (xEnd - xStart <= 1)
             //    return;
 
             int minCol = -1;
@@ -1315,23 +1315,17 @@ namespace NsSoftRenderer {
                         break;
 
                     Vector2 P = new Vector2(x, y);
-                    float a, b, c;
-
-
-                    //  SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P,
-                    //                 out a, out b, out c);
 
                     // 使用叉乘判斷點是否在三角形上面
                     bool isScreenVaild = SoftMath.ScreenSpacePtInTriangle(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
 
-                    if (isScreenVaild) 
-                    {
+                    if (isScreenVaild) {
+                        float a, b, c;
+                        float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
 
-                    float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
-                    
-                    bool isVaildP = (pz <= 1.0f) && (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ);
+                        bool isVaildP = (pz <= 1.0f) && (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ);
                         if (isVaildP) {
-        
+
                             bool doFill = false;
                             bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
 

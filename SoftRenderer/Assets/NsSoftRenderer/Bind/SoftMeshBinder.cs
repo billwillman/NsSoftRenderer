@@ -37,9 +37,9 @@ namespace NsSoftRenderer {
                 {
                     m_CustomMesh = new Mesh();
                     List<Vector3> vs = new List<Vector3>();
-                    vs.Add(new Vector3(-1, 0, 0));
-                    vs.Add(new Vector3(1, 0, 0));
-                    vs.Add(new Vector3(1, 1, 0));
+                    vs.Add(new Vector3(0, 0, -1));
+                    vs.Add(new Vector3(0, 0, 1));
+                    vs.Add(new Vector3(0, 1, 1));
                     m_CustomMesh.SetVertices(vs);
 
                     m_CustomMesh.subMeshCount = 1;
