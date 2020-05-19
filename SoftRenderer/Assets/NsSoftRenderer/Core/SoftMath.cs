@@ -30,7 +30,8 @@ namespace NsSoftRenderer {
 
     public static class SoftMath {
       
-        private static readonly float EPS = 1e-6f;
+        public static readonly float EPS = 1e-6f;
+        public static readonly float EPS1 = 1e-5f;
 
         /*
          * 判断一个点是否在三角形内，有两种常用方法：
@@ -280,6 +281,7 @@ namespace NsSoftRenderer {
             b = vv.x; //-->> b即是v
             c = vv.y; //-->> c即是u
             a = 1f - b - c; //-->>a即是 1- u - v = r
+            a = Mathf.Abs(a) < EPS ? 0 : a;
         }
 
         public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c/*, bool isUseNormal = true*/) {
@@ -295,25 +297,38 @@ namespace NsSoftRenderer {
             GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c/*, isUseNormal*/);
         }
 
-        public static float GetScreenSpaceBarycentricCoordinateZ(Vector3 A, Vector3 B, Vector3 C, Vector2 P) {
+        public static Color GetColorFromProjSpaceBarycentricCoordinateAndZ(TriangleVertex tri, float pz, float a, float b, float c) {
+            tri.triangle.InvZ();
+            Color ret = (tri.cP1 * a * tri.triangle.p1.z + tri.cP2 * b * tri.triangle.p2.z + tri.cP3 * c * tri.triangle.p3.z) * pz;
+            return ret;
+        }
+
+        public static float GetProjSpaceBarycentricCoordinateZ(Vector3 A, Vector3 B, Vector3 C, Vector2 P) {
             float a, b, c;
-            Vector3 AA = new Vector3(A.x, A.y, 0f);
-            Vector3 BB = new Vector3(B.x, B.y, 0f);
-            Vector3 CC = new Vector3(C.x, C.y, 0f);
             Vector3 PP = new Vector3(P.x, P.y, 0f);
-            GetBarycentricCoordinate(AA, BB, CC, PP, out a, out b, out c);
-            float invZ = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
-            float ret = 1f / invZ;
+            GetBarycentricCoordinate(A, B, C, PP, out a, out b, out c);
+
+             float ret = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
+            if (Mathf.Abs(ret) > float.Epsilon)
+               ret = 1f / ret;
+            //float ret = a * A.z + b * B.z + c * C.z;
             return ret;
         }
 
-        public static float GetScreenSpaceBarycentricCoordinateZ(Triangle tri, Vector2 P) {
-            float ret = GetScreenSpaceBarycentricCoordinateZ(tri.p1, tri.p2, tri.p3, P);
+        public static float GetProjSpaceBarycentricCoordinateZ(TriangleVertex tri, Vector2 P, out float a, out float b, out float c) {
+            Vector3 PP = new Vector3(P.x, P.y, 0f);
+            GetBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, PP, out a, out b, out c);
+            float ret = a * tri.triangle.p1.z + b * tri.triangle.p2.z + c * tri.triangle.p3.z;
             return ret;
         }
 
-        public static float GetScreenSpaceBarycentricCoordinateZ(TriangleVertex tri, Vector2 P) {
-            float ret = GetScreenSpaceBarycentricCoordinateZ(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
+        public static float GetProjSpaceBarycentricCoordinateZ(Triangle tri, Vector2 P) {
+            float ret = GetProjSpaceBarycentricCoordinateZ(tri.p1, tri.p2, tri.p3, P);
+            return ret;
+        }
+
+        public static float GetProjSpaceBarycentricCoordinateZ(TriangleVertex tri, Vector2 P) {
+            float ret = GetProjSpaceBarycentricCoordinateZ(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
             return ret;
         }
 

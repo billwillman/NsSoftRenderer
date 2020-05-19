@@ -300,9 +300,11 @@ namespace NsSoftRenderer {
                 /*
                 * 在摄影机VIEW空间 1/Zp = t * 1/Za + (1-t) * 1/Zc => 透视校正插值（一定要在摄影机ViewSpace[局部坐标系里]）
                 */
-                p.z = SoftMath.GetPerspectZFromLerp(top, bottom, t);
+                float a, b, c;
+                Vector2 PP = new Vector3(p.x, p.y, 0f);
+                p.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(this, PP, out a, out b, out c);
                 // 颜色UV的插值方式: Pcolor * 1/Zp = Acolor * t * 1/Za + (1 - t) * /Zc * Ccolor
-                Color pC = (topC * t * 1f / top.z + (1f - t) * bottomC / bottom.z) * p.z;
+                Color pC = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(this, p.z, a, b, c);
 
                 if (p.x > middle.x) {
                     topTri.triangle.p2 = p;
@@ -801,7 +803,6 @@ namespace NsSoftRenderer {
             }
         }
 
-#if !_USE_NEW_LERP_Z
         // 行填充
         private void ScreenSpaceScanLine(TriangleVertex tri, int row, Vector3 screenStart, Vector3 screenEnd,
                 Color startColor, Color endColor,
@@ -811,59 +812,61 @@ namespace NsSoftRenderer {
             minCol = col;
             float startX = col + 0.5f;
             float endX = Mathf.Min(m_FrontColorBuffer.Width - 1, Mathf.CeilToInt(screenEnd.x)) + 0.5f;
-            float e = -float.Epsilon;
+//            float e = -float.Epsilon;
             while (startX <= endX) {
-              //  if (startX < screenStart.x) {
-              //      startX += 1f;
-             //       continue;
-             //   }
-                Vector3 P = new Vector2(startX, screenStart.y);
-                
-                float t;
-                if (Mathf.Abs(screenEnd.x - screenStart.x) <= float.Epsilon)
-                    t = 1f;
-                else
-                    t = (P.x - screenEnd.x) / (screenStart.x - screenEnd.x);
-                P.z = SoftMath.GetPerspectZFromLerp(screenStart, screenEnd, t);
 
-             //   P.z = SoftMath.GetZFromVectorsX(screenStart, screenEnd, P);
+                if (startX >= screenStart.x) {
+                    Vector3 P = new Vector2(startX, screenStart.y);
 
-                if (P.z <= 1f) {
-
-                    // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
                     float a, b, c;
-                    SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P, out a, out b, out c);
-                    if (a >= e && b >= e && c >= e) {
+                    P.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
 
-                        bool doFill = false;
-                        bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+                //   a = Mathf.Max(0, a);
+                //    b = Mathf.Max(0, b);
+                //    c = Mathf.Max(0, c);
 
-                        /*
-                         * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
-                         * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
-                         * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
-                         */
+                    bool isVaildP = (P.z <= 1f) && (a >= -float.Epsilon) && (b >= -float.Epsilon) && (c >= -float.Epsilon);
+                    //  isVaildP = true;
 
-                        // 填充颜色 early-z culling
-                        if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
-                            Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
-                            //Color color = SoftMath.GetColorFromProjZ(screenStart.z, screenEnd.z, P.z, startColor, endColor);
-                            // 这部分是PixelShader
-                            if (passMode.pixelShader != null) {
-                                PixelData data = new PixelData();
-                                data.color = color;
-                                doFill = passMode.pixelShader.Main(data, out color);
-                            }
-                            // ----------------
-                            if (doFill) {
-                                // 如果不是Early-Z模式，需要再执行一次ZTEST检查
-                                if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
-                                    m_FrontColorBuffer.SetItem(col, row, color);
-                                    // 写入ZBUFFER
-                                    // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
-                                    float z = TransZBuffer(P.z);
-                                    // 填充ZBUFFER
-                                    FillZBuffer(row, col, z);
+                    if (isVaildP) {
+
+                        // 1.判断是否在三角形中。有两种方法：1.使用向量叉乘，保证AP都在AB,BC,CA的同侧。2.使用重心坐标，求出a,b,c都是大于0的
+                        //   if (a >= e && b >= e && c >= e) 
+                        {
+
+                            bool doFill = false;
+                            bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                            /*
+                             * 传统Z-Test其实是发生在PS之后的，因此仅仅依靠Z-Test并不能加快多少渲染速度。而EZC则发生在光栅化之后，
+                             * 调用PS之前。EZC会提前对深度进行比较，如果测试通过(Z-Func)，则执行PS，否则跳过此片段/像素(fragment/pixel)。
+                             * 不过要注意的是，在PS中不能修改深度值，否则EZC会被禁用。
+                             */
+
+                            // 填充颜色 early-z culling
+                            if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, P)) {
+                                //Color color = SoftMath.GetColorLerpFromScreenX(screenStart, screenEnd, P, startColor, endColor);
+
+                                Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, P.z, a, b, c);
+
+                                //Color color = SoftMath.GetColorFromProjZ(screenStart.z, screenEnd.z, P.z, startColor, endColor);
+                                // 这部分是PixelShader
+                                if (passMode.pixelShader != null) {
+                                    PixelData data = new PixelData();
+                                    data.color = color;
+                                    doFill = passMode.pixelShader.Main(data, out color);
+                                }
+                                // ----------------
+                                if (doFill) {
+                                    // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                                    if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
+                                        m_FrontColorBuffer.SetItem(col, row, color);
+                                        // 写入ZBUFFER
+                                        // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                        float z = TransZBuffer(P.z);
+                                        // 填充ZBUFFER
+                                        FillZBuffer(row, col, z);
+                                    }
                                 }
                             }
                         }
@@ -875,7 +878,6 @@ namespace NsSoftRenderer {
             }
             maxCol = col;
         }
-#endif
 
         // 在投影坐标系中的
         /*
@@ -1006,6 +1008,15 @@ namespace NsSoftRenderer {
                     Color startColor = SoftMath.GetColorDeltaT(tri.cP3, tri.cP1, t);
                     Color endColor = SoftMath.GetColorDeltaT(tri.cP2, tri.cP1, t);
 
+                    /*
+                    float a, b, c;
+                    SoftMath.GetBarycentricCoordinate(tri.triangle, start, out a, out b, out c);
+                    Color startColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, start.z, a, b, c);
+
+                    SoftMath.GetBarycentricCoordinate(tri.triangle, end, out a, out b, out c);
+                    Color endColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, end.z, a, b, c);
+                    */
+
                     int miC, maC;
                     ScanlineFill(tri, yIndex, start, end, startColor, endColor, passMode, out miC, out maC);
 
@@ -1091,7 +1102,6 @@ namespace NsSoftRenderer {
 
         }
 
-#if !_USE_NEW_LERP_Z
         // 填充上三角形
         protected void FillScreenTopTriangle(RenderPassMode passMode, TriangleVertex tri) {
             //   top
@@ -1108,10 +1118,10 @@ namespace NsSoftRenderer {
             bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
                 float y = row + 0.5f;
-                // if (y < tri.triangle.p3.y)
-                //     continue;
-                //  if (y > tri.triangle.p1.y)
-                //      break;
+                 if (y < tri.triangle.p3.y)
+                     continue;
+                  if (y > tri.triangle.p1.y)
+                     break;
 
                 if (minRow < 0)
                     minRow = row;
@@ -1130,22 +1140,40 @@ namespace NsSoftRenderer {
                 start.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(middleTop, tri.triangle.p2, y);
 
-                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
-                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
+                float a, b, c;
+                start.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, start, out a, out b, out c);
+           //     a = Mathf.Max(a, 0);
+           //     b = Mathf.Max(b, 0);
+           //     c = Mathf.Max(c, 0);
 
-                if (start.z <= 1f || end.z <= 1f) {
+                bool isVaidDelta = (a >= -float.Epsilon) && (b >= -float.Epsilon) && (c >= -float.Epsilon);
+                bool isStartVaild = (start.z <= 1f) && isVaidDelta;
+                end.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, end, out a, out b, out c);
+              //  a = Mathf.Max(a, 0);
+            //    b = Mathf.Max(b, 0);
+              //  c = Mathf.Max(c, 0);
 
-                    Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, start, tri.cP3, tri.cP1);
-                    Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p2, tri.triangle.p1, end, tri.cP2, tri.cP1);
+                isVaidDelta = (a >= -float.Epsilon) && (b >= -float.Epsilon) && (c >= -float.Epsilon);
+                bool isEndVaild = (end.z <= 1f) && isVaidDelta;
+
+                   if (isStartVaild || isEndVaild) 
+                {
+                    Color startColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, start.z, a, b, c);
+                    Color endColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, end.z, a, b, c);
 
                     int miC, maC;
                     ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
-                    if (minCol < 0 || minCol > miC)
+                    if (miC >= 0 && (minCol < 0 || minCol > miC)) {
                         minCol = miC;
-                    if (maxCol < 0 || maxCol < maC)
+                        isSet = true;
+                    }
+                    if (maC >= 0 && (maxCol < 0 || maxCol < maC)) {
                         maxCol = maC;
-
-                    isSet = true;
+                        isSet = true;
+                    }
+                    
+                } else {
+                    Debug.LogErrorFormat("a: {0}, b: {1}, c: {2} row: {3}", a, b, c, row);
                 }
             }
 
@@ -1171,13 +1199,14 @@ namespace NsSoftRenderer {
             int maxRow = -1;
             bool isSet = false;
             for (int row = yStart; row <= yEnd; ++row) {
-
+                
                 float y = row + 0.5f;
+                
                 if (y < tri.triangle.p3.y)
                     continue;
                 if (y > tri.triangle.p2.y)
                     break;
-
+                    
                 if (minRow < 0)
                     minRow = row;
                 else if (minRow > row)
@@ -1196,21 +1225,31 @@ namespace NsSoftRenderer {
                 start.x = GetVector2XFromY(bottomMiddle, tri.triangle.p3, y);
                 end.x = GetVector2XFromY(bottomTop, tri.triangle.p3, y);
 
-                start.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, start);
-                end.z = SoftMath.GetScreenSpaceBarycentricCoordinateZ(tri, end);
-                if (start.z <= 1f || end.z <= 1f) {
-                    Color startColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p2, start, tri.cP3, tri.cP2);
-                    Color endColor = SoftMath.GetColorLerpFromScreenY(tri.triangle.p3, tri.triangle.p1, end, tri.cP3, tri.cP1);
+                float a, b, c;
+                start.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, start, out a, out b, out c);
+                bool isVaidDelta = (a >= -float.Epsilon) && (b >= -float.Epsilon) && (c >= -float.Epsilon);
+                bool isStartVaild = (start.z <= 1f) && isVaidDelta;
+                end.z = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, end, out a, out b, out c);
+                isVaidDelta = (a >= -float.Epsilon) && (b >= -float.Epsilon) && (c >= -float.Epsilon);
+                bool isEndVaild = (end.z <= 1f) && isVaidDelta;
+
+                if (isStartVaild || isEndVaild) {
+                    Color startColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, start.z, a, b, c);
+                    Color endColor = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, end.z, a, b, c);
 
                     // 扫描
                     int miC, maC;
                     ScreenSpaceScanLine(tri, row, start, end, startColor, endColor, passMode, out miC, out maC);
-                    if (minCol < 0 || minCol > miC)
+                    if ((miC >= 0) && (minCol < 0 || minCol > miC)) {
                         minCol = miC;
-                    if (maxCol < 0 || maxCol < maC)
+                        isSet = true;
+                    }
+                    if ((maC >= 0) && (maxCol < 0 || maxCol < maC)) {
                         maxCol = maC;
+                        isSet = true;
+                    }
 
-                    isSet = true;
+                    
                 }
             }
 
@@ -1219,7 +1258,6 @@ namespace NsSoftRenderer {
                 UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
             }
         }
-#endif
 
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {

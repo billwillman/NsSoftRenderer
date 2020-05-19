@@ -56,7 +56,7 @@ namespace NsSoftRenderer {
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;
             } else if (m_MeshFilter != null && m_MeshFilter.sharedMesh != null) {
-
+                //Matrix4x4 mat = m_MeshFilter.GetComponent<MeshRenderer>().localToWorldMatrix * this.transform.worldToLocalMatrix;
                 Mesh mesh;
                 if (isMeshRevert_Z) {
                     m_CustomMesh = GameObject.Instantiate(m_MeshFilter.sharedMesh);
