@@ -24,7 +24,7 @@ namespace NsSoftRenderer {
         private static int m_GlobalResInstanceId = 0;
 
         protected static int GenInstanceId() {
-            return m_GlobalResInstanceId++;
+            return ++m_GlobalResInstanceId;
         }
 
         private Dictionary<int, SoftRes> m_ResMap = null;

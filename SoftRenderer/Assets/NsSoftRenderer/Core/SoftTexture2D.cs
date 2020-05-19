@@ -75,12 +75,18 @@ namespace NsSoftRenderer {
 
             switch (TexFilter) {
                 case TextureFliter.Nearst:
-                    return GetItem(Mathf.FloorToInt(uv.x), Mathf.FloorToInt(uv.y));
+                    return GetItem(Mathf.FloorToInt(uv.x * this.Width), Mathf.FloorToInt(uv.y * this.Height));
                 case TextureFliter.Biller: {
-                        int u0 = Mathf.FloorToInt(uv.x);
-                        int u1 = Mathf.RoundToInt(uv.x);
-                        int v0 = Mathf.FloorToInt(uv.y);
-                        int v1 = Mathf.RoundToInt(uv.y);
+
+                        float ux = uv.x * (float)this.Width;
+                        float uy = uv.y * (float)this.Height;
+
+                        int u0 = Mathf.FloorToInt(ux);
+                        int u1 = Mathf.CeilToInt(ux);
+                        int v0 = Mathf.FloorToInt(uy);
+                        int v1 = Mathf.CeilToInt(uy);
+
+                        
 
                         Color c00 = GetItem(u0, v0);
                         Color c01 = GetItem(u1, v0);
@@ -91,7 +97,7 @@ namespace NsSoftRenderer {
                         Color c1;
 
                         if (u1 != u0) {
-                            float t0 = (uv.x - (float)u0) / (float)(u1 - u0);
+                            float t0 = (ux - (float)u0) / (float)(u1 - u0);
                             c0 = (1f - t0) * c00 + t0 * c01;
                             c1 = (1f - t0) * c10 + t0 * c11;
                         } else {
@@ -102,7 +108,7 @@ namespace NsSoftRenderer {
                         Color c;
 
                         if (v1 != v0) {
-                            float t1 = (uv.y - (float)v0) / (float)(v1 - v0);
+                            float t1 = (uy - (float)v0) / (float)(v1 - v0);
                             c = (1f - t1) * c0 + t1 * c1;
                         } else {
                             c = c0;

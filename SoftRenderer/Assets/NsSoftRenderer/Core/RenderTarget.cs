@@ -165,12 +165,31 @@ namespace NsSoftRenderer {
         public Triangle triangle;
         // 顶点颜色
         public Color cP1, cP2, cP3;
+        // 暂时这样
+        public int mainTex;
+        public Vector4 uv1_1, uv1_2, uv1_3;
 
-        public TriangleVertex(Triangle tri, Color p1, Color p2, Color p3) {
+        // 主纹理
+        public SoftTexture2D MainTexture {
+            get {
+                if (mainTex == 0)
+                    return null;
+                var device = SoftDevice.StaticDevice;
+                if (device == null)
+                    return null;
+                return device.ResMgr.GetSoftRes<SoftTexture2D>(mainTex);
+            }
+        }
+
+        public TriangleVertex(Triangle tri, Color p1, Color p2, Color p3, int mainTex = 0) {
             triangle = tri;
             cP1 = p1;
             cP2 = p2;
             cP3 = p3;
+            this.mainTex = mainTex;
+            this.uv1_1 = Vector4.zero;
+            this.uv1_2 = Vector4.zero;
+            this.uv1_3 = Vector4.zero;
         }
 
         public bool IsAllZGreateOne {
@@ -1334,10 +1353,13 @@ namespace NsSoftRenderer {
 
 
                                 Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
 
                                 if (passMode.pixelShader != null) {
                                     PixelData data = new PixelData();
                                     data.color = color;
+                                    data.mainTex = tri.MainTexture;
+                                    data.uv1 = uv1;
                                     doFill = passMode.pixelShader.Main(data, out color);
                                 } else {
                                     doFill = true;

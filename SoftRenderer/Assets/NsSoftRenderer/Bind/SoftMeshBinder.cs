@@ -6,26 +6,56 @@ namespace NsSoftRenderer {
     [RequireComponent(typeof(MeshFilter))]
     public class SoftMeshBinder: MonoBehaviour {
         // 材质
-        public Material sharedMaterial = null;
         public CullMode cullMode = CullMode.back;
         public bool isMeshRevert_Z = false;
 
         private Mesh m_CustomMesh = null;
         private MeshFilter m_MeshFilter = null;
         private SoftMeshRenderer m_SoftMeshRenderer = null;
+
+        private void CheckTex() {
+            Texture2D mainTex = null;
+            MeshRenderer renderer = this.GetComponent<MeshRenderer>();
+            if (renderer != null && renderer.sharedMaterial != null) {
+                mainTex = renderer.sharedMaterial.mainTexture as Texture2D;
+            }
+
+            if (mainTex != null) {
+                var device = SoftDevice.StaticDevice;
+                if (device != null && m_SoftMeshRenderer != null) {
+                    var resMgr = device.ResMgr;
+                    if (resMgr != null) {
+                        int mainTexId = resMgr.LoadFromTexture2D(mainTex);
+                        m_SoftMeshRenderer.MainTex = mainTexId;
+                        var tex = resMgr.GetSoftRes<SoftTexture2D>(mainTexId);
+                        tex.TexFilter = TextureFliter.Biller;
+                    }
+                }
+            }
+        }
+
         private void Start() {
             m_MeshFilter = GetComponent<MeshFilter>();
             CheckMesh();
             var trans = this.transform;
 
-            Mesh mesh;
-            if (m_CustomMesh != null)
-                mesh = m_CustomMesh;
-            else
-                mesh = m_MeshFilter.sharedMesh;
+            Mesh mesh = this.editorMesh;
 
             m_SoftMeshRenderer = SoftMeshRenderer.Create(trans.position, trans.up, trans.forward, mesh);
             UpdatePos();
+
+            CheckTex();
+        }
+
+        protected Mesh editorMesh {
+            get {
+                Mesh mesh;
+                if (m_CustomMesh != null)
+                    mesh = m_CustomMesh;
+                else
+                    mesh = m_MeshFilter.sharedMesh;
+                return mesh;
+            }
         }
 
         private void CheckMesh()
@@ -37,9 +67,9 @@ namespace NsSoftRenderer {
                 {
                     m_CustomMesh = new Mesh();
                     List<Vector3> vs = new List<Vector3>();
-                    vs.Add(new Vector3(0, 0, -1));
-                    vs.Add(new Vector3(0, 0, 1));
-                    vs.Add(new Vector3(0, 1, 1));
+                    vs.Add(new Vector3(-1, 0, 0));
+                    vs.Add(new Vector3(1, 0, 0));
+                    vs.Add(new Vector3(0, 1, 0));
                     m_CustomMesh.SetVertices(vs);
 
                     m_CustomMesh.subMeshCount = 1;
@@ -113,6 +143,8 @@ namespace NsSoftRenderer {
                 GameObject.Destroy(m_CustomMesh);
                 m_CustomMesh = null;
             }
+
+            
         }
     }
 }

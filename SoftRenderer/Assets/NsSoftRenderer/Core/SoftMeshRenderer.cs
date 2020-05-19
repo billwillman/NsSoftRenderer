@@ -2,11 +2,10 @@
 
 namespace NsSoftRenderer {
 
-    
-
     public class SoftMeshRenderer : SoftRenderObject {
 
         private SoftMesh m_Mesh = null;
+        private int m_MainTex = 0;
 
         internal SoftMeshRenderer(Vector3 pos, Vector3 up, Vector3 lookAt, Mesh mesh): base() {
             this.Position = pos;
@@ -25,6 +24,15 @@ namespace NsSoftRenderer {
                 return ret;
             }
             return null;
+        }
+
+        public int MainTex {
+            get {
+                return m_MainTex;
+            }
+            set {
+                m_MainTex = value;
+            }
         }
 
         // 世界坐标系包围球
@@ -81,8 +89,12 @@ namespace NsSoftRenderer {
             UpdateGlobalToLocalMatrix();
             CullMode old = passMode.Cull;
             passMode.Cull = this.cullMode;
-            return camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
+            int oldMainTex = passMode.mainTex;
+            passMode.mainTex = m_MainTex;
+            bool ret = camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
             passMode.Cull = old;
+            passMode.mainTex = oldMainTex;
+            return ret;
         }
     }
 

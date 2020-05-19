@@ -543,12 +543,17 @@ namespace NsSoftRenderer {
             var indexes = subMesh.Indexes;
             var vertexs = mesh.Vertexs;
             var colors = mesh.Colors;
+            var uv1s = mesh.UV1s;
             bool ret = false;
 
             bool isColorEmpty = colors  == null || colors.Count <= 0;
+            bool isUV1Empty = uv1s == null || uv1s.Count <= 0;
             Color c1 = Color.white;
             Color c2 = Color.white;
             Color c3 = Color.white;
+            Vector4 uv1_1 = Vector4.zero;
+            Vector4 uv1_2 = Vector4.zero;
+            Vector4 uv1_3 = Vector4.zero;
             if (vertexs != null && (isColorEmpty || vertexs.Count == colors.Count)
                 && indexes != null && indexes.Count > 0) {
 
@@ -559,14 +564,20 @@ namespace NsSoftRenderer {
                     Vector3 p1 = vertexs[index];
                     if (!isColorEmpty)
                         c1 = colors[index];
+                    if (!isUV1Empty)
+                        uv1_1 = uv1s[index];
                     index = indexes[idx + 1];
                     Vector3 p2 = vertexs[index];
                     if (!isColorEmpty)
                         c2 = colors[index];
+                    if (!isUV1Empty)
+                        uv1_2 = uv1s[index];
                     index = indexes[idx + 2];
                     Vector3 p3 = vertexs[index];
                     if (!isColorEmpty)
                         c3 = colors[index];
+                    if (!isUV1Empty)
+                        uv1_3 = uv1s[index];
                     Triangle tri = new Triangle(p1, p2, p3);
 
                     // 三角形转到世界坐标系
@@ -578,7 +589,12 @@ namespace NsSoftRenderer {
                  //   }
                     //----
 
-                    TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3);
+                    TriangleVertex triV = new TriangleVertex(tri, c1, c2, c3, passMode.mainTex);
+                    if (!isUV1Empty) {
+                        triV.uv1_1 = uv1_1;
+                        triV.uv1_2 = uv1_2;
+                        triV.uv1_3 = uv1_3;
+                    }
 
                     // 进入VertexShader了， 做顶点变换等
                     m_TrianglesMgr.AddTriangle(triV);

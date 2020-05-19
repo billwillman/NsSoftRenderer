@@ -15,14 +15,29 @@ namespace NsSoftRenderer {
 
     public struct PixelData {
         public Color color;
+        public SoftTexture2D mainTex;
+        public Vector4 uv1;
     }
 
     public class PixelShader {
         // 是否开启了Clip
         public bool isUseClip = false;
         public virtual bool Main(PixelData data, out Color frag) {
-            frag = data.color;
-            frag.a = 1.0f;
+
+
+            /*
+             * 处理纹理
+             */
+
+           
+            if (data.mainTex != null) {
+                var texColor = data.mainTex.GetColor(data.uv1);
+                texColor.a = 1f;
+                frag = texColor * data.color;
+            } else {
+                frag = data.color;
+            }
+           
             return true; // 这里返回值模拟clip操作
         }
 
