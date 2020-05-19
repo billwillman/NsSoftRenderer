@@ -71,6 +71,21 @@ namespace NsSoftRenderer {
                 p3.z = 1f / p3.z;
         }
 
+        public Rect GetRect(out float minZ, out float maxZ) {
+            Rect ret = new Rect();
+            ret.xMin = Mathf.Min(Mathf.Min(p1.x, p2.x), p3.x);
+            ret.xMax = Mathf.Max(Mathf.Max(p1.x, p2.x), p3.x);
+            ret.yMax = Mathf.Max(Mathf.Max(p1.y, p2.y), p3.y);
+            ret.yMin = Mathf.Min(Mathf.Min(p1.y, p2.y), p3.y);
+
+            minZ = Mathf.Min(Mathf.Min(p1.z, p2.z), p3.z);
+            maxZ = Mathf.Max(Mathf.Max(p1.z, p2.z), p3.z);
+
+            return ret;
+        }
+
+        
+
         public bool IsAllZGreateOne {
             get {
                 return (p1.z > 1f) && (p2.z > 1f) && (p3.z > 1f);
@@ -688,7 +703,11 @@ namespace NsSoftRenderer {
 
         // ZTest检查
         private bool CheckZTest(RenderPassMode passMode, int row, int col, Vector3 p) {
-            float z = TransZBuffer(p.z);
+            return CheckZTest(passMode, row, col, p.z);
+        }
+
+        private bool CheckZTest(RenderPassMode passMode, int row, int col, float pz) {
+            float z = TransZBuffer(pz);
             float oldZ = m_FrontDepthBuffer.GetItem(col, row);
             if (oldZ < 0)
                 return true;
@@ -1250,6 +1269,128 @@ namespace NsSoftRenderer {
                     }
 
                     
+                }
+            }
+
+            // 更新填充Rect
+            if (isSet) {
+                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
+            }
+        }
+
+        // 采用矩形的方式，非三角形的方式
+        internal void FlipScreenTriangle2(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
+            float minZ, maxZ;
+            Rect r = tri.triangle.GetRect(out minZ, out maxZ);
+            int yStart = Mathf.Clamp((int)r.yMin, 0, m_FrontColorBuffer.Height - 1);
+            int yEnd = Mathf.Clamp((int)r.yMax, 0, m_FrontColorBuffer.Height - 1);
+            int xStart =  Mathf.Clamp((int)r.xMin, 0, m_FrontColorBuffer.Width - 1);
+            int xEnd = Mathf.Clamp((int)r.xMax, 0, m_FrontColorBuffer.Width - 1);
+
+            //if (yEnd - yStart <= 1)
+            //    return;
+
+           // if (xEnd - xStart <= 1)
+            //    return;
+
+            int minCol = -1;
+            int maxCol = -1;
+            int minRow = -1;
+            int maxRow = -1;
+
+            bool isSet = false;
+            for (int row = yStart; row <= yEnd; ++row) {
+                float y = row + 0.5f;
+                if (y < r.yMin)
+                    continue;
+                if (y > r.yMax)
+                    break;
+
+                bool isSetRow = false;
+                for (int col = xStart; col <= xEnd; ++col) {
+                    float x = col + 0.5f;
+                    if (x < r.xMin)
+                        continue;
+                    if (x > r.xMax)
+                        break;
+
+                    Vector2 P = new Vector2(x, y);
+                    float a, b, c;
+
+
+                    //  SoftMath.GetScreenSpaceBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P,
+                    //                 out a, out b, out c);
+
+                    // 使用叉乘判斷點是否在三角形上面
+                    bool isScreenVaild = SoftMath.ScreenSpacePtInTriangle(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
+
+                    if (isScreenVaild) 
+                    {
+
+                    float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
+                    
+                    bool isVaildP = (pz <= 1.0f) && (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ);
+                        if (isVaildP) {
+        
+                            bool doFill = false;
+                            bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                            if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, pz)) {
+
+
+
+                                Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+
+                                if (passMode.pixelShader != null) {
+                                    PixelData data = new PixelData();
+                                    data.color = color;
+                                    doFill = passMode.pixelShader.Main(data, out color);
+                                } else {
+                                    doFill = true;
+                                }
+
+                                if (doFill) {
+                                    // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                                    if (isUseEarlyZ || CheckZTest(passMode, row, col, pz)) {
+                                        m_FrontColorBuffer.SetItem(col, row, color);
+                                        // 写入ZBUFFER
+                                        // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                        // 填充ZBUFFER
+
+                                        float z = TransZBuffer(pz);
+                                        FillZBuffer(row, col, z);
+
+                                        isSetRow = true;
+
+                                        if (minCol < 0 && maxCol < 0) {
+                                            minCol = col;
+                                            maxCol = col;
+                                        } else {
+                                            minCol = minCol > col ? col : minCol;
+                                            maxCol = maxCol < col ? col : maxCol;
+                                        }
+
+                                    }
+                                }
+
+                            }
+                        }
+
+                    }
+                }
+
+                if (isSetRow) {
+                    if (minRow < 0)
+                        minRow = row;
+                    else if (minRow > row)
+                        minRow = row;
+
+                    if (maxRow < 0)
+                        maxRow = row;
+                    else if (maxRow < row)
+                        maxRow = row;
+
+                    isSet = true;
                 }
             }
 

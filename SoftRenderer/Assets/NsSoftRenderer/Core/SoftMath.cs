@@ -78,6 +78,23 @@ namespace NsSoftRenderer {
             return false;
         }
 
+        public static bool ScreenSpacePtInTriangle(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p) {
+            Vector2 p12 = p2 - p1;
+            Vector2 p23 = p3 - p2;
+            Vector2 p31 = p1 - p3;
+            
+            float z1 = Vector3.Cross(p12, p - p1).z;
+            float z2 = Vector3.Cross(p23, p - p2).z;
+            float z3 = Vector3.Cross(p31, p - p3).z;
+            if (z1 < 0f) {
+                z1 = -z1;
+                z2 = -z2;
+                z3 = -z3;
+            }
+
+            return (z1 > 0 && z2 > 0 && z3 > 0);
+        }
+
         public static float PtInPlane(Vector3 pt, SoftPlane plane) {
             float ret = plane.normal.x * pt.x + plane.normal.y * pt.y + plane.normal.z * pt.z + plane.d;
             return ret;
@@ -281,14 +298,14 @@ namespace NsSoftRenderer {
             b = vv.x; //-->> b即是v
             c = vv.y; //-->> c即是u
             a = 1f - b - c; //-->>a即是 1- u - v = r
-            a = Mathf.Abs(a) < EPS ? 0 : a;
+          //  a = Mathf.Abs(a) < EPS ? 0 : a;
         }
 
         public static void GetBarycentricCoordinate(Triangle tri, Vector3 P, out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             GetBarycentricCoordinate(tri.p1, tri.p2, tri.p3, P, out a, out b, out c/*, isUseNormal*/);
         }
 
-        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector3 C, Vector2 P,
+        public static void GetScreenSpaceBarycentricCoordinate(Vector2 A, Vector2 B, Vector2 C, Vector2 P,
             out float a, out float b, out float c/*, bool isUseNormal = true*/) {
             Vector3 AA = new Vector3(A.x, A.y, 0f);
             Vector3 BB = new Vector3(B.x, B.y, 0f);
@@ -308,10 +325,10 @@ namespace NsSoftRenderer {
             Vector3 PP = new Vector3(P.x, P.y, 0f);
             GetBarycentricCoordinate(A, B, C, PP, out a, out b, out c);
 
-             float ret = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
-            if (Mathf.Abs(ret) > float.Epsilon)
-               ret = 1f / ret;
-            //float ret = a * A.z + b * B.z + c * C.z;
+         //    float ret = a * 1f / A.z + b * 1f / B.z + c * 1f / C.z;
+        //    if (Mathf.Abs(ret) > float.Epsilon)
+         //      ret = 1f / ret;
+            float ret = a * A.z + b * B.z + c * C.z;
             return ret;
         }
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#define _Use_FlipTrangle2
+
+using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
@@ -510,8 +512,11 @@ namespace NsSoftRenderer {
                     return;
 
                 vertex.triangle.MulMatrix(this.LinkerScreenMatrix);
-
+#if _Use_FlipTrangle2
+                target.FlipScreenTriangle2(this, vertex, passMode);
+#else
                 target.FlipScreenTriangle(this, vertex, passMode);
+#endif
             }
         }
 
