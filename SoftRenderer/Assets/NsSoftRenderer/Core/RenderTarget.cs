@@ -1336,12 +1336,15 @@ namespace NsSoftRenderer {
                     Vector2 P = new Vector2(x, y);
 
                     // 使用叉乘判斷點是否在三角形上面
+                    // 不要使用重心坐标判断是否在三角形内，有误差。这里采用屏幕上的三角形向量叉乘特性：三角形内的点，一定在边向量同侧。
                     bool isScreenVaild = SoftMath.ScreenSpacePtInTriangle(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
 
                     if (isScreenVaild) {
                         float a, b, c;
                         float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
 
+                        // 下面的有注释，是因为开启有缝隙。。。
+                        // 不要使用重心坐标判断是否在三角形内，有误差
                         bool isVaildP = (pz <= 1.0f) /*&& (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ)*/;
                         if (isVaildP) {
 
