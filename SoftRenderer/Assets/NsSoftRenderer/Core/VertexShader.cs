@@ -33,7 +33,7 @@ namespace NsSoftRenderer {
             if (data.mainTex != null) {
                 var texColor = data.mainTex.GetColor(data.uv1);
                 texColor.a = 1f;
-                frag = texColor * data.color;
+                frag = texColor;//* data.color;
             } else {
                 frag = data.color;
             }
