@@ -651,6 +651,7 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
 
             if (m_RenderObjMgr != null) {
                 m_RenderObjMgr.Dispose();

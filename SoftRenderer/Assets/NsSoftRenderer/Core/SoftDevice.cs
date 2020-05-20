@@ -296,7 +296,9 @@ namespace NsSoftRenderer {
         }*/
 
         protected override void OnFree(bool isManual) {
-           // DestroyRenderObjects();
+            base.OnFree(isManual);
+
+            // DestroyRenderObjects();
 
             if (m_RenerTarget != null) {
                 m_RenerTarget.Dispose();

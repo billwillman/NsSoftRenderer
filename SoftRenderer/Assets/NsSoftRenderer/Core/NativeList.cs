@@ -219,6 +219,8 @@ namespace Utils {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             Clear();
         }
 

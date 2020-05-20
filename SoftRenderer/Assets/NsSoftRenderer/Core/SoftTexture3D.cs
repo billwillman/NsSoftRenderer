@@ -13,6 +13,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_Texs != null) {
                 for (int i = 0; i < m_Texs.Length; ++i) {
                     var tex = m_Texs[i];

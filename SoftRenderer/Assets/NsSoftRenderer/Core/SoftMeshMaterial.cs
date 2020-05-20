@@ -71,6 +71,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_ResMap != null) {
                 var iter = m_ResMap.GetEnumerator();
                 while (iter.MoveNext()) {

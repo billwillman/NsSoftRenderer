@@ -42,6 +42,8 @@ namespace Utils {
 
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_List != null) {
                 m_List.Dispose();
                 m_List = null;

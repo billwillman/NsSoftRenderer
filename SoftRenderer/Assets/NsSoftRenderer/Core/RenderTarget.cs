@@ -377,7 +377,7 @@ namespace NsSoftRenderer {
     }
 
     public class RenderTarget: DisposeObject {
-        private ColorBuffer m_FrontColorBuffer = null;
+        private PixelBuffer m_FrontColorBuffer = null;
         private Depth32Buffer m_FrontDepthBuffer = null;
         private RenderTargetUseFlags m_ClearFlags = 0;
         private Color m_CleanColor = Color.black;
@@ -395,7 +395,7 @@ namespace NsSoftRenderer {
         private static readonly RectInt _cZeroRect = new RectInt(0, 0, 0, 0);
 
         public RenderTarget(int deviceWidth, int deviceHeight) {
-            m_FrontColorBuffer = new ColorBuffer(deviceWidth, deviceHeight);
+            m_FrontColorBuffer = new PixelBuffer(deviceWidth, deviceHeight);
             m_FrontDepthBuffer = new Depth32Buffer(deviceWidth, deviceHeight);
             unchecked {
                 m_ClearFlags = (RenderTargetUseFlags)0xFFFFFFFF;
@@ -412,7 +412,7 @@ namespace NsSoftRenderer {
                 m_IsAllCleanedColor = true;
                 for (int r = 0; r < m_FrontColorBuffer.Height; ++r) {
                     for (int c = 0; c < m_FrontColorBuffer.Width; ++c) {
-                        m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
+                        m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero, 0);
                     }
                 }
                 m_IsCleanedColor = true;
@@ -463,7 +463,7 @@ namespace NsSoftRenderer {
                   //  Debug.LogErrorFormat("yMin: {0} yMax: {1} xMin: {2} xMax: {3}", yMin, yMax, xMin, xMax);
                     for (int r = yMin; r <= yMax; ++r) {
                         for (int c = xMin; c <= xMax; ++c) {
-                            m_FrontColorBuffer.SetItem(c, r, m_CleanColor);
+                            m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero);
                         }
                     }
 
@@ -501,10 +501,10 @@ namespace NsSoftRenderer {
             if (notify != null) {
                 if (m_IsFillAllColor) {
                     RectInt fillRect = new RectInt(0, 0, this.Width, this.Height);
-                    notify.OnFillColor(m_FrontColorBuffer, fillRect, _cZeroRect);
+                    notify.OnFillColor(m_FrontColorBuffer.colorBuffer, fillRect, _cZeroRect);
                 } else {
                     if ((m_ColorDirthRect.width > 0 && m_ColorDirthRect.height > 0) || (m_ClearColorDirtRect.width > 0 && m_ClearColorDirtRect.height > 0)) {
-                        notify.OnFillColor(m_FrontColorBuffer, m_ColorDirthRect, m_ClearColorDirtRect);
+                        notify.OnFillColor(m_FrontColorBuffer.colorBuffer, m_ColorDirthRect, m_ClearColorDirtRect);
                     }
                 }
 
@@ -645,7 +645,7 @@ namespace NsSoftRenderer {
             bool isUseDepth = IncludeUseFlag(flags, RenderTargetClearFlag.Depth);
 
             if (isUseColor && m_FrontColorBuffer != null) {
-                m_FrontColorBuffer.SetItem(x, y, color);
+                m_FrontColorBuffer.SetPixel(x, y, color);
                 // 设置脏矩形
                 InitColorDirty(x, y);
             }
@@ -658,7 +658,7 @@ namespace NsSoftRenderer {
             return true;
         }
 
-        public ColorBuffer FrontColorBuffer {
+        public PixelBuffer FrontColorBuffer {
             get {
                 return m_FrontColorBuffer;
             }
@@ -672,6 +672,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_FrontColorBuffer != null) {
                 m_FrontColorBuffer.Dispose();
                 m_FrontColorBuffer = null;
@@ -813,14 +815,16 @@ namespace NsSoftRenderer {
                         // 这部分是PixelShader
                         if (passMode.pixelShader != null) {
                             PixelData data = new PixelData();
-                            data.color = color;
+                            data.info.color = color;
+                            data.info.u = xIndex;
+                            data.info.v = row;
                             doFill = passMode.pixelShader.Main(data, out color);
                         }
 
                         if (doFill) {
                             // 如果不是Early-Z模式，需要再执行一次ZTEST检查
                             if (isUseEarlyZ || CheckInvZTest(passMode, row, xIndex, oneDivZ)) {
-                                m_FrontColorBuffer.SetItem(xIndex, row, color);
+                                m_FrontColorBuffer.SetPixel(xIndex, row, color);
                                 // 写入ZBUFFER
                                 // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
                                 // 填充ZBUFFER
@@ -891,14 +895,16 @@ namespace NsSoftRenderer {
                                 // 这部分是PixelShader
                                 if (passMode.pixelShader != null) {
                                     PixelData data = new PixelData();
-                                    data.color = color;
+                                    data.info.color = color;
+                                    data.info.u = col;
+                                    data.info.v = row;
                                     doFill = passMode.pixelShader.Main(data, out color);
                                 }
                                 // ----------------
                                 if (doFill) {
                                     // 如果不是Early-Z模式，需要再执行一次ZTEST检查
                                     if (isUseEarlyZ || CheckZTest(passMode, row, col, P)) {
-                                        m_FrontColorBuffer.SetItem(col, row, color);
+                                        m_FrontColorBuffer.SetPixel(col, row, color);
                                         // 写入ZBUFFER
                                         // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
                                         float z = TransZBuffer(P.z);
@@ -1299,158 +1305,179 @@ namespace NsSoftRenderer {
 
         // 采用矩形的方式，非三角形的方式
         internal void FlipScreenTriangle2(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
-            float minZ, maxZ;
-            Rect r = tri.triangle.GetRect(out minZ, out maxZ);
-            int yStart = Mathf.Clamp((int)r.yMin, 0, m_FrontColorBuffer.Height - 1);
-            int yEnd = Mathf.Clamp((int)r.yMax, 0, m_FrontColorBuffer.Height - 1);
-            int xStart = Mathf.Clamp((int)r.xMin, 0, m_FrontColorBuffer.Width - 1);
-            int xEnd = Mathf.Clamp((int)r.xMax, 0, m_FrontColorBuffer.Width - 1);
+            if (passMode.pixelShader != null) {
+                passMode.pixelShader.SetParam(this);
+            }
+            try {
+                float minZ, maxZ;
+                Rect r = tri.triangle.GetRect(out minZ, out maxZ);
+                int yStart = Mathf.Clamp((int)r.yMin, 0, m_FrontColorBuffer.Height - 1);
+                int yEnd = Mathf.Clamp((int)r.yMax, 0, m_FrontColorBuffer.Height - 1);
+                int xStart = Mathf.Clamp((int)r.xMin, 0, m_FrontColorBuffer.Width - 1);
+                int xEnd = Mathf.Clamp((int)r.xMax, 0, m_FrontColorBuffer.Width - 1);
 
-            //if (yEnd - yStart <= 1)
-            //    return;
+                //if (yEnd - yStart <= 1)
+                //    return;
 
-            // if (xEnd - xStart <= 1)
-            //    return;
+                // if (xEnd - xStart <= 1)
+                //    return;
 
-            int minCol = -1;
-            int maxCol = -1;
-            int minRow = -1;
-            int maxRow = -1;
+                int minCol = -1;
+                int maxCol = -1;
+                int minRow = -1;
+                int maxRow = -1;
 
-            bool isSet = false;
-            for (int row = yStart; row <= yEnd; ++row) {
-                float y = row + 0.5f;
-                if (y < r.yMin)
-                    continue;
-                if (y > r.yMax)
-                    break;
-
-                bool isSetRow = false;
-                for (int col = xStart; col <= xEnd; ++col) {
-                    float x = col + 0.5f;
-                    if (x < r.xMin)
+                bool isSet = false;
+                for (int row = yStart; row <= yEnd; ++row) {
+                    float y = row + 0.5f;
+                    if (y < r.yMin)
                         continue;
-                    if (x > r.xMax)
+                    if (y > r.yMax)
                         break;
 
-                    Vector2 P = new Vector2(x, y);
+                    bool isSetRow = false;
+                    for (int col = xStart; col <= xEnd; ++col) {
+                        float x = col + 0.5f;
+                        if (x < r.xMin)
+                            continue;
+                        if (x > r.xMax)
+                            break;
 
-                    // 使用叉乘判斷點是否在三角形上面
-                    // 不要使用重心坐标判断是否在三角形内，有误差。这里采用屏幕上的三角形向量叉乘特性：三角形内的点，一定在边向量同侧。
-                    bool isScreenVaild = SoftMath.ScreenSpacePtInTriangle(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
+                        Vector2 P = new Vector2(x, y);
 
-                    if (isScreenVaild) {
-                        float a, b, c;
-                        float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
+                        // 使用叉乘判斷點是否在三角形上面
+                        // 不要使用重心坐标判断是否在三角形内，有误差。这里采用屏幕上的三角形向量叉乘特性：三角形内的点，一定在边向量同侧。
+                        bool isScreenVaild = SoftMath.ScreenSpacePtInTriangle(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, P);
 
-                        // 下面的有注释，是因为开启有缝隙。。。
-                        // 不要使用重心坐标判断是否在三角形内，有误差
-                        bool isVaildP = (pz <= 1.0f) /*&& (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ)*/;
-                        if (isVaildP) {
+                        if (isScreenVaild) {
+                            float a, b, c;
+                            float pz = SoftMath.GetProjSpaceBarycentricCoordinateZ(tri, P, out a, out b, out c);
 
-                            bool doFill = false;
-                            bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+                            // 下面的有注释，是因为开启有缝隙。。。
+                            // 不要使用重心坐标判断是否在三角形内，有误差
+                            bool isVaildP = (pz <= 1.0f) /*&& (a >= 0) && (b >= 0) && (c >= 0) && (pz >= minZ) && (pz <= maxZ)*/;
+                            if (isVaildP) {
 
-                            if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, pz)) {
+                                bool doFill = false;
+                                bool isUseEarlyZ = (passMode.pixelShader == null) || (!passMode.pixelShader.isUseClip);
+
+                                if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, pz)) {
 
 
 
-                                Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
-                                Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                    Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                    Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
 
-                                if (passMode.pixelShader != null) {
-                                    PixelData data = new PixelData();
-                                    data.color = color;
-                                    data.mainTex = tri.MainTexture;
-                                    data.uv1 = uv1;
-                                    doFill = passMode.pixelShader.Main(data, out color);
-                                } else {
-                                    doFill = true;
-                                }
-
-                                if (doFill) {
-                                    // 如果不是Early-Z模式，需要再执行一次ZTEST检查
-                                    if (isUseEarlyZ || CheckZTest(passMode, row, col, pz)) {
-                                        m_FrontColorBuffer.SetItem(col, row, color);
-                                        // 写入ZBUFFER
-                                        // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
-                                        // 填充ZBUFFER
-
-                                        float z = TransZBuffer(pz);
-                                        FillZBuffer(row, col, z);
-
-                                        isSetRow = true;
-
-                                        if (minCol < 0 && maxCol < 0) {
-                                            minCol = col;
-                                            maxCol = col;
-                                        } else {
-                                            minCol = minCol > col ? col : minCol;
-                                            maxCol = maxCol < col ? col : maxCol;
-                                        }
-
+                                    if (passMode.pixelShader != null) {
+                                        PixelData data = new PixelData();
+                                        data.info.color = color;
+                                        data.mainTex = tri.MainTexture;
+                                        data.info.uv1 = uv1;
+                                        data.info.u = col;
+                                        data.info.v = row;
+                                        doFill = passMode.pixelShader.Main(data, out color);
+                                    } else {
+                                        doFill = true;
                                     }
+
+                                    if (doFill) {
+                                        // 如果不是Early-Z模式，需要再执行一次ZTEST检查
+                                        if (isUseEarlyZ || CheckZTest(passMode, row, col, pz)) {
+                                            m_FrontColorBuffer.SetPixel(col, row, color, uv1);
+                                            // 写入ZBUFFER
+                                            // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
+                                            // 填充ZBUFFER
+
+                                            float z = TransZBuffer(pz);
+                                            FillZBuffer(row, col, z);
+
+                                            isSetRow = true;
+
+                                            if (minCol < 0 && maxCol < 0) {
+                                                minCol = col;
+                                                maxCol = col;
+                                            } else {
+                                                minCol = minCol > col ? col : minCol;
+                                                maxCol = maxCol < col ? col : maxCol;
+                                            }
+
+                                        }
+                                    }
+
                                 }
-
                             }
-                        }
 
+                        }
+                    }
+
+                    if (isSetRow) {
+                        if (minRow < 0)
+                            minRow = row;
+                        else if (minRow > row)
+                            minRow = row;
+
+                        if (maxRow < 0)
+                            maxRow = row;
+                        else if (maxRow < row)
+                            maxRow = row;
+
+                        isSet = true;
                     }
                 }
 
-                if (isSetRow) {
-                    if (minRow < 0)
-                        minRow = row;
-                    else if (minRow > row)
-                        minRow = row;
-
-                    if (maxRow < 0)
-                        maxRow = row;
-                    else if (maxRow < row)
-                        maxRow = row;
-
-                    isSet = true;
+                // 更新填充Rect
+                if (isSet) {
+                    UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
                 }
-            }
-
-            // 更新填充Rect
-            if (isSet) {
-                UpdateColorBufferRect(minRow, maxRow, minCol, maxCol);
+            } finally {
+                if (passMode.pixelShader != null) {
+                    passMode.pixelShader.ResetParam();
+                }
             }
         }
 
         // tri已经是屏幕坐标系
         internal void FlipScreenTriangle(SoftCamera camera, TriangleVertex tri, RenderPassMode passMode) {
+            if (passMode.pixelShader != null) {
+                passMode.pixelShader.SetParam(this);
+            }
             // 三角形
-            TriangleVertex topTri, bottomTri;
-            var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
-             switch (triType) {
-                case TriangleVertex.ScreenSpaceTopBottomType.top:
+            try {
+                TriangleVertex topTri, bottomTri;
+                var triType = tri.GetScreenSpaceTopBottomTriangle(camera, out topTri, out bottomTri);
+                switch (triType) {
+                    case TriangleVertex.ScreenSpaceTopBottomType.top:
 
 #if !_USE_NEW_LERP_Z
                      FillScreenTopTriangle(passMode, topTri);
 #else
-                    DrawTopTriangle(passMode, topTri);
+                        DrawTopTriangle(passMode, topTri);
 #endif
-                    break;
-                case TriangleVertex.ScreenSpaceTopBottomType.bottom:
+                        break;
+                    case TriangleVertex.ScreenSpaceTopBottomType.bottom:
 
 #if !_USE_NEW_LERP_Z
                    FillScreenBottomTriangle(passMode, bottomTri);
 #else
-                    DrawBottomTriangle(passMode, bottomTri);
+                        DrawBottomTriangle(passMode, bottomTri);
 #endif
-                    break;
-                case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
+                        break;
+                    case TriangleVertex.ScreenSpaceTopBottomType.topBottom:
 #if !_USE_NEW_LERP_Z
                     FillScreenTopTriangle(passMode, topTri);
                      DrawBottomTriangle(passMode, bottomTri);
 #else
-                    DrawTopTriangle(passMode, topTri);
-                    DrawBottomTriangle(passMode, bottomTri);
+                        DrawTopTriangle(passMode, topTri);
+                        DrawBottomTriangle(passMode, bottomTri);
 #endif
-                    break;
+                        break;
+                }
+            } finally {
+                if (passMode.pixelShader != null) {
+                    passMode.pixelShader.ResetParam();
+                }
             }
-        }
+
+            }
     }
 }

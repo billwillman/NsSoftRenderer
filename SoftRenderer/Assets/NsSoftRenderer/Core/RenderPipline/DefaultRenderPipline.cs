@@ -16,7 +16,7 @@ namespace NsSoftRenderer {
         public DefaultRenderPipline() {
             RegisterRenderQueue(RenderQueue.Geometry, new GeometryQueue());
             m_DefaultPassMode.CreateVertexShader<VertexShader>();
-            m_DefaultPassMode.CreatePixelShader<PixelShader>();
+            m_DefaultPassMode.CreatePixelShader<MipMapShowPixelShader>();
         }
 
         private class VisiableListSort: IComparer<int> {

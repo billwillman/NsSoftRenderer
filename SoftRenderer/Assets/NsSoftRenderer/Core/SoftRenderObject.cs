@@ -60,6 +60,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             var device = SoftDevice.StaticDevice;
             if (device != null) {
                 device.RemoveRenderObject(this);

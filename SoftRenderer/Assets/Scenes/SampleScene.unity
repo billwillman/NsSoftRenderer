@@ -412,7 +412,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cullMode: 2
-  isMeshRevert_Z: 0
 --- !u!33 &568633215
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -485,7 +484,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 736716c028cb70d428cb1e503a05089f, type: 2}
+  - {fileID: 2100000, guid: 7050ef99da277fe409f8afd3263ade24, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -560,7 +559,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cullMode: 2
-  isMeshRevert_Z: 1
 --- !u!33 &1788346341
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -600,7 +598,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 7050ef99da277fe409f8afd3263ade24, type: 2}
+  - {fileID: 2100000, guid: 736716c028cb70d428cb1e503a05089f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -11,6 +11,8 @@ namespace NsSoftRenderer {
         private NativeList<int> m_Objs = new NativeList<int>();
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_Objs != null) {
                 m_Objs.Dispose();
                 m_Objs = null;

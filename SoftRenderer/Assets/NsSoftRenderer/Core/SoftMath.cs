@@ -338,6 +338,12 @@ namespace NsSoftRenderer {
             return ret;
         }
 
+        public static Vector2 GetPosFromProjSpaceBarycentricCoordinateZ(TriangleVertex tri, float pz, float a, float b, float c) {
+            tri.triangle.InvZ();
+            Vector2 ret = (tri.triangle.p1 * a * tri.triangle.p1.z + tri.triangle.p2 * b * tri.triangle.p2.z + tri.triangle.p3 * c * tri.triangle.p3.z) * pz;
+            return ret;
+        }
+
         public static float GetProjSpaceBarycentricCoordinateZ(TriangleVertex tri, Vector2 P, out float a, out float b, out float c) {
             Vector3 PP = new Vector3(P.x, P.y, 0f);
             GetBarycentricCoordinate(tri.triangle.p1, tri.triangle.p2, tri.triangle.p3, PP, out a, out b, out c);

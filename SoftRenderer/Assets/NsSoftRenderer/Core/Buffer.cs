@@ -46,6 +46,63 @@ namespace NsSoftRenderer {
         public ColorBuffer(int width, int height): base(width, height) { }
     }
 
+    public class PixelBuffer : Buffer<PixelInfo> {
+        // 这里有内存数据冗余，不太合理。先不管暂时这样，只是图形学效果
+        private ColorBuffer m_ColorBuffer = null;
+
+        public ColorBuffer colorBuffer {
+            get {
+                return m_ColorBuffer;
+            }
+        }
+
+        public Vector4 GetUV1(int col, int row) {
+            PixelInfo info = GetItem(col, row);
+            return info.uv1;
+        }
+
+        public PixelBuffer(int width, int height) : base(width, height) {
+            // 循环标注出索引
+            PixelInfo info = new PixelInfo();
+            for (int row = 0; row < height; ++row) {
+                for (int col = 0; col < width; ++col) {
+                    info.u = col;
+                    info.v = row;
+                    SetItem(col, row, info);
+                }
+            }
+
+            m_ColorBuffer = new ColorBuffer(width, height);
+        }
+
+        protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
+            if (m_ColorBuffer != null) {
+                m_ColorBuffer.Dispose();
+                m_ColorBuffer = null;
+            }
+        }
+
+
+        public void SetPixel(int col, int row, Color color) {
+            PixelInfo info = this.GetItem(col, row);
+            info.color = color;
+            info.uv1 = Vector4.zero;
+            this.SetItem(col, row, info);
+            m_ColorBuffer.SetItem(col, row, color);
+        }
+        public void SetPixel(int col, int row, Color color, Vector4 uv1, byte isFill = 1) {
+            PixelInfo info = this.GetItem(col, row);
+            info.color = color;
+            info.uv1 = uv1;
+            info.isFill = isFill;
+            this.SetItem(col, row, info);
+            m_ColorBuffer.SetItem(col, row, color);
+        }
+    }
+
+
     public class VertexColorBuffer: NativeList<Color> { }
 
     // 32位深度

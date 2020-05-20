@@ -67,6 +67,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_Mesh != null) {
                 m_Mesh.Dispose();
                 m_Mesh = null;

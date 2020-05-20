@@ -24,6 +24,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             if (m_IndexBuffer != null) {
                 m_IndexBuffer.Dispose();
                 m_IndexBuffer = null;
@@ -193,6 +195,8 @@ namespace NsSoftRenderer {
         }
 
         protected override void OnFree(bool isManual) {
+            base.OnFree(isManual);
+
             Clear();
         }
     }

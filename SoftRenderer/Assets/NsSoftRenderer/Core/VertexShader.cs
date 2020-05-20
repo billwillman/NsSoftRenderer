@@ -13,15 +13,37 @@ namespace NsSoftRenderer {
         public RenderPassMode m_Owner = null;
     }
 
-    public struct PixelData {
+    public struct PixelInfo {
+        public int u; // x坐标（垂直坐标）
+        public int v; // y坐标（水平坐标）
         public Color color;
-        public SoftTexture2D mainTex;
         public Vector4 uv1;
+        public byte isFill;
     }
+
+    public struct PixelData {
+        public PixelInfo info;
+        public SoftTexture2D mainTex;
+    }
+
+    public struct PixelShaderParam {
+        public RenderTarget target;
+    }
+
 
     public class PixelShader {
         // 是否开启了Clip
         public bool isUseClip = false;
+        public PixelShaderParam param = new PixelShaderParam();
+
+        public void SetParam(RenderTarget target) {
+            param.target = target;
+        }
+
+        public void ResetParam() {
+            param = new PixelShaderParam();
+        }
+
         public virtual bool Main(PixelData data, out Color frag) {
 
 
@@ -31,13 +53,13 @@ namespace NsSoftRenderer {
 
            
             if (data.mainTex != null) {
-                var texColor = data.mainTex.GetColor(data.uv1);
+                var texColor = data.mainTex.GetColor(data.info.uv1);
                // texColor.a = 1f;
-                frag = texColor * data.color;
+                frag = texColor * data.info.color;
                 //  frag = data.color;
                 frag.a = 1f;
             } else {
-                frag = data.color;
+                frag = data.info.color;
             }
            
             return true; // 这里返回值模拟clip操作
