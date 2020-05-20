@@ -47,7 +47,7 @@ namespace NsSoftRenderer {
                 // 垂直变化率
                 float ddy = 0f;
                 if (v > 0) {
-                    var info2 = target.FrontColorBuffer.GetItem(u, data.info.v);
+                    var info2 = target.FrontColorBuffer.GetItem(data.info.u, v);
                     if (info2.isFill != 0) {
                         Vector2 uv2 = info2.uv1;
                         ddy = (((uv - uv2).magnitude) / 1f) / dh;

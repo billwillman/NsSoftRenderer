@@ -84,18 +84,22 @@ namespace NsSoftRenderer {
             }
         }
 
-
+        
         public void SetPixel(int col, int row, Color color) {
             PixelInfo info = this.GetItem(col, row);
             info.color = color;
             info.uv1 = Vector4.zero;
+            info.pos = Vector3.zero;
             this.SetItem(col, row, info);
             m_ColorBuffer.SetItem(col, row, color);
         }
-        public void SetPixel(int col, int row, Color color, Vector4 uv1, byte isFill = 1) {
+        
+
+        public void SetPixel(int col, int row, Color color, Vector4 uv1, Vector3 pos, byte isFill = 1) {
             PixelInfo info = this.GetItem(col, row);
             info.color = color;
             info.uv1 = uv1;
+            info.pos = pos;
             info.isFill = isFill;
             this.SetItem(col, row, info);
             m_ColorBuffer.SetItem(col, row, color);

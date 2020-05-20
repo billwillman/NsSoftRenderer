@@ -6,7 +6,8 @@ using NsSoftRenderer;
 public enum PixelShaderEnum {
     None = -1,
     Default = 0,
-    MipMapShow = 1
+    MipMapShow = 1,
+    NormalShow = 2
 }
 
 public class PixelShaderSelector : MonoBehaviour {
@@ -53,6 +54,9 @@ public class PixelShaderSelector : MonoBehaviour {
                 m_PixelShaderHandles.Add(handle);
 
                 handle = resMgr.CreatePixelShader<MipMapShowPixelShader>();
+                m_PixelShaderHandles.Add(handle);
+
+                handle = resMgr.CreatePixelShader<NormalShowPixelShader>();
                 m_PixelShaderHandles.Add(handle);
             }
         }

@@ -412,7 +412,7 @@ namespace NsSoftRenderer {
                 m_IsAllCleanedColor = true;
                 for (int r = 0; r < m_FrontColorBuffer.Height; ++r) {
                     for (int c = 0; c < m_FrontColorBuffer.Width; ++c) {
-                        m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero, 0);
+                        m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero, Vector3.zero, 0);
                     }
                 }
                 m_IsCleanedColor = true;
@@ -463,7 +463,7 @@ namespace NsSoftRenderer {
                   //  Debug.LogErrorFormat("yMin: {0} yMax: {1} xMin: {2} xMax: {3}", yMin, yMax, xMin, xMax);
                     for (int r = yMin; r <= yMax; ++r) {
                         for (int c = xMin; c <= xMax; ++c) {
-                            m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero);
+                            m_FrontColorBuffer.SetPixel(c, r, m_CleanColor, Vector4.zero, Vector3.zero, 0);
                         }
                     }
 
@@ -1366,11 +1366,13 @@ namespace NsSoftRenderer {
 
 
                                     Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                    Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                    Vector3 pos = SoftMath.GetPosFromProjSpaceBarycentricCoordinateZ(tri, pz, a, b, c);
 
                                     if (passMode.pixelShader != null) {
 
-                                        Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
-                                        Vector3 pos = SoftMath.GetPosFromProjSpaceBarycentricCoordinateZ(tri, pz, a, b, c);
+                                        
+                                        
 
                                         PixelData data = new PixelData();
                                         data.info.color = color;
@@ -1387,7 +1389,7 @@ namespace NsSoftRenderer {
                                     if (doFill) {
                                         // 如果不是Early-Z模式，需要再执行一次ZTEST检查
                                         if (isUseEarlyZ || CheckZTest(passMode, row, col, pz)) {
-                                            m_FrontColorBuffer.SetPixel(col, row, color, uv1);
+                                            m_FrontColorBuffer.SetPixel(col, row, color, uv1, pos);
                                             // 写入ZBUFFER
                                             // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
                                             // 填充ZBUFFER
