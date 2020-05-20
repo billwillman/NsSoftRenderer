@@ -7,7 +7,7 @@ namespace NsSoftRenderer {
     public class SoftMeshBinder: MonoBehaviour {
         // 材质
         public CullMode cullMode = CullMode.back;
-        public bool isMeshRevert_Z = false;
+        //public bool isMeshRevert_Z = false;
 
         private Mesh m_CustomMesh = null;
         private MeshFilter m_MeshFilter = null;
@@ -68,26 +68,31 @@ namespace NsSoftRenderer {
                     m_CustomMesh = new Mesh();
                     List<Vector3> vs = new List<Vector3>();
                     vs.Add(new Vector3(-1, 0, 0));
-                    vs.Add(new Vector3(1, 0, 0));
                     vs.Add(new Vector3(0, 1, 0));
+                    vs.Add(new Vector3(1, 0, 0));
+                    vs.Add(new Vector3(0, -1, 0));
+                    
                     m_CustomMesh.SetVertices(vs);
 
                     m_CustomMesh.subMeshCount = 1;
-                    int[] idxs = new int[3];
-                    idxs[0] = 0; idxs[1] = 2; idxs[2] = 1;
+                    int[] idxs = new int[6];
+                    idxs[0] = 0; idxs[1] = 1; idxs[2] = 2;
+                    idxs[3] = 0; idxs[4] = 2; idxs[5] = 3;
                     m_CustomMesh.SetIndices(idxs, MeshTopology.Triangles, 0);
 
                     List<Color> colors = new List<Color>();
                     colors.Add(Color.red);
                     colors.Add(Color.green);
                     colors.Add(Color.blue);
+                    colors.Add(Color.white);
                     m_CustomMesh.SetColors(colors);
                 }
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;
             } else if (m_MeshFilter != null && m_MeshFilter.sharedMesh != null) {
                 //Matrix4x4 mat = m_MeshFilter.GetComponent<MeshRenderer>().localToWorldMatrix * this.transform.worldToLocalMatrix;
-                Mesh mesh;
+                /*Mesh mesh;
+                
                 if (isMeshRevert_Z) {
                     m_CustomMesh = GameObject.Instantiate(m_MeshFilter.sharedMesh);
 
@@ -102,7 +107,9 @@ namespace NsSoftRenderer {
                     mesh = m_CustomMesh;
                 } else {
                     mesh = m_MeshFilter.sharedMesh;
-                }
+                }*/
+
+                Mesh mesh = mesh = m_MeshFilter.sharedMesh;
 
                 List<Color> colors = new List<Color>();
                 mesh.GetColors(colors);
@@ -151,3 +158,4 @@ namespace NsSoftRenderer {
         }
     }
 }
+ 

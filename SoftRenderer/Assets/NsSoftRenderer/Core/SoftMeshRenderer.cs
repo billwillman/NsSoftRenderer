@@ -82,6 +82,16 @@ namespace NsSoftRenderer {
             }
         }
 
+        // 模型空间转世界空间
+        private Matrix4x4 m_MeshAxisToGlobalMatrix = Matrix4x4.identity;
+
+        protected override void DoUpdateGlobalToLocalMatrix() {
+            // 模型空间转到局部坐标系空间
+            // 这里注意要做Z取反，是因为模型工具导出的模型坐标系和UNITY不一致
+            Matrix4x4 modelViewToLocalView = Matrix4x4.Scale(new Vector3(1f, 1f, -1f));
+            m_MeshAxisToGlobalMatrix = m_LocalToGlobalMatrix * modelViewToLocalView;
+        }
+
         // 提交到渲染队列中
         public override bool Render(SoftCamera camera, RenderPassMode passMode) {
             if (camera == null || passMode == null || m_Mesh == null)
@@ -91,7 +101,7 @@ namespace NsSoftRenderer {
             passMode.Cull = this.cullMode;
             int oldMainTex = passMode.mainTex;
             passMode.mainTex = m_MainTex;
-            bool ret = camera.RenderMesh(m_Mesh, m_LocalToGlobalMatrix, passMode);
+            bool ret = camera.RenderMesh(m_Mesh, m_MeshAxisToGlobalMatrix, passMode);
             passMode.Cull = old;
             passMode.mainTex = oldMainTex;
             return ret;
