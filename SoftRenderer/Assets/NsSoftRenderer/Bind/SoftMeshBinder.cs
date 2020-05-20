@@ -86,6 +86,13 @@ namespace NsSoftRenderer {
                     colors.Add(Color.blue);
                     colors.Add(Color.white);
                     m_CustomMesh.SetColors(colors);
+
+                    List<Vector4> uvs = new List<Vector4>();
+                    uvs.Add(new Vector4(0, 0, 0, 0));
+                    uvs.Add(new Vector4(1, 0, 0, 0));
+                    uvs.Add(new Vector4(1, 1, 0, 0));
+                    uvs.Add(new Vector4(0, 1, 0, 0));
+                    m_CustomMesh.SetUVs(0, uvs);
                 }
 
                 m_MeshFilter.sharedMesh = m_CustomMesh;

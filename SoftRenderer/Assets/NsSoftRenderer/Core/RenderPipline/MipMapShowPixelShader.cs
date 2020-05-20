@@ -5,10 +5,28 @@ using UnityEngine;
 namespace NsSoftRenderer {
 
     public class MipMapShowPixelShader: PixelShader {
+
+        private static Color[] m_MipColor = {
+            new Color(0f, 1f, 0f),
+            new Color(0.25f, 0.75f, 0f),
+            new Color(0.5f, 0.5f, 0f),
+            new Color(0.75f, 0.25f, 0f),
+            new Color(1f, 0f, 0f),
+            new Color(0.75f, 0f, 0.25f),
+            new Color(0.5f, 0f, 0.5f),
+            new Color(0.25f, 0f, 0.75f),
+            new Color(0f, 0, 1f),
+        };
+
+        private static int m_ColorCnt = m_MipColor.Length;
+
         public override bool Main(PixelData data, out Color frag) {
             var target = this.param.target;
             var tex = data.mainTex;
             if (tex != null && target != null) {
+                float dw = 1f / tex.Width;
+                float dh = 1f / tex.Height;
+
                 Vector2 uv = data.info.uv1;
                 int u = data.info.u - 1;
                 int v = data.info.v - 1;
@@ -19,7 +37,7 @@ namespace NsSoftRenderer {
                     if (info1.isFill != 0) {
                         // UV变化率 除以1是因为是1距离的变化
                         Vector2 uv1 = info1.uv1;
-                        ddx = ((uv - uv1).magnitude) / 1f * tex.Width;
+                        ddx = (((uv - uv1).magnitude) / 1f) / dw;
                     }
                 }
 
@@ -29,14 +47,33 @@ namespace NsSoftRenderer {
                     var info2 = target.FrontColorBuffer.GetItem(u, data.info.v);
                     if (info2.isFill != 0) {
                         Vector2 uv2 = info2.uv1;
-                        ddy = ((uv - uv2).magnitude) / 1f * tex.Height;
+                        ddy = (((uv - uv2).magnitude) / 1f) / dh;
                     }
                 }
 
+               
                 float maxDD = Mathf.Max(ddx, ddy);
-                float n = Mathf.Log(maxDD, 2);
-                float nn = 1f/n;
-                frag = new Color(nn, nn, nn);
+
+                if (maxDD > 0) {
+                    float n = Mathf.Log(maxDD, 2);
+
+                    int s = Mathf.FloorToInt(n);
+                    int e = Mathf.CeilToInt(n);
+                    float t = SoftMath.GetDeltaT(s, e, n);
+
+                    int idx = s - 1;
+
+                    idx = Mathf.Clamp(idx, 0, m_ColorCnt - 1);
+                    Color sC = m_MipColor[idx];
+
+                    idx = e - 1;
+                    idx = Mathf.Clamp(idx, 0, m_ColorCnt - 1);
+                    Color eC = m_MipColor[idx];
+
+
+                    frag = SoftMath.GetColorDeltaT(sC, eC, t);
+                } else
+                    frag = Color.black;
             } else
                 frag = Color.black;
             
