@@ -16,8 +16,11 @@ namespace NsSoftRenderer {
         public DefaultRenderPipline() {
             RegisterRenderQueue(RenderQueue.Geometry, new GeometryQueue());
             m_DefaultPassMode.CreateVertexShader<VertexShader>();
-            // m_DefaultPassMode.CreatePixelShader<MipMapShowPixelShader>();
-            m_DefaultPassMode.CreatePixelShader<PixelShader>();
+           //  m_DefaultPassMode.CreatePixelShader<MipMapShowPixelShader>();
+        }
+
+        public override void AttachPixelShader(int pixel) {
+            m_DefaultPassMode.AttachPixelShader(pixel);
         }
 
         private class VisiableListSort: IComparer<int> {

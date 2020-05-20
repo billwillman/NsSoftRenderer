@@ -20,7 +20,7 @@ namespace NsSoftRenderer {
     }
 
     // 材质管理器
-    public class SoftMaterialManager: DisposeObject {
+    public class SoftResourceManager: DisposeObject {
         private static int m_GlobalResInstanceId = 0;
 
         protected static int GenInstanceId() {
@@ -45,6 +45,12 @@ namespace NsSoftRenderer {
             AddRes(softTex);
 
             return softTex.uuid;
+        }
+
+        public int CreatePixelShader<T>() where T: PixelShader, new() {
+            T ret = new T();
+            AddRes(ret);
+            return ret.uuid;
         }
 
         protected void AddRes(SoftRes res) {

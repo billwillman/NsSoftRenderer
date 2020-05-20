@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Bind\PixelShaderSelector.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftCameraBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftDeviceBinder.cs" />
     <Compile Include="Assets\NsSoftRenderer\Bind\SoftMeshBinder.cs" />

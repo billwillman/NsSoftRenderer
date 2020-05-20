@@ -7,15 +7,18 @@ namespace NsSoftRenderer {
     public class MipMapShowPixelShader: PixelShader {
 
         private static Color[] m_MipColor = {
-            new Color(0f, 1f, 0f),
-            new Color(0.25f, 0.75f, 0f),
-            new Color(0.5f, 0.5f, 0f),
-            new Color(0.75f, 0.25f, 0f),
-            new Color(1f, 0f, 0f),
-            new Color(0.75f, 0f, 0.25f),
-            new Color(0.5f, 0f, 0.5f),
-            new Color(0.25f, 0f, 0.75f),
-            new Color(0f, 0, 1f),
+            new Color(1, 0, 0),
+            new Color(0, 0, 1),
+            new Color(1, 0.5f, 0),
+            new Color(1, 0, 0.5f),
+            new Color(0, 0.5f, 0.5f),
+            new Color(0, 0.25f, 0.5f),
+            new Color(0.25f, 0.5f, 0),
+            new Color(0.5f, 0, 1),
+            new Color(1, 0.25f, 0.5f),
+            new Color(0.5f, 0.5f, 0.5f),
+            new Color(0.25f, 0.25f, 0.25f),
+            new Color(0.125f, 0.125f, 0.125f)
         };
 
         private static int m_ColorCnt = m_MipColor.Length;

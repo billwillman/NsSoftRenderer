@@ -26,6 +26,7 @@ namespace NsSoftRenderer {
         protected Matrix4x4 m_LocalToGlobalMatrix = Matrix4x4.identity;
         protected bool m_MustGlobalToLocalMatrixChg = true;
         protected SoftRenderObjType m_Type = SoftRenderObjType.None;
+        protected Vector3 m_Scale = Vector3.one;
 
         // 是否能渲染
         public bool CanRenderer {
@@ -133,7 +134,18 @@ namespace NsSoftRenderer {
                 axis.m10 = m_Up.x; axis.m11 = m_Up.y; axis.m12 = m_Up.z;
                 // 注意UNITY的局部坐标系Z坐轴系与LOOKAT相反（Unity是左手坐标系，摄影机朝向[0, 0, -1]的方向。
                 axis.m20 = -m_LookAt.x; axis.m21 = -m_LookAt.y; axis.m22 = -m_LookAt.z;
-                m_GlobalToLocalMatrix = axis * invTranslate;
+
+                Vector3 scale = m_Scale;
+                if (Mathf.Abs(scale.x) > float.Epsilon)
+                    scale.x = 1f / scale.x;
+                if (Mathf.Abs(scale.y) > float.Epsilon)
+                    scale.y = 1f / scale.y;
+                if (Mathf.Abs(scale.z) > float.Epsilon)
+                    scale.z = 1f / scale.z;
+
+                Matrix4x4 scaleMat = Matrix4x4.Scale(scale);
+
+                m_GlobalToLocalMatrix = axis * scaleMat * invTranslate;
 
                 // 有平移就不是正交矩阵了（可以拆解为，正交矩阵的逆+平移矩阵的逆）
                 m_LocalToGlobalMatrix = m_GlobalToLocalMatrix.inverse;
@@ -170,6 +182,19 @@ namespace NsSoftRenderer {
                 if (m_Up != value) {
                     m_Up = value;
                     DoLookAtUpChange();
+                    DoMustGlobalToLocalMatrixChg();
+                }
+            }
+        }
+
+        public Vector3 Scale {
+            get {
+                return m_Scale;
+            }
+            
+            set {
+                if (m_Scale != value) {
+                    m_Scale = value;
                     DoMustGlobalToLocalMatrixChg();
                 }
             }

@@ -45,9 +45,21 @@ namespace NsSoftRenderer {
         // 当前的VertexShader
         public VertexShader vertexShader = null;
         // 当前的PixelShader
-        public PixelShader pixelShader = null;
+        public int pixelShaderHandle = 0;
         // 暂时放这里
         public int mainTex = 0;
+
+        public PixelShader pixelShader {
+            get {
+                if (pixelShaderHandle == 0)
+                    return null;
+
+                var device = SoftDevice.StaticDevice;
+                if (device == null || device.ResMgr == null)
+                    return null;
+                return device.ResMgr.GetSoftRes<PixelShader>(pixelShaderHandle);
+            }
+        }
 
         public T CreateVertexShader<T>() where T : VertexShader, new() {
             T ret = new T();
@@ -63,18 +75,8 @@ namespace NsSoftRenderer {
             vertexShader = vert;
         }
 
-        public T CreatePixelShader<T>() where T: PixelShader, new() {
-            T ret = new T();
-            ret.m_Owner = this;
-            pixelShader = ret;
-            return ret;
-        }
-
-        public void AttachPixelShader(PixelShader pixel) {
-            if (pixel != null) {
-                pixel.m_Owner = this;
-            }
-            pixelShader = pixel;
+        public void AttachPixelShader(int pixel) {
+            this.pixelShaderHandle = pixel;
         }
 
         public Matrix4x4 MVPMatrix = Matrix4x4.identity;
@@ -139,6 +141,8 @@ namespace NsSoftRenderer {
                 return (x - y);
             }
         }
+
+        public virtual void AttachPixelShader(int pixel) { }
 
         internal virtual bool DoCameraRender(SoftCamera camera, Dictionary<int, SoftRenderObject> objMap) { return false; }
 

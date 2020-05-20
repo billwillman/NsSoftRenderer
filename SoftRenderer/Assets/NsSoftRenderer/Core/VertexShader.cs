@@ -31,10 +31,17 @@ namespace NsSoftRenderer {
     }
 
 
-    public class PixelShader {
+    public class PixelShader: SoftRes {
         // 是否开启了Clip
         public bool isUseClip = false;
         public PixelShaderParam param = new PixelShaderParam();
+
+        public int uuid {
+            get;
+            set;
+        }
+
+        public virtual void Dispose() { }
 
         public void SetParam(RenderTarget target) {
             param.target = target;
