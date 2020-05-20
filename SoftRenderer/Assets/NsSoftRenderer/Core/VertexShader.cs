@@ -18,10 +18,12 @@ namespace NsSoftRenderer {
         public int v; // y坐标（水平坐标）
         public Color color;
         public Vector4 uv1;
+        public Vector3 pos;
         public byte isFill;
     }
 
     public struct PixelData {
+        // 输入数据
         public PixelInfo info;
         public SoftTexture2D mainTex;
     }

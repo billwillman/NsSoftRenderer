@@ -1366,15 +1366,19 @@ namespace NsSoftRenderer {
 
 
                                     Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
-                                    Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
 
                                     if (passMode.pixelShader != null) {
+
+                                        Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
+                                        Vector3 pos = SoftMath.GetPosFromProjSpaceBarycentricCoordinateZ(tri, pz, a, b, c);
+
                                         PixelData data = new PixelData();
                                         data.info.color = color;
                                         data.mainTex = tri.MainTexture;
                                         data.info.uv1 = uv1;
                                         data.info.u = col;
                                         data.info.v = row;
+                                        data.info.pos = pos;
                                         doFill = passMode.pixelShader.Main(data, out color);
                                     } else {
                                         doFill = true;
