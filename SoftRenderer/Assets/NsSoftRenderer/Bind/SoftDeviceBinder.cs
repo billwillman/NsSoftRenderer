@@ -12,6 +12,7 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
     public Color m_ClearColor = Color.clear;
     public bool ApplyOneScale = true;
     public bool DisableDirtRect = false; // 是否禁用脏矩形
+    public bool IsFlip = true;
 
     public virtual void OnFillColor(ColorBuffer buffer, RectInt fillRect, RectInt clearRect) {
         if (buffer != null && m_TargetTexture != null && buffer.IsVaild) {
@@ -63,6 +64,7 @@ public class SoftDeviceBinder : MonoBehaviour, IRenderTargetNotify {
             InitTargetTexture();
             m_Device.ClearColor = m_ClearColor;
             m_Device.DisableDirtRect = DisableDirtRect;
+            m_Device.IsFlip = IsFlip;
             IRenderTargetNotify notify = null;
             if (m_IsShowRenderer)
                 notify = this;

@@ -28,6 +28,16 @@ namespace NsSoftRenderer {
         // 默认渲染管线
         private IRenderPipline m_RenderPipline = new DefaultRenderPipline();
         private SoftResourceManager m_ResMgr = new SoftResourceManager();
+        private bool m_IsFlip = true;
+
+        public bool IsFlip {
+            get {
+                return m_IsFlip;
+            }
+            set {
+                m_IsFlip = value;
+            }
+        }
 
         public IRenderPipline Pipline {
             get {
@@ -272,7 +282,8 @@ namespace NsSoftRenderer {
                    // Debug.LogError("NoRenderer");
                 }
 
-                m_RenerTarget.FlipToNotify(notify);
+                if (m_IsFlip)
+                    m_RenerTarget.FlipToNotify(notify);
             }
         }
 
