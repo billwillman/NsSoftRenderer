@@ -47,6 +47,7 @@ namespace NsSoftRenderer {
                 // 垂直变化率
                 float ddy = 0f;
                 if (v > 0) {
+                    // 这里和真实SHADER还是有点不一样的，这个是直接拿设备【当前】所有模型渲染后结果的BUFFER，SHADER并不是
                     var info2 = target.FrontColorBuffer.GetItem(data.info.u, v);
                     if (info2.isFill != 0) {
                         Vector2 uv2 = info2.uv1;

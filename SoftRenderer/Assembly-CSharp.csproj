@@ -89,6 +89,8 @@
     <Compile Include="Assets\NsSoftRenderer\Core\VertexShader.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
+    <None Include="Assets\Normal.shader" />
+    <None Include="Assets\Mipmap.shader" />
     <None Include="Assets\NewUnlitShader.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
