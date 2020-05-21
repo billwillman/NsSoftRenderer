@@ -6,7 +6,7 @@ namespace NsSoftRenderer {
 
     public class MipMapShowPixelShader: PixelShader {
 
-        private static Color[] m_MipColor = {
+        public static Color[] m_MipColor = {
             new Color(1, 0, 0),
             new Color(0, 0, 1),
             new Color(1, 0.5f, 0),
@@ -57,7 +57,7 @@ namespace NsSoftRenderer {
                
                 float maxDD = Mathf.Max(ddx, ddy);
 
-                if (maxDD > 0) {
+                if (maxDD >= 0) {
                     float n = Mathf.Log(maxDD, 2);
 
                     int s = Mathf.FloorToInt(n);

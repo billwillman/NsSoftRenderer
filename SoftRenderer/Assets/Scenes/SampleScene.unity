@@ -142,6 +142,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShaderEnum: 0
+  m_Shaders:
+  - {fileID: 4800000, guid: 6003105c214d0a44c8b399f93c1210ed, type: 3}
+  - {fileID: 4800000, guid: 8bae876a38c76844895779703aff0139, type: 3}
+  - {fileID: 4800000, guid: 2b1a795afce649945885538a2138f88d, type: 3}
 --- !u!4 &1092990
 Transform:
   m_ObjectHideFlags: 0
@@ -610,7 +614,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788346339}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1788346342
 Transform:
   m_ObjectHideFlags: 0
@@ -619,7 +623,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788346339}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -5}
+  m_LocalPosition: {x: 0, y: 0, z: -7.38}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

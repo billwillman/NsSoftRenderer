@@ -16,6 +16,8 @@ public class PixelShaderSelector : MonoBehaviour {
     private PixelShaderEnum m_Selctor = PixelShaderEnum.None;
     private List<int> m_PixelShaderHandles = new List<int>();
 
+    public Shader[] m_Shaders = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,6 +26,21 @@ public class PixelShaderSelector : MonoBehaviour {
 
     private void Update() {
         CheckShaderEnum();
+    }
+
+    private void ProcessMaterial(Material target, PixelShaderEnum selctor) {
+        switch (selctor) {
+            case PixelShaderEnum.MipMapShow: {
+                    List<Vector4> colorLst = new List<Vector4>(MipMapShowPixelShader.m_MipColor.Length);
+                    for (int i = 0; i < MipMapShowPixelShader.m_MipColor.Length; ++i) {
+                        Color color = MipMapShowPixelShader.m_MipColor[i];
+                        Vector4 v = new Vector4(color.r, color.g, color.b, color.a);
+                        colorLst.Add(v);
+                    }
+                    target.SetVectorArray("_MipmapColor", colorLst);
+                    break;
+                }
+        }
     }
 
     void CheckShaderEnum() {
@@ -36,6 +53,28 @@ public class PixelShaderSelector : MonoBehaviour {
                     int handle = m_PixelShaderHandles[idx];
                     if (handle != 0) {
                         device.Pipline.AttachPixelShader(handle);
+
+                        Shader targetShader = null;
+                        if ((m_Shaders != null) && (idx < m_Shaders.Length)) {
+                            targetShader = m_Shaders[idx];
+                        }
+
+                        if (targetShader != null) {
+                            SoftMeshBinder[] binders = GameObject.FindObjectsOfType<SoftMeshBinder>();
+                            if (binders != null) {
+                                for (int i = 0; i < binders.Length; ++i) {
+                                    var binder = binders[i];
+                                    if (binder != null) {
+                                        var renderer = binder.GetComponent<MeshRenderer>();
+                                        if (renderer != null) {
+                                            renderer.material.shader = targetShader;
+                                            ProcessMaterial(renderer.material, ShaderEnum);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         m_Selctor = ShaderEnum;
                     }
                 }
