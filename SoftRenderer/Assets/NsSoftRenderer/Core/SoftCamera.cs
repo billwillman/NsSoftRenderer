@@ -411,6 +411,7 @@ namespace NsSoftRenderer {
             set;
         }
 
+        // 采用1f - z的方式，解决一定浮点的精度问题
         public bool ZBuffer_RevertZ {
             get {
                 var target = this.Target;
