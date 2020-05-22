@@ -263,6 +263,7 @@ MonoBehaviour:
   m_ClearColor: {r: 0, g: 0, b: 0, a: 0}
   ApplyOneScale: 1
   DisableDirtRect: 0
+  IsFlip: 1
   m_ShowRenderer: {fileID: 1411613832}
   m_IsShowRenderer: 1
 --- !u!4 &366691690
@@ -375,6 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsOpenCameraSpereCull: 1
+  ZBuffer_RevertZ: 0
 --- !u!1 &568633211
 GameObject:
   m_ObjectHideFlags: 0
@@ -394,7 +396,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &568633212
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -593,7 +595,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1788346340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -614,7 +616,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1788346339}
-  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!4 &1788346342
 Transform:
   m_ObjectHideFlags: 0

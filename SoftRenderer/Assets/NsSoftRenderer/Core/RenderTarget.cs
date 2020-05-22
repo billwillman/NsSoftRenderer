@@ -686,26 +686,37 @@ namespace NsSoftRenderer {
         }
 
         private float TransZBuffer(float orgZ) {
-            if (Mathf.Abs(orgZ) > float.Epsilon)
-               // return orgZ * 1000f;
-                return 1f/orgZ;
-            return orgZ;
+            if (m_IsOneRevertZ) {
+                return (1f - orgZ);
+            } else {
+                if (Mathf.Abs(orgZ) > float.Epsilon)
+                    // return orgZ * 1000f;
+                    return 1f / orgZ;
+                return orgZ;
+            }
         }
 
-        private int CompareZBuffer(float oldZ, float newZ) {
+        private int CompareZBuffer(float oldZ, float newZ, bool isCheckRevertZ = true) {
             if (Mathf.Abs(oldZ - newZ) <= float.Epsilon)
                 return 0;
-            if (oldZ < newZ)
-                return -1;
-            else
-                return 1;
+            if (isCheckRevertZ && m_IsOneRevertZ) {
+                if (oldZ < newZ)
+                    return -1;
+                else
+                    return 1;
+            } else {
+                if (oldZ < newZ)
+                    return -1;
+                else
+                    return 1;
+            }
         }
 
         private bool CheckInvZTest(RenderPassMode passMode, int row, int col, float z) {
             float oldZ = m_FrontDepthBuffer.GetItem(col, row);
             if (oldZ < 0)
                 return true;
-            int cmp = CompareZBuffer(oldZ, z);
+            int cmp = CompareZBuffer(oldZ, z, false);
             switch (passMode.ZTest) {
                 case ZTestOp.Equal:
                     return cmp == 0;
@@ -719,6 +730,17 @@ namespace NsSoftRenderer {
                     return cmp <= 0;
                 default:
                     return false;
+            }
+        }
+
+        private bool m_IsOneRevertZ = true;
+        // 是否采用1-z的方式存储到ZBUFFER里
+        public bool isOneRevertZ {
+            get {
+                return m_IsOneRevertZ;
+            }
+            set {
+                m_IsOneRevertZ = value;
             }
         }
 

@@ -6,6 +6,7 @@ public class SoftCameraBinder: MonoBehaviour {
 
     // 是否开启视锥体球面剪裁
     public bool IsOpenCameraSpereCull = true;
+    public bool ZBuffer_RevertZ = true;
 
     private Camera m_Cam = null;
     private SoftCamera m_SoftCam = null;
@@ -26,6 +27,7 @@ public class SoftCameraBinder: MonoBehaviour {
         if (m_Cam != null && m_SoftCam != null) {
             m_SoftCam.UpdateCamera(m_Cam);
             m_SoftCam.IsOpenCameraSpereCull = this.IsOpenCameraSpereCull;
+            m_SoftCam.ZBuffer_RevertZ = ZBuffer_RevertZ;
         }
     }
 

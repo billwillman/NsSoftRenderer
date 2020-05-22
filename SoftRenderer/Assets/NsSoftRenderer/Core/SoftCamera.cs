@@ -411,6 +411,21 @@ namespace NsSoftRenderer {
             set;
         }
 
+        public bool ZBuffer_RevertZ {
+            get {
+                var target = this.Target;
+                if (target == null)
+                    return false;
+                return target.isOneRevertZ;
+            }
+            set {
+                var target = this.Target;
+                if (target == null)
+                    return;
+                target.isOneRevertZ = value;
+            }
+        }
+
        public Matrix4x4 PorjInvMatrix {
             get {
                 UpdateMatrix();
