@@ -685,8 +685,8 @@ namespace NsSoftRenderer {
             }
         }
 
-        private float TransZBuffer(float orgZ) {
-            if (m_IsOneRevertZ) {
+        private float TransZBuffer(float orgZ, bool isCheckRevertZ = true) {
+            if (isCheckRevertZ && m_IsOneRevertZ) {
                 return (1f - orgZ);
             } else {
                 if (Mathf.Abs(orgZ) > float.Epsilon)
