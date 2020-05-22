@@ -376,7 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IsOpenCameraSpereCull: 1
-  ZBuffer_RevertZ: 0
+  ZBuffer_RevertZ: 1
 --- !u!1 &568633211
 GameObject:
   m_ObjectHideFlags: 0
