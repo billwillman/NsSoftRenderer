@@ -1386,7 +1386,6 @@ namespace NsSoftRenderer {
                                 if ((!isUseEarlyZ) || CheckZTest(passMode, row, col, pz)) {
 
 
-
                                     Color color = SoftMath.GetColorFromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
                                     Vector4 uv1 = SoftMath.GetUV1FromProjSpaceBarycentricCoordinateAndZ(tri, pz, a, b, c);
                                     Vector3 pos = SoftMath.GetPosFromProjSpaceBarycentricCoordinateZ(tri, pz, a, b, c);
@@ -1411,6 +1410,7 @@ namespace NsSoftRenderer {
                                     if (doFill) {
                                         // 如果不是Early-Z模式，需要再执行一次ZTEST检查
                                         if (isUseEarlyZ || CheckZTest(passMode, row, col, pz)) {
+                                            // 这个FrontColorBuffer有点G-BUFFER的意思。。。。
                                             m_FrontColorBuffer.SetPixel(col, row, color, uv1, pos);
                                             // 写入ZBUFFER
                                             // Debug.LogErrorFormat("y: %d z: %s", row, P.z);
