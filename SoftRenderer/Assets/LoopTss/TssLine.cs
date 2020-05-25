@@ -2,23 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Utils;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace TssLoop {
 
 
     using TssLineMap = Dictionary<long, TssLine>;
+    using TssVertexRefMap = Dictionary<int, int>;
 
     // 三角形边
     public struct TssLine {
         // 保证一点pt1的值小于pt2的值，这样解决边的顶点前后关系，好做HASH
         public int pt1;   // 第一个顶点索引
         public int pt2;   // 第二个顶点索引
-    }
 
+        public int tri1, tri2;
+    }
 
     // 三角形由三条边组成
     public struct TssTriangle {
-        public int[] vertIdxs;
+        public int vertIdx1, vertIdx2, vertIdx3;
         public long line1, line2, line3; // 全是索引而且也是从小到大排序
 
         public static long MakeLineKey(int pt1, int pt2) {
@@ -32,7 +36,7 @@ namespace TssLoop {
             return ret;
         }
 
-        private static void CheckAddLineMap(TssLineMap lineMap, int pt1, int pt2) {
+        private static void CheckAddLineMap(TssLineMap lineMap, TssTriangleBuffer triBuf, int pt1, int pt2) {
             if (pt1 > pt2) {
                 int tmp = pt1;
                 pt1 = pt2;
@@ -41,26 +45,31 @@ namespace TssLoop {
 
             long key = MakeLineKey(pt1, pt2);
 
-            if (!lineMap.ContainsKey(key)) {
-                TssLine line = new TssLine();
+            TssLine line;
+            if (!lineMap.TryGetValue(key, out line)) {
+                line = new TssLine();
                 line.pt1 = pt1; line.pt2 = pt2;
+                line.tri1 = triBuf.Count;
+                line.tri2 = -1;
                 lineMap.Add(key, line);
+            } else {
+                line.tri2 = triBuf.Count;
+                lineMap[key] = line;
             }
         }
 
 
-        public TssTriangle(int idx1, int idx2, int idx3, TssLineMap lineMap) {
-            vertIdxs = new int[3];
-            vertIdxs[0] = idx1;
-            vertIdxs[1] = idx2;
-            vertIdxs[2] = idx3;
+        public TssTriangle(int idx1, int idx2, int idx3, TssLineMap lineMap, TssTriangleBuffer triBuf) {
+            vertIdx1 = idx1;
+            vertIdx2 = idx2;
+            vertIdx3 = idx3;
 
-            line1 = MakeLineKey(vertIdxs[0], vertIdxs[1]);
-            CheckAddLineMap(lineMap, vertIdxs[0], vertIdxs[1]);
-            line2 = MakeLineKey(vertIdxs[1], vertIdxs[2]);
-            CheckAddLineMap(lineMap, vertIdxs[1], vertIdxs[2]);
-            line3 = MakeLineKey(vertIdxs[2], vertIdxs[0]);
-            CheckAddLineMap(lineMap, vertIdxs[2], vertIdxs[0]);
+            line1 = MakeLineKey(vertIdx1, vertIdx2);
+            CheckAddLineMap(lineMap, triBuf, vertIdx1, vertIdx2);
+            line2 = MakeLineKey(vertIdx2, vertIdx3);
+            CheckAddLineMap(lineMap, triBuf, vertIdx2, vertIdx3);
+            line3 = MakeLineKey(vertIdx3, vertIdx1);
+            CheckAddLineMap(lineMap, triBuf, vertIdx3, vertIdx1);
         }
     }
 
@@ -70,12 +79,21 @@ namespace TssLoop {
     public class TssVertexBuffer : NativeList<Vector3> { }
 
     // 顶点索引数据
-    public class TssTriangleBuffer : NativeList<TssTriangle> { }
+    public class TssTriangleBuffer : NativeList<TssTriangle> {
+
+    }
+
+    // 新的顶点三角形
+    public struct TssExtrTriangle {
+        public Vector3 p1, p2, p3; // 新的点
+        public long line1, line2, line3; // 初始生成在的边
+    }
 
     // 细分过后，法线得重新计算
     public class TssMesh: DisposeObject {
 
         private TssVertexBuffer m_VertexBuffer = new TssVertexBuffer();
+        private TssVertexRefMap m_VertexRefMap = new TssVertexRefMap();
         private TssTriangleBuffer m_TriangleBuffer = new TssTriangleBuffer();
         private TssLineMap m_LinesMap = new TssLineMap();
 
@@ -97,7 +115,7 @@ namespace TssLoop {
                 int idx1 = tris[idx++];
                 int idx2 = tris[idx++];
                 int idx3 = tris[idx++];
-                TssTriangle tri = new TssTriangle(idx1, idx2, idx3, m_LinesMap);
+                TssTriangle tri = new TssTriangle(idx1, idx2, idx3, m_LinesMap, m_TriangleBuffer);
                 m_TriangleBuffer.Add(tri);
             }
         }
