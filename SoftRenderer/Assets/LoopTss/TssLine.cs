@@ -102,6 +102,11 @@ namespace TssLoop {
             }
         }
 
+        // 生成下一級的細分
+        public void TssNextLevel() {
+
+        }
+
         private void Clear() {
             m_LinesMap.Clear();
 
