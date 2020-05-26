@@ -60,6 +60,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Command\CommandBufferBlurRefraction.cs" />
     <Compile Include="Assets\LoopTss\LoopTss.cs" />
     <Compile Include="Assets\LoopTss\TssLine.cs" />
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
@@ -91,8 +92,10 @@
     <Compile Include="Assets\NsSoftRenderer\Core\VertexShader.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
+    <None Include="Assets\Command\SeparableBlur.shader" />
     <None Include="Assets\Normal.shader" />
     <None Include="Assets\Mipmap.shader" />
+    <None Include="Assets\Command\GlassWithoutGrab.shader" />
     <None Include="Assets\NewUnlitShader.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
