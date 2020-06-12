@@ -90,6 +90,7 @@
     <Compile Include="Assets\NsSoftRenderer\Core\SoftTexture2D.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\SoftTexture3D.cs" />
     <Compile Include="Assets\NsSoftRenderer\Core\VertexShader.cs" />
+    <Compile Include="Assets\NsSoftRenderer\Test\ListTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
     <None Include="Assets\Command\SeparableBlur.shader" />
@@ -97,6 +98,7 @@
     <None Include="Assets\Mipmap.shader" />
     <None Include="Assets\Command\GlassWithoutGrab.shader" />
     <None Include="Assets\NewUnlitShader.shader" />
+    <None Include="Assets\渲染方程\Base.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
