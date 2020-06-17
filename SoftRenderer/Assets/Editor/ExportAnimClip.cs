@@ -9,7 +9,7 @@ public class ExportAnimClip : Editor
 {
     public static int totalNum = 0;
 
-    public static void ExportAnimClips(string abFileName, bool isTotalFiles, ref int num) {
+    public static void ExportAnimClips(string abFileName, bool isTotalFiles, ref int num, bool isLegacy = false, bool copySerier = true) {
         if (isTotalFiles)
             num = 0;
         
@@ -55,9 +55,26 @@ public class ExportAnimClip : Editor
                         var setting = AnimationUtility.GetAnimationClipSettings(clip);//获取AnimationClipSettings
                         AnimationUtility.SetAnimationClipSettings(newClip, setting);//设置新clip的AnimationClipSettings
                         newClip.frameRate = clip.frameRate;//设置新clip的帧率
-                        EditorCurveBinding[] curveBindings = AnimationUtility.GetCurveBindings(clip);//获取clip的curveBinds
-                        for (int j = 0; j < curveBindings.Length; ++j) {
-                            AnimationUtility.SetEditorCurve(newClip, curveBindings[j], AnimationUtility.GetEditorCurve(clip, curveBindings[j]));//设置新clip的curve
+
+                        if (!copySerier) {
+                            EditorCurveBinding[] curveBindings;
+                            if (isLegacy)
+                                curveBindings = AnimationUtility.GetObjectReferenceCurveBindings(clip);
+                            else
+                                curveBindings = AnimationUtility.GetCurveBindings(clip);//获取clip的curveBinds
+                            for (int j = 0; j < curveBindings.Length; ++j) {
+                                if (isLegacy) {
+                                    var binding = curveBindings[j];
+                                    var curve = AnimationUtility.GetObjectReferenceCurve(clip, curveBindings[j]);
+                                    AnimationUtility.SetObjectReferenceCurve(newClip, binding, curve);//设置新clip的curve
+                                } else {
+                                    var binding = curveBindings[j];
+                                    var curve = AnimationUtility.GetEditorCurve(clip, curveBindings[j]);
+                                    AnimationUtility.SetEditorCurve(newClip, binding, curve);//设置新clip的curve
+                                }
+                            }
+                        } else {
+                            EditorUtility.CopySerialized(clip, newClip);
                         }
 
                         string clipFileName = string.Format("{0}/{1}.anim", outDir, clip.name);
@@ -89,7 +106,9 @@ public class ExportAnimClip : Editor
         string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.dat", SearchOption.AllDirectories);
 
 
-        string startStr = "Assets/StreamingAssets/";
+        string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
+        bool isLegacy = false;
+
         // 先计算文件内容
         totalNum = 0;
         for (int i = 0; i < files.Length; ++i) {
@@ -98,7 +117,7 @@ public class ExportAnimClip : Editor
             if (idx >= 0) {
                 abFileName = abFileName.Substring(idx);
                 int num = 0;
-                ExportAnimClips(abFileName, true, ref num);
+                ExportAnimClips(abFileName, true, ref num, isLegacy);
                 totalNum += num;
             }
         }
@@ -116,7 +135,7 @@ public class ExportAnimClip : Editor
                 int idx = abFileName.IndexOf(startStr, StringComparison.CurrentCultureIgnoreCase);
                 if (idx >= 0) {
                     abFileName = abFileName.Substring(idx);      
-                    ExportAnimClips(abFileName, false, ref num);
+                    ExportAnimClips(abFileName, false, ref num, isLegacy);
                 }
             }
         } finally {
