@@ -33,6 +33,21 @@ public class ExportAnimClip : Editor
             // float process = (float)i / (float)files.Length;
             // EditorUtility.DisplayProgressBar("导出动画", title, process);
 
+            var objs = ab.LoadAllAssets<GameObject>();
+            if (objs != null && objs.Length > 0) {
+                for (int i = 0; i < objs.Length; ++i) {
+                    var obj = objs[i];
+                    if (obj != null) {
+                        var r = obj.GetComponent<SkinnedMeshRenderer>();
+                        if (r.sharedMesh != null) {
+                            var mat = r.sharedMesh.bindposes;
+                            if (mat != null)
+                                Debug.Log(mat.ToString());
+                        }
+                    }
+                }
+            }
+
             bool isCheck = true;
             var clips = ab.LoadAllAssets<AnimationClip>();
             if ((clips != null) && (clips.Length > 0)) {
@@ -40,6 +55,9 @@ public class ExportAnimClip : Editor
                     num += clips.Length;
                     return;
                 }
+
+                
+
                 bool isChanged = false;
                 for (int i = 0; i < clips.Length; ++i) {
                     var clip = clips[i];
