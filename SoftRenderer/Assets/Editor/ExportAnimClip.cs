@@ -113,7 +113,7 @@ public class ExportAnimClip : Editor
 
     static string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
     static bool isLegacy = false;
-    static bool copySerier = true;
+    static bool copySerier = false;
 
     [MenuItem("Assets/导出测试的AB的AnimClips")]
     public static void TestExportAnimClips() {
