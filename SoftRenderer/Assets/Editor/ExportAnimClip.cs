@@ -100,15 +100,28 @@ public class ExportAnimClip : Editor
         }
     }
 
+    [MenuItem("Assets/测试BindPose")]
+    public static void TestBindPose() {
+        var gameObj = Selection.activeGameObject;
+        if (gameObj != null) {
+            var skl = gameObj.GetComponentInChildren<SkinnedMeshRenderer>();
+            if (skl != null) {
+                Debug.Log(skl.sharedMesh.bindposes.ToString());
+            }
+        }
+    }
+
+    static string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
+    static bool isLegacy = false;
+    static bool copySerier = true;
+
     [MenuItem("Assets/导出测试的AB的AnimClips")]
     public static void TestExportAnimClips() {
        // string abFileName = AssetDatabase.GetAssetPath(Selection.activeObject);
         string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.dat", SearchOption.AllDirectories);
 
 
-        string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
-        bool isLegacy = false;
-        bool copySerier = false;
+        
 
         // 先计算文件内容
         totalNum = 0;
