@@ -38,8 +38,8 @@ public class ExportAnimClip : Editor
                 for (int i = 0; i < objs.Length; ++i) {
                     var obj = objs[i];
                     if (obj != null) {
-                        var r = obj.GetComponent<SkinnedMeshRenderer>();
-                        if (r.sharedMesh != null) {
+                        var r = obj.GetComponentInChildren<SkinnedMeshRenderer>();
+                        if (r != null && r.sharedMesh != null) {
                             var mat = r.sharedMesh.bindposes;
                             if (mat != null)
                                 Debug.Log(mat.ToString());
