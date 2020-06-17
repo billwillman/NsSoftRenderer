@@ -108,6 +108,7 @@ public class ExportAnimClip : Editor
 
         string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
         bool isLegacy = false;
+        bool copySerier = false;
 
         // 先计算文件内容
         totalNum = 0;
@@ -117,7 +118,7 @@ public class ExportAnimClip : Editor
             if (idx >= 0) {
                 abFileName = abFileName.Substring(idx);
                 int num = 0;
-                ExportAnimClips(abFileName, true, ref num, isLegacy);
+                ExportAnimClips(abFileName, true, ref num, isLegacy, copySerier);
                 totalNum += num;
             }
         }
@@ -135,7 +136,7 @@ public class ExportAnimClip : Editor
                 int idx = abFileName.IndexOf(startStr, StringComparison.CurrentCultureIgnoreCase);
                 if (idx >= 0) {
                     abFileName = abFileName.Substring(idx);      
-                    ExportAnimClips(abFileName, false, ref num, isLegacy);
+                    ExportAnimClips(abFileName, false, ref num, isLegacy, copySerier);
                 }
             }
         } finally {
