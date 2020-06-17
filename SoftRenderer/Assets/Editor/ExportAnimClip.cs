@@ -29,7 +29,7 @@ public class ExportAnimClip : Editor
             string parentDir = Path.GetDirectoryName(abFileName).Replace('\\', '/');
             string outDir = parentDir + "/AnimClips";
 
-            string title = string.Format("AB: {0}", Path.GetFileNameWithoutExtension(abFileName));
+            string title = string.Format("导出动画文件 AB: {0}", Path.GetFileNameWithoutExtension(abFileName));
             // float process = (float)i / (float)files.Length;
             // EditorUtility.DisplayProgressBar("导出动画", title, process);
 
@@ -47,7 +47,8 @@ public class ExportAnimClip : Editor
                         // Debug.LogFormat("导出=》{0}", clip.name);
                         num += 1;
                         float process = (float)num / (float)totalNum;
-                        EditorUtility.DisplayProgressBar("导出动画文件", title, process);
+                        string info = clip.name + ".anim";
+                        EditorUtility.DisplayProgressBar(title, info, process);
 
                         var newClip = new AnimationClip();
                         newClip.name = clip.name;//设置新clip的名字
