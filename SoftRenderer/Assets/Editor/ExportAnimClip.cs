@@ -7,7 +7,12 @@ using UnityEngine;
 
 public class ExportAnimClip : Editor
 {
-    public static void ExportAnimClips(string abFileName) {
+    public static int totalNum = 0;
+
+    public static void ExportAnimClips(string abFileName, bool isTotalFiles, ref int num) {
+        if (isTotalFiles)
+            num = 0;
+        
         if (string.IsNullOrEmpty(abFileName))
             return;
         abFileName = abFileName.Replace('\\', '/');
@@ -23,15 +28,26 @@ public class ExportAnimClip : Editor
         try {
             string parentDir = Path.GetDirectoryName(abFileName).Replace('\\', '/');
             string outDir = parentDir + "/AnimClips";
-            
+
+            string title = string.Format("AB: {0}", Path.GetFileNameWithoutExtension(abFileName));
+            // float process = (float)i / (float)files.Length;
+            // EditorUtility.DisplayProgressBar("导出动画", title, process);
+
             bool isCheck = true;
             var clips = ab.LoadAllAssets<AnimationClip>();
             if ((clips != null) && (clips.Length > 0)) {
+                if (isTotalFiles) {
+                    num += clips.Length;
+                    return;
+                }
                 bool isChanged = false;
                 for (int i = 0; i < clips.Length; ++i) {
                     var clip = clips[i];
                     if (clip != null) {
-                        Debug.LogFormat("导出=》{0}", clip.name);
+                        // Debug.LogFormat("导出=》{0}", clip.name);
+                        num += 1;
+                        float process = (float)num / (float)totalNum;
+                        EditorUtility.DisplayProgressBar("导出动画文件", title, process);
 
                         var newClip = new AnimationClip();
                         newClip.name = clip.name;//设置新clip的名字
@@ -72,18 +88,34 @@ public class ExportAnimClip : Editor
         string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.dat", SearchOption.AllDirectories);
 
 
-        //  string abFileName = Application.streamingAssetsPath + "/pack_1.dat";
         string startStr = "Assets/StreamingAssets/";
+        // 先计算文件内容
+        totalNum = 0;
+        for (int i = 0; i < files.Length; ++i) {
+            string abFileName = files[i].Replace('\\', '/');
+            int idx = abFileName.IndexOf(startStr, StringComparison.CurrentCultureIgnoreCase);
+            if (idx >= 0) {
+                abFileName = abFileName.Substring(idx);
+                int num = 0;
+                ExportAnimClips(abFileName, true, ref num);
+                totalNum += num;
+            }
+        }
+
+       //  string abFileName = Application.streamingAssetsPath + "/pack_1.dat";
+       
         try {
+
+            int num = 0;
             for (int i = 0; i < files.Length; ++i) {
-                string title = string.Format("AB: {0}", Path.GetFileNameWithoutExtension(files[i]));
-                float process = (float)i / (float)files.Length;
-                EditorUtility.DisplayProgressBar("导出动画", title, process);
+                //string title = string.Format("AB: {0}", Path.GetFileNameWithoutExtension(files[i]));
+               // float process = (float)i / (float)files.Length;
+               // EditorUtility.DisplayProgressBar("导出动画", title, process);
                 string abFileName = files[i].Replace('\\', '/');
                 int idx = abFileName.IndexOf(startStr, StringComparison.CurrentCultureIgnoreCase);
                 if (idx >= 0) {
-                    abFileName = abFileName.Substring(idx);
-                    ExportAnimClips(abFileName);
+                    abFileName = abFileName.Substring(idx);      
+                    ExportAnimClips(abFileName, false, ref num);
                 }
             }
         } finally {
