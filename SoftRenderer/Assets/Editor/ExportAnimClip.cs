@@ -135,7 +135,8 @@ public class ExportAnimClip : Editor
         }
     }
 
-    static string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
+    //static string startStr = "Assets/StreamingAssets/npc/npc_baboben_1";
+    static string startStr = "Assets/StreamingAssets";
     static bool isLegacy = false;
     static bool copySerier = false;
 
