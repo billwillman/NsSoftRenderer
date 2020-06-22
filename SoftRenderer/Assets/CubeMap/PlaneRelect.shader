@@ -7,6 +7,7 @@ Shader "Unlit/PlaneRelect"
     Properties
     {
         _MainTex ("Texture", CUBE) = "black" {}
+		_CubeSize ("CubeSize", float) = 1.0
     }
     SubShader
     {
@@ -42,6 +43,7 @@ Shader "Unlit/PlaneRelect"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+			float _CubeSize;
 
             v2f vert (appdata v)
             {
