@@ -56,9 +56,19 @@ Shader "Unlit/PlaneRelect"
                 return o;
             }
 
-			bool CheckPlanePt(float3 dir, float3 normal, float3 plnPt, out float3 pt)
+			bool CheckPlanePt(float3 dir, float3 org, float3 pnlNormal, float3 pnlPt, out float3 pt)
 			{
-				return false;
+				float3 p = pnlPt - org;
+				float div = (dir.x * pnlNormal.x + dir.y * pnlNormal.y + dir.z * pnlNormal.z);
+				if (div == 0)
+					return false;
+				float t = (p.x * pnlNormal.x + p.y * pnlNormal.y + p.z * pnlNormal.z) / div;
+				if (t <= 0)
+					return false;
+				pt = org + dir * t;
+				if (pt.z > _CubeSize)
+					return false;
+				return true;
 			}
 
             fixed4 frag (v2f i) : SV_Target
