@@ -56,7 +56,7 @@ Shader "Unlit/PlaneRelect"
                 return o;
             }
 
-			bool CheckPlanePt(float3 dir, float3 normal, float d, out float3 pt)
+			bool CheckPlanePt(float3 dir, float3 normal, float3 plnPt, out float3 pt)
 			{
 				return false;
 			}
