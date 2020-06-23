@@ -8,6 +8,7 @@ Shader "Unlit/PlaneRelect"
     {
         _MainTex ("Texture", CUBE) = "black" {}
 		_CubeSize ("CubeSize", float) = 1.0
+		_Delta("_Delta", float) = 0.00001
     }
     SubShader
     {
@@ -41,9 +42,10 @@ Shader "Unlit/PlaneRelect"
                 float4 vertex : SV_POSITION;
             };
 
-            sampler2D _MainTex;
+            samplerCUBE _MainTex;
             float4 _MainTex_ST;
 			float _CubeSize;
+			float _Delta;
 
             v2f vert (appdata v)
             {
@@ -56,6 +58,12 @@ Shader "Unlit/PlaneRelect"
                 return o;
             }
 
+			bool CheckPt(float3 pt)
+			{
+				float halfSize = _CubeSize / 2.0;
+				return (pt.z >= 0 - _Delta) && (pt.z <= _CubeSize + _Delta) && (pt.x >= -halfSize - _Delta) && (pt.x <= halfSize + _Delta) && (pt.y >= -halfSize - _Delta) && (pt.y <= halfSize + _Delta);
+			}
+
 			bool CheckPlanePt(float3 dir, float3 org, float3 pnlNormal, float3 pnlPt, out float3 pt)
 			{
 				float3 p = pnlPt - org;
@@ -66,17 +74,81 @@ Shader "Unlit/PlaneRelect"
 				if (t <= 0)
 					return false;
 				pt = org + dir * t;
-				if (pt.z > _CubeSize)
-					return false;
-				return true;
+				return CheckPt(pt);
+				//return true;
 			}
+
+			
 
             fixed4 frag (v2f i) : SV_Target
             {
-				float3 dir = i.model_camPos - i.model_vertex;
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
+				fixed4 col;
+
+				float3 org = i.model_camPos;
+				float3 dir = i.model_vertex - org;
+
+				float halfSize = _CubeSize / 2.0;
+				float3 reflectCenter = float3(0, 0, halfSize);
+
+				// left panel
+				float3 pnlNormal = float3(1.0, 0, 0);
+				float3 pnlPt = float3(-halfSize, 0, 0);
+				float3 pt;
+				bool isInPnl = CheckPlanePt(dir, org, pnlNormal, pnlPt, pt);
+				if (isInPnl)
+				{
+					float3 reflectDir = normalize(pt - reflectCenter);
+					col = texCUBE(_MainTex, reflectDir);
+				}
+				else
+				{
+					// back panel
+					
+					pnlNormal = float3(0, 0, -1);
+					pnlPt = float3(-halfSize, 0, _CubeSize);
+					isInPnl = CheckPlanePt(dir, org, pnlNormal, pnlPt, pt);
+					if (isInPnl)
+					{
+						float3 reflectDir = normalize(pt - reflectCenter);
+						col = texCUBE(_MainTex, reflectDir);
+					}
+					else
+					{
+						
+
+						// right panel
+						pnlNormal = float3(-1, 0, 0);
+						pnlPt = float3(halfSize, 0, 0);
+						isInPnl = CheckPlanePt(dir, org, pnlNormal, pnlPt, pt);
+						if (isInPnl)
+						{
+							float3 reflectDir = normalize(pt - reflectCenter);
+							col = texCUBE(_MainTex, reflectDir);
+						}
+						else
+						{
+							// top panel
+							pnlNormal = float3(0, -1, 0);
+							pnlPt = float3(0, halfSize, 0);
+							isInPnl = CheckPlanePt(dir, org, pnlNormal, pnlPt, pt);
+							if (isInPnl)
+							{
+								float3 reflectDir = normalize(pt - reflectCenter);
+								col = texCUBE(_MainTex, reflectDir);
+							}
+						}
+
+						
+					}
+					
+				}
+				
+				if (!isInPnl)
+					col = fixed4(0, 0, 0, 0);
+
 		
+				//col = fixed4(normalize(float3(0.5, 0.5, 0) + i.model_vertex), 0);
+
                 // apply fog
                 //UNITY_APPLY_FOG(i.fogCoord, col);
                 return col;
