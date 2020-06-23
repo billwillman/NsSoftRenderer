@@ -62,7 +62,8 @@ Shader "Unlit/PlaneRelect"
 			bool CheckPt(float3 pt)
 			{
 				float halfSize = _CubeSize / 2.0;
-				return (pt.z >= 0 - _Delta) && (pt.z <= _CubeSize + _Delta) && (pt.x >= -halfSize - _Delta) && (pt.x <= halfSize + _Delta) && (pt.y >= -halfSize - _Delta) && (pt.y <= halfSize + _Delta);
+				return (pt.z >= 0 - _Delta) && (pt.z <= _CubeSize + _Delta) && (pt.x >= -halfSize - _Delta) && (pt.x <= halfSize + _Delta) && 
+					(pt.y >= -halfSize - _Delta) && (pt.y <= halfSize + _Delta);
 			}
 
 			bool CheckPlanePt(float3 dir, float3 org, float3 pnlNormal, float3 pnlPt, out float3 pt)
