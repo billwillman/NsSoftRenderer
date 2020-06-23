@@ -50,6 +50,7 @@ Shader "Unlit/PlaneRelect"
             v2f vert (appdata v)
             {
                 v2f o;
+				// 这里不应该在模型空间而是应该在local viewSpace下，就是模型节点在世界里的局部坐标系空间，这里偷懒，所以这里必须保证模型的GameObject固定在0的原点
 				o.model_vertex = v.vertex.xyz/v.vertex.w;
 				o.model_camPos = mul(unity_WorldToObject, _WorldSpaceCameraPos.xyz);
                 o.vertex = UnityObjectToClipPos(v.vertex);
