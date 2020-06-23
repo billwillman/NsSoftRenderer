@@ -32,7 +32,6 @@ public class CubeMapTest : MonoBehaviour
 
         TestCam(Vector3.zero);
 
-
     }
 
     void TestCam(Vector3 model_vertex) {
