@@ -136,6 +136,18 @@ Shader "Unlit/PlaneRelect"
 								float3 reflectDir = normalize(pt - reflectCenter);
 								col = texCUBE(_MainTex, reflectDir);
 							}
+							else
+							{
+								// bottom panel
+								pnlNormal = float3(0, 1, 0);
+								pnlPt = float3(0, -halfSize, 0);
+								isInPnl = CheckPlanePt(dir, org, pnlNormal, pnlPt, pt);
+								if (isInPnl)
+								{
+									float3 reflectDir = normalize(pt - reflectCenter);
+									col = texCUBE(_MainTex, reflectDir);
+								}
+							}
 						}
 
 						
