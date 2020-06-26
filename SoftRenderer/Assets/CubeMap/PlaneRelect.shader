@@ -47,6 +47,8 @@ Shader "Unlit/PlaneRelect"
 			float _CubeSize;
 			float _Delta;
 
+			// 。。。。。。。。。未考虑玻璃折射
+
             v2f vert (appdata v)
             {
                 v2f o;
