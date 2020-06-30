@@ -61,6 +61,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Command\CommandBufferBlurRefraction.cs" />
+    <Compile Include="Assets\CubeMap\CubeMapTest.cs" />
     <Compile Include="Assets\LoopTss\LoopTss.cs" />
     <Compile Include="Assets\LoopTss\TssLine.cs" />
     <Compile Include="Assets\NsSoftRenderer\3rd\DisposeObject.cs" />
@@ -93,11 +94,17 @@
     <Compile Include="Assets\NsSoftRenderer\Test\ListTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftCameraTest.cs" />
     <Compile Include="Assets\NsSoftRenderer\Test\SoftMathTest.cs" />
+    <Compile Include="Assets\UnityFBXExporter\FBXExporter.cs" />
+    <Compile Include="Assets\UnityFBXExporter\FBXUnityMaterialGetter.cs" />
+    <Compile Include="Assets\UnityFBXExporter\FBXUnityMeshGetter.cs" />
     <None Include="Assets\Command\SeparableBlur.shader" />
+    <None Include="Assets\CubeMap\PlaneRelect.shader" />
+    <None Include="Assets\TestProj\TestProj.shader" />
     <None Include="Assets\Normal.shader" />
     <None Include="Assets\Mipmap.shader" />
     <None Include="Assets\Command\GlassWithoutGrab.shader" />
     <None Include="Assets\NewUnlitShader.shader" />
+    <None Include="Assets\CustomPBR\PBR.shader" />
     <None Include="Assets\渲染方程\Base.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>D:/NsSoftRenderer/SoftRenderer/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
