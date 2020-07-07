@@ -182,10 +182,11 @@ Shader "Unlit/PBR"
 			}
 
 			// 鏡面
-			half Disney_Spec(half f0, half vh)
+			half3 Disney_Spec(half f0, half vh)
 			{
 				// float F_Schlick(float f0, float f90, float cos)
 				half f = F_Schlick(f0, 1.0, vh);
+				return half3(0, 0, 0);
 			}
 
             fixed4 frag (v2f i) : SV_Target
@@ -215,6 +216,7 @@ Shader "Unlit/PBR"
 				half3 lh = saturate(normalize(dot(worldDirectLightDir, h)));
 				half3 nl = saturate(normalize(dot(worldNormal, worldDirectLightDir)));
 				half3 nv = saturate(normalize(dot(worldNormal, worldViewDir)));
+				half3 vh = saturate(normalize(dot(h, worldViewDir)));
 
 				half smoothness = _Smoothness;
 #ifdef Use_MetallicSmooth
@@ -230,7 +232,7 @@ Shader "Unlit/PBR"
 
 			//	col.rgb = CalcLightDiffuse_Lambert(_LightColor0, diffuseColor, worldNormal, worldDirectLightDir);
 
-				fixed3 spec = Disney_Spec();
+				fixed3 spec = Disney_Spec(f0, vh);
 				fixed4 col = fixed4(diffuse + spec, 1.0);
 
 				col *= _BaseColor;
