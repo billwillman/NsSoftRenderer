@@ -182,11 +182,17 @@ Shader "Unlit/PBR"
 			}
 
 			// 鏡面
-			half3 Disney_Spec(half f0, half vh)
+			half3 Disney_Spec(half f0, half vh, half nh, half nv, half nl, half roughness)
 			{
 				// float F_Schlick(float f0, float f90, float cos)
-				half f = F_Schlick(f0, 1.0, vh);
-				return half3(0, 0, 0);
+				half3 f = F_Schlick(f0, 1.0, vh);
+
+				half d = D_GGX(nh, roughness);
+				half g = G_GGX(roughness, nv, nl);
+
+				half3 ret = f * d * g / (4 * nv * nl);
+
+				return ret;
 			}
 
             fixed4 frag (v2f i) : SV_Target
@@ -217,6 +223,7 @@ Shader "Unlit/PBR"
 				half3 nl = saturate(normalize(dot(worldNormal, worldDirectLightDir)));
 				half3 nv = saturate(normalize(dot(worldNormal, worldViewDir)));
 				half3 vh = saturate(normalize(dot(h, worldViewDir)));
+				half3 nh = saturate(normalize(dot(h, worldNormal)));
 
 				half smoothness = _Smoothness;
 #ifdef Use_MetallicSmooth
@@ -224,15 +231,15 @@ Shader "Unlit/PBR"
 #endif
 				float3 f0 = lerp(unity_ColorSpaceDielectricSpec.rgb, baseColor, metal);
 
-
-				half f90 = F90(1.0 - smoothness, lh);
+				half roughness = 1.0 - smoothness;
+				half f90 = F90(roughness, lh);
 				fixed3 diffuse = Disny_Diffuse(_LightColor0, nl, nv, /*1.0*/1.0 - f0, f90) * diffuseColor;
 
 				//col = fixed4((worldNormal + half3(1.0, 1.0, 1.0)) / 2.0, 1.0);
 
 			//	col.rgb = CalcLightDiffuse_Lambert(_LightColor0, diffuseColor, worldNormal, worldDirectLightDir);
 
-				fixed3 spec = Disney_Spec(f0, vh);
+				fixed3 spec = Disney_Spec(f0, vh, nh, nv, nl, roughness) * diffuseColor;
 				fixed4 col = fixed4(diffuse + spec, 1.0);
 
 				col *= _BaseColor;
