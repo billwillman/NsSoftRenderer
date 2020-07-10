@@ -40,6 +40,7 @@ Shader "Unlit/PBR"
 
             #include "UnityCG.cginc"
 			#include "Lighting.cginc"
+			#include "../CgIncludes/brdf.cginc"
 		//	#include "AutoLight.cginc"
 
 			#pragma shader_feature Use_MetallicSmooth
@@ -200,7 +201,7 @@ Shader "Unlit/PBR"
                 // 基础颜色
 				fixed4 metallic = tex2D(_MetallicMap, i.uv);
 				fixed4 baseColor = tex2D(_MainTex, i.uv);
-
+				//baseColor.rgb = pow(baseColor.rgb, 2.2);
 
 				half metal = metallic.r;
                 fixed4 diffuseColor = DiffuseColor(baseColor, metal);
@@ -217,14 +218,6 @@ Shader "Unlit/PBR"
 				half3 worldDirectLightDir = WorldDirectLightDir();
 				half3 worldViewDir = WorldViewDir(worldVector);
 
-				// 必须是normal因为计算是COSA,是角度值
-				half3 h = normalize(WorldHDir(worldViewDir, worldDirectLightDir));
-				half3 lh = saturate(normalize(dot(worldDirectLightDir, h)));
-				half3 nl = saturate(normalize(dot(worldNormal, worldDirectLightDir)));
-				half3 nv = saturate(normalize(dot(worldNormal, worldViewDir)));
-				half3 vh = saturate(normalize(dot(h, worldViewDir)));
-				half3 nh = saturate(normalize(dot(h, worldNormal)));
-
 				half smoothness = _Smoothness;
 #ifdef Use_MetallicSmooth
 				smoothness *= metallic.g;
@@ -232,19 +225,35 @@ Shader "Unlit/PBR"
 				float3 f0 = lerp(unity_ColorSpaceDielectricSpec.rgb, baseColor, metal);
 
 				half roughness = 1.0 - smoothness;
+
+				fixed4 col;
+				// 必须是normal因为计算是COSA,是角度值
+				/*
+				half3 h = normalize(WorldHDir(worldViewDir, worldDirectLightDir));
+				half3 lh = saturate(normalize(dot(worldDirectLightDir, h)));
+				half3 nl = saturate(normalize(dot(worldNormal, worldDirectLightDir)));
+				half3 nv = saturate(normalize(dot(worldNormal, worldViewDir)));
+				half3 vh = saturate(normalize(dot(h, worldViewDir)));
+				half3 nh = saturate(normalize(dot(h, worldNormal)));
+
+
 				half f90 = F90(roughness, lh);
-				fixed3 diffuse = Disny_Diffuse(_LightColor0, nl, nv, /*1.0*/1.0 - f0, f90) * diffuseColor;
-
-				//col = fixed4((worldNormal + half3(1.0, 1.0, 1.0)) / 2.0, 1.0);
-
-			//	col.rgb = CalcLightDiffuse_Lambert(_LightColor0, diffuseColor, worldNormal, worldDirectLightDir);
+				fixed3 diffuse = Disny_Diffuse(_LightColor0, nl, nv, 1.0 - f0, f90) * diffuseColor;
 
 				fixed3 spec = Disney_Spec(f0, vh, nh, nv, nl, roughness) * diffuseColor;
-				fixed4 col = fixed4(diffuse + spec, 1.0);
+				col = fixed4(diffuse, 1.0);
 
 				col *= _BaseColor;
+				*/
 
-			//	col = fixed4((worldNormal + half3(1.0, 1.0, 1.0)) / 2.0, 1.0);
+				col.rgb = f_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) * 
+						g_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) *
+						d_beckmann(worldDirectLightDir, worldViewDir, worldNormal) /
+						(4.0 * dot(worldNormal, worldDirectLightDir) * dot(worldNormal, worldViewDir));
+				col.a = 1.0;
+				col *= baseColor * smoothness;
+
+				//col = half4(f_cooktorrance( worldDirectLightDir, worldViewDir, worldNormal, 2.0), 1.0);
 
                 return col;
             }
