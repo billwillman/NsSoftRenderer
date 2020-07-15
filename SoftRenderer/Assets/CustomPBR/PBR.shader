@@ -24,6 +24,11 @@ Shader "Unlit/PBR"
 
 		// 高度贴图
 		_HeightMap("高度贴图", 2D) = "None" {}
+
+		// 次表面
+	    subsurface("次表面值", Range(0, 1)) = 0
+		// 各异向
+		anisotropic("各异向值", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -73,26 +78,13 @@ Shader "Unlit/PBR"
             float4 _MainTex_ST;
 			fixed4 _BaseColor;
 			float _Smoothness;
+			half subsurface;
+			half anisotropic;
 
 			// 获得DiffuseColor 金属度metallic
 			fixed4 DiffuseColor(fixed4 baseColor, float metallic)
 			{
 				fixed4 ret = (1.0 - metallic) * baseColor;
-				return ret;
-			}
-
-			// GGX
-			float F90(float roughness, float lh)
-			{
-				float ret = 0.5 + 2.0 * roughness * lh * lh;
-				return ret;
-			}
-
-			// Schlick简化公式，菲涅尔中的F
-			// 原来简化公式里f90项是1，这里漫反射有一个修正值f90，高光模型这个f90就是1
-			float3 F_Schlick(float3 f0, float f90, float cos)
-			{
-				float3 ret = f0 + (float3(f90, f90, f90) - f0) * pow((1.0 - cos), 5.0);
 				return ret;
 			}
 
@@ -214,6 +206,8 @@ Shader "Unlit/PBR"
 				half3 worldNormal = normalize(half3(dot(i.NormalToWorld_1.xyz, normal), dot(i.NormalToWorld_2.xyz, normal), dot(i.NormalToWorld_3.xyz, normal)));
 			//	half3 worldNormal = UnityObjectToWorldNormal(normal);
 				half3 worldVector = half3(i.NormalToWorld_1.w, i.NormalToWorld_2.w, i.NormalToWorld_3.w);
+				half3 worldTangent = half3(i.NormalToWorld_1.x, i.NormalToWorld_2.x, i.NormalToWorld_3.x);
+				half3 worldbTagent = half3(i.NormalToWorld_1.y, i.NormalToWorld_2.y, i.NormalToWorld_3.y);
 
 				half3 worldDirectLightDir = WorldDirectLightDir();
 				half3 worldViewDir = WorldViewDir(worldVector);
@@ -245,14 +239,16 @@ Shader "Unlit/PBR"
 
 				col *= _BaseColor;
 				*/
-
+				/*
 				col.rgb = f_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) * 
 						g_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) *
 						d_beckmann(worldDirectLightDir, worldViewDir, worldNormal) /
 						(4.0 * dot(worldNormal, worldDirectLightDir) * dot(worldNormal, worldViewDir));
 				col.a = 1.0;
 				col *= baseColor * smoothness;
-
+				*/
+				col.rgb = Disney_Brdf(worldDirectLightDir, worldViewDir, worldNormal, baseColor, roughness, metal, worldTangent, worldbTagent, subsurface, anisotropic);
+				//col.rgb = baseColor.rgb;
 				//col = half4(f_cooktorrance( worldDirectLightDir, worldViewDir, worldNormal, 2.0), 1.0);
 
                 return col;
