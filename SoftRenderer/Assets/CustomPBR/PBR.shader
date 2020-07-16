@@ -81,21 +81,6 @@ Shader "Unlit/PBR"
 			half subsurface;
 			half anisotropic;
 
-			// 获得DiffuseColor 金属度metallic
-			fixed4 DiffuseColor(fixed4 baseColor, float metallic)
-			{
-				fixed4 ret = (1.0 - metallic) * baseColor;
-				return ret;
-			}
-
-
-			// 迪士尼 漫反射
-			fixed3 Disny_Diffuse(fixed4 diffColor, half3 nl, half3 nv, half3 f0, half f90)
-			{
-				fixed3 ret = diffColor / 3.141592653 * F_Schlick(f0, f90, nl) * F_Schlick(f0, f90, nv);
-				return ret;
-			}
-
             v2f vert (appdata v)
             {
                 v2f o;
@@ -166,27 +151,6 @@ Shader "Unlit/PBR"
 				return ret;
 			}
 
-			// 几何遮蔽函数
-			half G_GGX(float roughness, half nv, half nl)
-			{
-				half f = lerp(2 * nl * nv, nl + nv, roughness);
-				half ret = 0.5 / f;
-				return ret;
-			}
-
-			// 鏡面
-			half3 Disney_Spec(half f0, half vh, half nh, half nv, half nl, half roughness)
-			{
-				// float F_Schlick(float f0, float f90, float cos)
-				half3 f = F_Schlick(f0, 1.0, vh);
-
-				half d = D_GGX(nh, roughness);
-				half g = G_GGX(roughness, nv, nl);
-
-				half3 ret = f * d * g / (4 * nv * nl);
-
-				return ret;
-			}
 
             fixed4 frag (v2f i) : SV_Target
             {
@@ -196,7 +160,6 @@ Shader "Unlit/PBR"
 				//baseColor.rgb = pow(baseColor.rgb, 2.2);
 
 				half metal = metallic.r;
-                fixed4 diffuseColor = DiffuseColor(baseColor, metal);
 				
 
 				half3 normal = UnpackNormal(tex2D(_NormalMap, i.uv));
@@ -221,35 +184,10 @@ Shader "Unlit/PBR"
 				half roughness = 1.0 - smoothness;
 
 				fixed4 col;
-				// 必须是normal因为计算是COSA,是角度值
-				/*
-				half3 h = normalize(WorldHDir(worldViewDir, worldDirectLightDir));
-				half3 lh = saturate(normalize(dot(worldDirectLightDir, h)));
-				half3 nl = saturate(normalize(dot(worldNormal, worldDirectLightDir)));
-				half3 nv = saturate(normalize(dot(worldNormal, worldViewDir)));
-				half3 vh = saturate(normalize(dot(h, worldViewDir)));
-				half3 nh = saturate(normalize(dot(h, worldNormal)));
 
+				col.rgb = UE4_Brdf(worldDirectLightDir, worldViewDir, worldNormal, baseColor, roughness, metal);
 
-				half f90 = F90(roughness, lh);
-				fixed3 diffuse = Disny_Diffuse(_LightColor0, nl, nv, 1.0 - f0, f90) * diffuseColor;
-
-				fixed3 spec = Disney_Spec(f0, vh, nh, nv, nl, roughness) * diffuseColor;
-				col = fixed4(diffuse, 1.0);
-
-				col *= _BaseColor;
-				*/
-				/*
-				col.rgb = f_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) * 
-						g_cooktorrance(worldDirectLightDir, worldViewDir, worldNormal) *
-						d_beckmann(worldDirectLightDir, worldViewDir, worldNormal) /
-						(4.0 * dot(worldNormal, worldDirectLightDir) * dot(worldNormal, worldViewDir));
-				col.a = 1.0;
-				col *= baseColor * smoothness;
-				*/
-				col.rgb = Disney_Brdf(worldDirectLightDir, worldViewDir, worldNormal, baseColor, roughness, metal, worldTangent, worldbTagent, subsurface, anisotropic);
-				//col.rgb = baseColor.rgb;
-				//col = half4(f_cooktorrance( worldDirectLightDir, worldViewDir, worldNormal, 2.0), 1.0);
+				col.rgb = pow(col.rgb, 1.0 / 2.2);
 
                 return col;
             }
