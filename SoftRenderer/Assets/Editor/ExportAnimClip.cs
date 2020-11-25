@@ -25,6 +25,12 @@ public class ExportAnimClip : Editor
             Debug.LogError("AB not found~!");
             return;
         }
+
+        if (ab.isStreamedSceneAssetBundle) {
+            ab.Unload(true);
+            return;
+        }
+
         try {
             string parentDir = Path.GetDirectoryName(abFileName).Replace('\\', '/');
             string outDir = parentDir + "/AnimClips";
@@ -143,7 +149,7 @@ public class ExportAnimClip : Editor
     [MenuItem("Assets/导出测试的AB的AnimClips")]
     public static void TestExportAnimClips() {
        // string abFileName = AssetDatabase.GetAssetPath(Selection.activeObject);
-        string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.dat", SearchOption.AllDirectories);
+        string[] files = Directory.GetFiles(Application.streamingAssetsPath, "*.xj", SearchOption.AllDirectories);
 
 
         
